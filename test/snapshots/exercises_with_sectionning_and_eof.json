@@ -1,0 +1,49 @@
+{
+  "042": {
+    "kind": "exercise",
+    "counter": 1,
+    "section": "# 1. Keep this\n# 1.1. Keep this",
+    "statement": "how?",
+    "salt": "042",
+    "formula": "salt_042 as token",
+    "solutions": [
+      {
+        "text": "",
+        "query": "SELECT foo",
+        "result_head": "",
+        "token": "5664"
+      }
+    ]
+  },
+  "043": {
+    "kind": "exercise",
+    "counter": 2,
+    "section": "# 1.2. Keep this",
+    "statement": "how?",
+    "salt": "043",
+    "formula": "salt_043 as token",
+    "solutions": [
+      {
+        "text": "",
+        "query": "SELECT foo",
+        "result_head": "",
+        "token": "6877"
+      }
+    ]
+  },
+  "044": {
+    "kind": "exercise",
+    "counter": 3,
+    "statement": "how?",
+    "salt": "044",
+    "formula": "salt_044 as token",
+    "solutions": [
+      {
+        "text": "",
+        "query": "SELECT foo",
+        "result_head": "",
+        "token": "9112"
+      }
+    ]
+  }
+}

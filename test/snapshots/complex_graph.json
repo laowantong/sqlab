@@ -1,0 +1,147 @@
+{
+  "001": {
+    "kind": "episode",
+    "counter": 1,
+    "context": "First episode of one adventure",
+    "statement": "how?",
+    "salt": "001",
+    "formula": "salt_001 as token",
+    "solutions": [
+      {
+        "text": "",
+        "query": "SELECT foo",
+        "result_head": "",
+        "token": "1003"
+      },
+      {
+        "text": "",
+        "query": "SELECT bar",
+        "result_head": "",
+        "token": "1003"
+      },
+      {
+        "text": "",
+        "query": "SELECT bizz",
+        "result_head": "",
+        "token": "2003"
+      },
+      {
+        "text": "",
+        "query": "SELECT buzz",
+        "result_head": "",
+        "token": "2002"
+      },
+      {
+        "text": "",
+        "query": "SELECT no_token\nFROM table",
+        "result_head": "",
+        "token": "1003"
+      }
+    ]
+  },
+  "2002": "1002",
+  "1002": {
+    "kind": "episode",
+    "counter": 2,
+    "context": "blah blah",
+    "statement": "how?",
+    "salt": "002",
+    "formula": "salt_002 as token",
+    "solutions": [
+      {
+        "text": "",
+        "query": "SELECT qux",
+        "result_head": "",
+        "token": "1004"
+      }
+    ]
+  },
+  "0102": {
+    "kind": "hint",
+    "counter": 2,
+    "text": "Wrong",
+    "query": "SELECT bar, salt_002 as token"
+  },
+  "0202": {
+    "kind": "hint",
+    "counter": 2,
+    "text": "Bad",
+    "query": "SELECT bizz, salt_002 as token"
+  },
+  "1003": {
+    "kind": "episode",
+    "counter": 3,
+    "context": "blah blah",
+    "statement": "how?",
+    "salt": "003",
+    "formula": "salt_003 as token",
+    "solutions": [
+      {
+        "text": "",
+        "query": "SELECT quux",
+        "result_head": "",
+        "token": "1002"
+      },
+      {
+        "text": "",
+        "query": "SELECT bozo",
+        "result_head": "",
+        "token": "2004"
+      },
+      {
+        "text": "",
+        "query": "SELECT baz",
+        "result_head": "",
+        "token": "1002"
+      }
+    ]
+  },
+  "2003": "1003",
+  "1004": "2004",
+  "2004": {
+    "kind": "episode",
+    "counter": 4,
+    "context": "End of one adventure",
+    "statement": "no question asked!",
+    "salt": "004",
+    "solutions": []
+  },
+  "011": {
+    "kind": "episode",
+    "counter": 1,
+    "context": "First episode of another adventure",
+    "statement": "how?",
+    "salt": "011",
+    "formula": "salt_011 as token",
+    "solutions": [
+      {
+        "text": "",
+        "query": "SELECT foo",
+        "result_head": "",
+        "token": "1012"
+      },
+      {
+        "text": "",
+        "query": "SELECT foo",
+        "result_head": "",
+        "token": "1013"
+      }
+    ]
+  },
+  "1012": {
+    "kind": "episode",
+    "counter": 2,
+    "context": "End of another adventure",
+    "statement": "no question asked either!",
+    "salt": "012",
+    "solutions": []
+  },
+  "1013": {
+    "kind": "episode",
+    "counter": 3,
+    "context": "Alternative end of another adventure",
+    "statement": "no question asked either!",
+    "salt": "013",
+    "solutions": []
+  }
+}

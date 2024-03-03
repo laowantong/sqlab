@@ -1,0 +1,29 @@
+{
+  "042": {
+    "kind": "exercise",
+    "counter": 1,
+    "statement": "how?",
+    "salt": "042",
+    "formula": "salt_042 as token",
+    "solutions": [
+      {
+        "text": "",
+        "query": "SELECT foo",
+        "result_head": "",
+        "token": "4547"
+      }
+    ]
+  },
+  "3839": {
+    "kind": "hint",
+    "counter": 1,
+    "text": "This is wrong",
+    "query": "SELECT bar, salt_042 as token"
+  },
+  "8968": {
+    "kind": "hint",
+    "counter": 1,
+    "text": "This is bad",
+    "query": "SELECT bizz, salt_042 as token"
+  }
+}

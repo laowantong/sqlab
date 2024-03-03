@@ -1,0 +1,52 @@
+digraph G {
+    layout=dot
+  rankdir=LR
+    bgcolor="#FDFEFF"
+    edge [color="#34262B" penwidth=0.75]
+    node [
+        shape=star
+        fixedsize=true
+        width=0.3
+        height=0.3
+        fillcolor="#FEE548"
+        color="#34262B"
+        fontcolor="#34262B"
+        fontsize=18
+        penwidth=1
+        style=filled
+        label=""
+    ]
+    
+    node [
+        width=1.2
+        height=1.2
+        fontname=Helvetica
+        label="\N"
+    ]
+    
+    node [
+        width=0.6
+        height=0.6
+        shape=circle
+        fillcolor="#FFC19C"
+    ]
+    003 003 003 002 003 004 002 004 002 012 013
+    node [fillcolor="#DBDE92"]
+    
+    001 -> 003
+    001 -> 003
+    001 -> 003
+    001 -> 002
+    001 -> 003
+    002 -> 004
+    003 -> 002
+    003 -> 004
+    003 -> 002
+    011 -> 012
+    011 -> 013
+    node [style=invisible label=""]
+    0102 0202
+    edge [arrowhead=odot]
+    002 -> 0102
+    002 -> 0202
+}
