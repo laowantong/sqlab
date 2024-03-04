@@ -23,7 +23,7 @@ digraph G {
         fontname=Helvetica
         label="\N"
     ]
-    
+    004 012 013
     node [
         width=0.6
         height=0.6

@@ -8,7 +8,6 @@
     "formula": "salt_042 as token",
     "solutions": [
       {
-        "text": "",
         "query": "SELECT foo",
         "result_head": "",
         "token": "5664"
@@ -24,7 +23,6 @@
     "formula": "salt_043 as token",
     "solutions": [
       {
-        "text": "",
         "query": "SELECT foo",
         "result_head": "",
         "token": "6877"
@@ -39,7 +37,6 @@
     "formula": "salt_044 as token",
     "solutions": [
       {
-        "text": "",
         "query": "SELECT foo",
         "result_head": "",
         "token": "9112"

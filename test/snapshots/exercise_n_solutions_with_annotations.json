@@ -6,17 +6,24 @@
     "salt": "042",
     "formula": "salt_042 as token",
     "solutions": [
+      "Before all.",
+      "Before 4547.",
+      "Annotation for 4547",
       {
         "query": "SELECT foo",
         "result_head": "",
         "token": "4547"
       },
-      "Variant. ",
+      "After 4547.",
+      "Before 3839.",
+      "Annotation for 3839",
       {
         "query": "SELECT bar",
         "result_head": "",
-        "token": "4547"
-      }
+        "token": "3839"
+      },
+      "After 3839.",
+      "After all."
     ]
   }
 }

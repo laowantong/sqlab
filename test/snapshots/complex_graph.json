@@ -7,36 +7,36 @@
     "salt": "001",
     "formula": "salt_001 as token",
     "solutions": [
+      "Before 1003.",
       {
-        "text": "",
         "query": "SELECT foo",
         "result_head": "",
         "token": "1003"
       },
       {
-        "text": "",
         "query": "SELECT bar",
         "result_head": "",
         "token": "1003"
       },
+      "Before 2003.",
       {
-        "text": "",
         "query": "SELECT bizz",
         "result_head": "",
         "token": "2003"
       },
+      "Before 2002.",
       {
-        "text": "",
         "query": "SELECT buzz",
         "result_head": "",
         "token": "2002"
       },
+      "Before variant without token.",
       {
-        "text": "",
         "query": "SELECT no_token\nFROM table",
         "result_head": "",
         "token": "1003"
-      }
+      },
+      "After variants."
     ]
   },
   "2002": "1002",
@@ -49,7 +49,6 @@
     "formula": "salt_002 as token",
     "solutions": [
       {
-        "text": "",
         "query": "SELECT qux",
         "result_head": "",
         "token": "1004"
@@ -77,19 +76,16 @@
     "formula": "salt_003 as token",
     "solutions": [
       {
-        "text": "",
         "query": "SELECT quux",
         "result_head": "",
         "token": "1002"
       },
       {
-        "text": "",
         "query": "SELECT bozo",
         "result_head": "",
         "token": "2004"
       },
       {
-        "text": "",
         "query": "SELECT baz",
         "result_head": "",
         "token": "1002"
@@ -115,13 +111,11 @@
     "formula": "salt_011 as token",
     "solutions": [
       {
-        "text": "",
         "query": "SELECT foo",
         "result_head": "",
         "token": "1012"
       },
       {
-        "text": "",
         "query": "SELECT foo",
         "result_head": "",
         "token": "1013"

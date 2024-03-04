@@ -17,6 +17,7 @@ config = {
         "hint_label": "Hint",
         "episode_label": "Episode",
         "formula_label": "Formula",
+        "annotation_label": "Annotation",
         "preamble_correct": "Correct",
         "emoji_instruction": "replace 👀 by {repl}",
         "preamble_hint": "Almost there!",
@@ -227,6 +228,20 @@ def create_records():
     ]
     path.write_text(dumps(cells))
 
+    path = Path(base_dir, "exercise_n_solutions_with_annotations.json")
+    cells = [
+        markdown("**Exercise [042].** how?"),
+        markdown("**Annotation.** Before all."),
+        markdown("**Annotation.** Before 4547."),
+        sql("-- Annotation for 4547\nSELECT foo, salt_042 as token", "4547"),
+        markdown("**Annotation.** After 4547."),
+        markdown("**Annotation.** Before 3839."),
+        sql("-- Annotation for 3839\nSELECT bar, salt_042 as token", "3839"),
+        markdown("**Annotation.** After 3839."),
+        markdown("**Annotation.** After all."),
+    ]
+    path.write_text(dumps(cells))
+
     path = Path(base_dir, "exercise_with_useless_next_salt.json")
     cells = [
         markdown("**Exercise [042].** how?"),
@@ -284,11 +299,16 @@ def create_records():
         #                                       0202
         markdown("**Episode [001].** First episode of one adventure"),      # --> 001
         markdown("**Statement.** how?"),
+        markdown("**Annotation.** Before 1003."),
         sql("SELECT foo, salt_001 as token\n--> Episod [003]", "1003"),   # 001 --- 1003 ---> 003
         sql("SELECT bar, salt_001 as token", "1003"),                     # 001 --- 1003 ---> 003
+        markdown("**Annotation.** Before 2003."),
         sql("SELECT bizz, salt_001 as token", "2003"),                    # 001 --- 2003 ---> 003
+        markdown("**Annotation.** Before 2002."),
         sql("SELECT buzz, salt_001 as token\n--> Episode [002]", "2002"), # 001 --- 2002 ---> 002
+        markdown("**Annotation.** Before variant without token."),
         sql("SELECT no_token\nFROM table", "a variant without token"),    # 001 ------------> 003
+        markdown("**Annotation.** After variants."),
         markdown("**Episode [002].** blah blah"),
         markdown("**Statement.** how?"),
         sql("SELECT qux, salt_002 as token\n--> Epilog [004]", "1004"),   # 002 --- 1004 ---> 004
@@ -324,7 +344,7 @@ def create_messages():
         records = json.loads(path.read_text())
         messages = message_generator.run(records)
         messages = "\n".join(f"{k:4s}\t{repr(sub('--', v))}" for (k, v) in messages.items())
-        Path(base_dir, f"{path.stem}.tsv").write_text(messages)
+        Path(base_dir, f"{path.stem}.tsv").write_text(messages + "\n")
 
 
 create_records()

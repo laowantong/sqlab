@@ -7,7 +7,6 @@
     "formula": "salt_042 as token",
     "solutions": [
       {
-        "text": "",
         "query": "SELECT foo",
         "result_head": "",
         "token": "4547"

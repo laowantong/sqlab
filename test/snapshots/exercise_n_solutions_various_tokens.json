@@ -7,13 +7,11 @@
     "formula": "salt_042 as token",
     "solutions": [
       {
-        "text": "",
         "query": "SELECT foo",
         "result_head": "",
         "token": "4547"
       },
       {
-        "text": "",
         "query": "SELECT bar",
         "result_head": "",
         "token": "3839"
