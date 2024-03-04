@@ -67,7 +67,7 @@ class NotebookParser:
                     salts.add(salt)
 
                 kind = self.labels_to_kinds.get(label.lower())
-                assert kind in ("statement", "episode", "exercise"), f"Unknown label '{label}'."
+                assert kind in ("statement", "annotation", "episode", "exercise"), f"Unknown label '{label}'."
 
                 if kind == "statement":
                     assert segments, f"{FAIL}A statement must be preceded by an exercise or an episode.\n{source}.{RESET}"
@@ -75,8 +75,12 @@ class NotebookParser:
                     segments[-1]["statement"] = text
                     continue
 
+                if kind == "annotation":
+                    segments[-1]["solutions"].append(text)
+                    continue
+
                 segment = {}
-                segment["kind"] = kind
+                segment["kind"] = kind # "exercise" or "episode"
                 segment["counter"] = None # to be filled after the segments are complete
                 if section_buffer:
                     segment["section"] = "\n".join(section_buffer)
@@ -146,13 +150,16 @@ class NotebookParser:
                         segments[-1]["default_token"] = token
                     
                     if formula: # The formula is explicitely stated
-                        assert salt == segments[-1]["salt"], f"{FAIL}Salt mismatch for {kind} [{label}].{RESET}\n{source}."
-                        assert formula == segments[-1]["formula"], f"{FAIL}Formula mismatch for {kind} [{label}].{RESET}\n{source}."
+                        assert salt == segments[-1]["salt"], f"{FAIL}Salt mismatch.{RESET}\n{source}."
+                        assert formula == segments[-1]["formula"], f"{FAIL}Formula mismatch.{RESET}\n{source}."
 
                     next_salt = next_salt or segments[-1]["default_next_salt"]
                     token = token or segments[-1]["default_token"]
+                    if label:
+                        text = f"{label}. {text}"
+                    if text:
+                        segments[-1]["solutions"].append(text)
                     segments[-1]["solutions"].append({
-                        "text": f"{label}. {text}" if label else text,
                         "query": query,
                         "result_head": self.extract_result_head(cell),
                         "next_salt": next_salt,
@@ -164,7 +171,7 @@ class NotebookParser:
         # Convert the salts into tokens
         tokens_by_salt = defaultdict(list)
         for segment in filter(lambda s: s["kind"] == "episode", segments):
-            for solution in segment["solutions"]:
+            for solution in self.actual_solutions(segment):
                 if token := solution["token"]:
                     tokens_by_salt[solution["next_salt"]].append(token)
 
@@ -172,7 +179,7 @@ class NotebookParser:
         for segment in segments:
             del segment["default_next_salt"] # the default next salt has been propagated
             del segment["default_token"] # the default next token has been propagated
-            for solution in segment["solutions"]:
+            for solution in self.actual_solutions(segment):
                 del solution["next_salt"] # the next salt has been associated with the token
             if not segment["tweak"]: # formula without tweak
                 del segment["tweak"]
@@ -202,7 +209,7 @@ class NotebookParser:
                 for token in tokens: # the remaining tokens are aliases
                     records[token] = main_token
                     non_hint_tokens.add(token)
-            non_hint_tokens.update(solution["token"] for solution in segment["solutions"])
+            non_hint_tokens.update(solution["token"] for solution in self.actual_solutions(segment))
             records[main_token] = segment
             non_hint_tokens.add(main_token)
             # Move the hints at the top level
@@ -259,6 +266,14 @@ class NotebookParser:
             return ""
         # Keep only the first two rows
         return re.sub(r"(?s)(<table>\n(?: *<tr>.+?</tr>\n){,3}).*(</table>)", fr"\1\2\nTotal: {count}", table)
+    
+    @staticmethod
+    def actual_solutions(segment_or_record):
+        """Filter out the annotations (strings) and return the actual solutions (dictionaries)."""
+        for solution in segment_or_record["solutions"]:
+            if isinstance(solution, str): # An annotation
+                continue
+            yield solution
 
     def dump_graph(self, records):
         data = {
@@ -277,12 +292,12 @@ class NotebookParser:
             x = record["salt"]
             if record["kind"] == "exercise":
                 has_exercises = True
-                for solution in record["solutions"]:
+                for solution in self.actual_solutions(record):
                     y = solution["token"]
                     data["exercise_edges"].append(f"{x} -> {y}")
                     data["exercise_ends"].append(f"{y}")
             elif record["kind"] == "episode":
-                for solution in record["solutions"]:
+                for solution in self.actual_solutions(record):
                     x = record["salt"]
                     next_record = records[solution["token"]]
                     if isinstance(next_record, str):

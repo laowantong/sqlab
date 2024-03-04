@@ -1,7 +1,6 @@
 
 from collections import defaultdict
 from pathlib import Path
-import re
 
 from .text_tools import TextWrapper, transform_markdown, join_non_empty, WARNING, RESET, OK, FAIL
 
@@ -36,7 +35,27 @@ class MessageGenerator:
     def compose_solutions(self, solutions):
         if not solutions:
             return ""
-        return "\n\n".join([self.hr] + solutions + [self.hr])
+        result = [self.hr]
+        for solution in solutions:
+            if isinstance(solution, str):
+                result.append(self.format_text(solution))
+            else:
+                result.append(solution["query"])
+        result.append(self.hr)
+        return "\n\n".join(result)
+    
+    @staticmethod
+    def actual_solutions(solutions):
+        """Filter out the annotations from a sequence of so-called solutions."""
+        for solution in solutions:
+            if isinstance(solution, str): # An annotation
+                continue
+            yield solution # An actual solution
+
+    @staticmethod
+    def get_first_token_from_solutions(solutions):
+        for solution in MessageGenerator.actual_solutions(solutions):
+            return solution["token"]
 
     def run(self, records):
         self.rows = {}
@@ -63,8 +82,14 @@ class MessageGenerator:
                     preamble = f"⚪️ {counter}. {self.strings['preamble_adventure']}"
                 else:
                     preamble = f"🟢 {counter}. {self.strings['preamble_correct']}"
-                for d in record.get("solutions", []):
-                    solutions_by_token[d["token"]].append(self.format_text("{text}\n\n{query}".format(**d).strip()))
+                current_token = self.get_first_token_from_solutions(record["solutions"])
+                if current_token: # All episodes should have at least one solution, except for the last one
+                    for solution in record["solutions"]:
+                        if isinstance(solution, str):
+                            solutions_by_token[current_token].append(self.format_text(solution))
+                        else:
+                            current_token = solution["token"]
+                            solutions_by_token[current_token].append(solution["query"])
                 solutions = self.compose_solutions(solutions_by_token[entry_token])
                 context = self.format_text(record["context"])
                 statement = self.format_text(f"**{self.strings['statement_label']}**. {record['statement']}")
@@ -77,9 +102,8 @@ class MessageGenerator:
                 statement = self.format_text(f"⚪️ **{self.strings['exercise_label']} {counter}**. {record['statement']}")
                 self.rows[entry_token] = join_non_empty(statement, formula)
                 preamble = f"🟢 {counter}. {self.strings['preamble_correct']}"
-                solutions = [self.format_text("{text}\n\n{query}".format(**d)) for d in record["solutions"]]
-                plain_text = join_non_empty(preamble, self.compose_solutions(solutions))
-                for solution in record["solutions"]:
+                plain_text = join_non_empty(preamble, self.compose_solutions(record["solutions"]))
+                for solution in self.actual_solutions(record["solutions"]):
                     next_token = solution["token"]
                     if next_token in self.rows: # An output token already registered
                         continue
@@ -97,15 +121,16 @@ class MessageGenerator:
 
     def compile_plot(self, records):
         result = []
-        for record in records:
         for record in records.values():
             if isinstance(record, str) or record["kind"] != "episode":
                 continue
             result.append(f"\n{record['context']}\n")
             if solutions := record["solutions"]:
                 result.append(f"<details><summary>{self.strings['statement_label']}</summary>{record['statement']}<br><br>")
-                if result_head := solutions[0].get("result_head"):
-                    result.append(f"\n{result_head}\n")
+                for solution in self.actual_solutions(solutions):
+                    if result_head := solution.get("result_head"):
+                        result.append(f"\n{result_head}\n")
+                        break
                 result.append("</details><br>\n")
         if result:
             result.append("")
@@ -113,7 +138,6 @@ class MessageGenerator:
 
     def compile_exercises(self, records):
         result = []
-        for record in records:
         for record in records.values():
             if isinstance(record, str) or record["kind"] != "exercise":
                 continue
@@ -122,7 +146,8 @@ class MessageGenerator:
             statement_start = record["statement"].split("\n")[0]
             i = record["counter"]
             result.append(f"- **{self.strings['exercise_label']} {i}**. {statement_start}  ")
-            result.append(f"  {self.strings['full_statement']} : `call decrypt({record['salt']})`. {self.strings['solution_label']} : `call decrypt({record['solutions'][0]['token']})`.")
+            first_token = self.get_first_token_from_solutions(record["solutions"])
+            result.append(f"  {self.strings['full_statement']} : `call decrypt({record['salt']})`. {self.strings['solution_label']} : `call decrypt({first_token})`.")
         if result:
             result.append("")
             return "\n".join(result)
@@ -153,9 +178,10 @@ class MessageGenerator:
                 formula = record["formula"].replace("{{x}}", "👀")
                 result.append(f"\n**{self.strings['formula_label']}**{tweak}. `{formula}`\n")
             for solution in record["solutions"]:
-                if solution["text"]:
-                    result.append(f"{solution['text']}\n")
-                result.append(f"```sql\n{solution['query']}\n```\n")
+                if isinstance(solution, str):
+                    result.append(f"{solution}\n")
+                else:
+                    result.append(f"```sql\n{solution['query']}\n```\n")
         if result:
             result.insert(0, f"# Cheat sheet\n")
             result.append("")
