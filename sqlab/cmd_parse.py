@@ -290,6 +290,8 @@ class NotebookParser:
                     y = next_record["salt"]
                     data["episode_edges"].append(f"{x} -> {y}")
                     data["episode_ends"].append(y)
+                if not record["solutions"]:
+                    data["epilogues"].append(record["salt"])
             elif record["kind"] == "hint":
                 y = token
                 data["hint_edges"].append(f"{x} -> {y}")
