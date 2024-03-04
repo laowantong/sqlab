@@ -98,6 +98,7 @@ class MessageGenerator:
     def compile_plot(self, records):
         result = []
         for record in records:
+        for record in records.values():
             if isinstance(record, str) or record["kind"] != "episode":
                 continue
             result.append(f"\n{record['context']}\n")
@@ -113,6 +114,7 @@ class MessageGenerator:
     def compile_exercises(self, records):
         result = []
         for record in records:
+        for record in records.values():
             if isinstance(record, str) or record["kind"] != "exercise":
                 continue
             if section := record.get("section"):
