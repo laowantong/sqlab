@@ -16,20 +16,22 @@ defaults = { # Not a JSON object because it contains comments and Python lambda 
     "salt_seed": 42,
     "salt_bound": 100,
     "column_width": 100, # for wrapping text in the `sqlab_msg` table
+    "reformat_sql": True, # Reformat the SQL queries in the notebook
     "sqlparse_kwargs": {
         "keyword_case": "upper",  # Limitation: https://github.com/andialbrecht/sqlparse/pull/501
         "identifier_case": "lower",
         "use_space_around_operators": True,
         "reindent": True,
         "indent_width": 4,
+        "comma_first": True,
     },
     "sqlparse_subs": {
         "capitalize_keywords": (r"\b(on|over|like|separator|interval|as)\b", lambda m: m[0].upper()),
         "uppercase_table_aliases": (r"\b(?<=[ \(])\w[0-9]?\b", lambda m: m[0].upper()),  # e.g. "FROM city c1, city c2" -> "FROM city C1, city C2"
         "fix_cross_join_indents": (r"\nCROSS JOIN", r","),
+        "align_fields_when_comma_first": (r"(?m)( +, ) ", r"\1"),
         "space_around_union": (r"( +)UNION( ALL)? ", r"\n\1UNION\2\n\n\1"), # more space around the UNION operators
-        "compact_commas": (r",\n +", r", "), # prevent random indent after commas
-        "newline_salt": (r", salt_", r",\n    salt_"), # but keep salt functions on a separate line
+        "fix_newlines_after_over": (r"\b(OVER)\(\n +", r"\1 ("),
     },
     "strings_en": {
         "exercise_label": "Exercise",

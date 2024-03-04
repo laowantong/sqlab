@@ -9,7 +9,7 @@ def run_notebook(config: dict) -> bool:
     ipynb_path = config["source_path"]
     record_path = config["output_dir"] / "records.json"
     if record_path.is_file() and ipynb_path.stat().st_mtime < record_path.stat().st_mtime:
-        if input(f"{WARNING}The notebook is older than 'records.json'. Run it anyway (y/)? {RESET}").lower() != 'y':
+        if input(f"{WARNING}The notebook is older than 'records.json'. Run and update it anyway (y/)? {RESET}").lower() != 'y':
             return True
     nb = nbformat.read(ipynb_path, as_version=4)
     print(f"Running '{ipynb_path}'...")
@@ -22,15 +22,16 @@ def run_notebook(config: dict) -> bool:
             print(f"{FAIL}Error: {e}{RESET}")
             success = False
     if success or input("Updating the notebook anyway (y/)? ").lower() == 'y':
-        print(f"Formatting SQL queries in '{ipynb_path}'...")
-        format_sql = SQLFormatter(config)
-        magic_header = "%%sql\n"
-        for cell in nb.cells:
-            if cell.cell_type == "code":
-                if cell.source.startswith(magic_header):
-                    content = cell.source[len(magic_header):]
-                    (comment, query, end_comment, *whatever) = re.split(r"(?m)((?:^(?!--).*\n?)+)", content, maxsplit=1) + ["", ""]
-                    cell.source = f"{magic_header}{comment}{format_sql(query)}\n{end_comment}".rstrip()
+        if config["reformat_sql"]:
+            print(f"Formatting SQL queries in '{ipynb_path}'...")
+            format_sql = SQLFormatter(config)
+            magic_header = "%%sql\n"
+            for cell in nb.cells:
+                if cell.cell_type == "code":
+                    if cell.source.startswith(magic_header):
+                        content = cell.source[len(magic_header):]
+                        (comment, query, end_comment, *whatever) = re.split(r"(?m)((?:^(?!--).*\n?)+)", content, maxsplit=1) + ["", ""]
+                        cell.source = f"{magic_header}{comment}{format_sql(query)}\n{end_comment}".rstrip()
                 
         # Clean up the notebook.
         for cell in nb.cells:

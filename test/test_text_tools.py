@@ -1,5 +1,5 @@
 import unittest
-from sqlab.text_tools import repr_single, separate_query_and_formula, split_sql_source, separate_label_salt_and_text
+from sqlab.text_tools import repr_single, separate_query_formula_and_salt, split_sql_source, separate_label_salt_and_text
 
 class TestReprSingle(unittest.TestCase):
 
@@ -18,30 +18,30 @@ class TestSeparateQueryAndFormula(unittest.TestCase):
 
     def test_query_without_salt(self):
         query = "SELECT * FROM table"
-        actual = separate_query_and_formula(query)
+        actual = separate_query_formula_and_salt(query)
         self.assertEqual(actual, (query, "", ""))
         query = "SELECT 1"
-        actual = separate_query_and_formula(query)
+        actual = separate_query_formula_and_salt(query)
         self.assertEqual(actual, (query, "", ""))
     
     def test_query_with_formula(self):
         query = "SELECT *, salt_096(sum(hash) OVER ()) AS token FROM table"
-        actual = separate_query_and_formula(query)
+        actual = separate_query_formula_and_salt(query)
         self.assertEqual(actual, ("SELECT * FROM table", "salt_096(sum(hash) OVER ()) AS token", "096"))
     
     def test_query_with_just_formula(self):
         query = "SELECT salt_096(sum(hash) OVER ()) AS token FROM table"
-        actual = separate_query_and_formula(query)
+        actual = separate_query_formula_and_salt(query)
         self.assertEqual(actual, ("SELECT FROM table", "salt_096(sum(hash) OVER ()) AS token", "096"))
     
     def test_query_used_in_parser_testing(self):
         query = "SELECT foo, salt_042 as token"
-        actual = separate_query_and_formula(query)
+        actual = separate_query_formula_and_salt(query)
         self.assertEqual(actual, ("SELECT foo", "salt_042 as token", "042"))
     
     def test_query_with_x_formula(self):
         query = """SELECT *, salt_025(sum(crc32("{{x}}")) OVER ()) AS token FROM table"""
-        actual = separate_query_and_formula(query)
+        actual = separate_query_formula_and_salt(query)
         self.assertEqual(actual, ("SELECT * FROM table", "salt_025(sum(crc32(\"👀\")) OVER ()) AS token", "025"))
 
 

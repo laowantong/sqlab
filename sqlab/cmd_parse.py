@@ -8,7 +8,7 @@ from typing import Optional
 import importlib
 
 from .text_tools import FAIL, OK, RESET, WARNING
-from .text_tools import separate_label_salt_and_text, split_sql_source, separate_query_and_formula
+from .text_tools import separate_label_salt_and_text, split_sql_source, separate_query_formula_and_salt
 
 def run(config: dict):
     parser = NotebookParser(config)
@@ -119,7 +119,7 @@ class NotebookParser:
                 source = "".join(source[1:])  # strips the magic command
                 (label, text, raw_query, next_salt) = split_sql_source(source)
                 kind = self.labels_to_kinds.get(label.lower(), "")
-                (query, formula, salt) = separate_query_and_formula(raw_query)
+                (query, formula, salt) = separate_query_formula_and_salt(raw_query)
                 token = self.extract_first_token_from_output(cell)
 
                 if salt:
@@ -299,7 +299,9 @@ class NotebookParser:
             elif record["kind"] == "episode":
                 for solution in self.actual_solutions(record):
                     x = record["salt"]
-                    next_record = records[solution["token"]]
+                    next_record = records.get(solution["token"])
+                    if not next_record:
+                        continue # A query without redirection
                     if isinstance(next_record, str):
                         next_record = records[next_record] # resolve the alias
                     y = next_record["salt"]

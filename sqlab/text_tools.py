@@ -85,9 +85,9 @@ def repr_single(s):
     return "'" + repr('"' + s)[2:]
 
 
-def separate_query_and_formula(
+def separate_query_formula_and_salt(
     query: str,
-    match_formula=re.compile(r"(?si)(.+?),?\s*(salt_(\d+).+?as +token)(.*)").match,
+    match_formula=re.compile(r"(?si)(.+?)\s*,?\s*(salt_(\d+).+?as +token)(.*)").match,
 ) -> tuple[str, str, str]:
     if m := match_formula(query):
         return (m[1] + m[4], m[2].replace("{{x}}", "👀"), m[3])

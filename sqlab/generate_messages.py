@@ -30,7 +30,7 @@ class MessageGenerator:
         if tweak := record.get("tweak", ""):
             tweak = f" ({self.strings['emoji_instruction'].format(repl=tweak)})"
         title = self.format_text(f"**{self.strings['formula_label']}**{tweak}.")
-        return f"{title}\n{record['formula']}"
+        return f"{title}\n, {record['formula']}"
     
     def compose_solutions(self, solutions):
         if not solutions:
@@ -113,6 +113,9 @@ class MessageGenerator:
         for (alias, token) in records.items():
             if isinstance(token, str):
                 self.rows[alias] = self.rows[token]
+        
+        for token in solutions_by_token.keys():
+            assert token in self.rows, f"{FAIL}Missing output token: {token}. Check that the adventure's last episode has no query.{RESET}"
 
         markup = OK if self.rows else WARNING
         print(f"{markup}{len(self.rows)} messages generated.")
