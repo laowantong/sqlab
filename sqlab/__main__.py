@@ -3,7 +3,7 @@ import importlib
 from textwrap import dedent, TextWrapper
 
 from .config import get_config
-from .version import __version__
+from . import __version__
 
 
 class CustomHelpFormatter(argparse.ArgumentDefaultsHelpFormatter):
