@@ -1,4 +1,9 @@
 {
+  "info": {
+    "adventure_count": 0,
+    "episode_count": 0,
+    "exercise_count": 1
+  },
   "042": {
     "kind": "exercise",
     "counter": 1,

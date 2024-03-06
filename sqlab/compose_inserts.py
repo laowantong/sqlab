@@ -38,13 +38,13 @@ def compose_message_inserts(db, rows: list[str]) -> str:
 
 
 def compose_data_inserts(config: dict, db, trigger_template) -> str:
-    """ Return a string of SQL commands to insert the data from the TSV files into the database.
+    """ Return a string of SQL commands to insert the data_from the TSV files into the database.
     No actual insertion is performed. The db argument is only used to retrieve the colum names
     of the database just created from the `ddl.sql` file. """
-    data_dir = Path(config["data_dir"])
+    dataset_dir = Path(config["dataset_dir"])
     tsv_row_to_sql_values = TsvRowToSqlValues(config)
     result = []
-    for tsv_path in data_dir.glob("*.tsv"):
+    for tsv_path in dataset_dir.glob("*.tsv"):
         table = unicodedata.normalize('NFC', tsv_path.stem) # On macOS, the filenames use NFD, while MySQL is expecting NFC.
         headers = db.get_headers(table) # Columns to be hashed.
         triggers = trigger_template.format(table=table, columns=', NEW.'.join(headers))
@@ -61,7 +61,7 @@ def compose_data_inserts(config: dict, db, trigger_template) -> str:
         result.append(db.reset_table_statement(table))
         result.append("\n".join(insertions))
     if not result:
-        print(f"{WARNING}Missing directory '{data_dir}' or no '*.tsv' files in it.{RESET}")
+        print(f"{WARNING}Missing directory '{dataset_dir}' or no '*.tsv' files in it.{RESET}")
     return "\n".join(result)
 
 
@@ -112,3 +112,12 @@ class TsvRowToSqlValues:
         except (ValueError, SyntaxError):
             return "'" + cell.replace("'", "''") + "'"
 
+
+def compose_info_inserts(**kwargs) -> str:
+    """Return a string of SQL commands to insert info relative to the SQLab database. """
+    insertions = [f"INSERT INTO sqlab_info (name, value) VALUES"]
+    for (name, value) in kwargs.items():
+        insertions.append(f"  ({repr_single(str(name))}, {repr_single(str(value))}),")
+    insertions[-1] = insertions[-1].rstrip(",")
+    insertions.append(";")
+    return "\n".join(insertions)

@@ -24,6 +24,9 @@ class AbstractDatabase:
         Print a message with the server version and the database name.
         """
         raise NotImplementedError
+    
+    def get_version(self) -> str:
+        return self.dbms_version
 
     def get_headers(self, table: str, keep_auto_increment=True) -> list[str]:
         """

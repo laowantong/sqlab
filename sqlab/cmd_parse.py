@@ -187,18 +187,30 @@ class NotebookParser:
                 del segment["formula"]
         
         # Number the exercises
-        exercise_counter = itertools.count(1)
+        exercise_count = 0
         for segment in filter(lambda s: s["kind"] == "exercise", segments):
-            segment["counter"] = next(exercise_counter)
+            exercise_count += 1
+            segment["counter"] = exercise_count
 
-        # Number the episodes
+        # Number the adventures and their episodes
+        adventure_count = 0
+        episode_count = 0
         for segment in filter(lambda s: s["kind"] == "episode", segments):
             if segment["salt"] not in tokens_by_salt: # the first episode of an adventure
-                episode_counter = itertools.count(1) # initialize or reset the counter
+                adventure_count += 1
+                episode_counter = itertools.count(1)
+            segment["adventure"] = adventure_count
+            episode_count += 1
             segment["counter"] = next(episode_counter)
 
         # Create the (almost) final token dictionary
-        records = {}
+        records = {
+            "info": {
+                "adventure_count": adventure_count,
+                "episode_count": episode_count,
+                "exercise_count": exercise_count,
+            }
+        }
         non_hint_tokens = set()
         hint_tokens = set()
         for segment in segments:
@@ -287,6 +299,8 @@ class NotebookParser:
         }
         has_exercises = False
         for (token, record) in records.items():
+            if token == "info":
+                continue
             if isinstance(record, str):
                 continue
             x = record["salt"]

@@ -10,7 +10,7 @@ defaults = { # Not a JSON object because it contains comments and Python lambda 
     "cnx_path": NotImplementedError("Connection configuration is mandatory. It must be the path of an INI file for SQLAlchemy."),
     "language": NotImplementedError("Language configuration is mandatory. Example values: 'fr', 'en'."),
     "ddl_path": NotImplementedError("DDL configuration is mandatory. It must be the path of a .sql file."),
-    "data_dir": NotImplementedError("Data configuration is mandatory. It must be the path of a folder containing TSV files."),
+    "dataset_dir": NotImplementedError("Dataset configuration is mandatory. It must be the path of a folder containing TSV files."),
     "source_path": NotImplementedError("Source configuration is mandatory. It must be the path of either a .ipynb or .json file."),
     "output_dir": NotImplementedError("Output dir configuration is mandatory."),
     "salt_seed": 42,
@@ -69,6 +69,7 @@ defaults = { # Not a JSON object because it contains comments and Python lambda 
         "adventure_label": "Aventure",
         "exercises_label": "Exercices",
     },
+    "info": {}
 }
 # fmt: on
 

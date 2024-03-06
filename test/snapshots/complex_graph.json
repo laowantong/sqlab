@@ -1,4 +1,9 @@
 {
+  "info": {
+    "adventure_count": 2,
+    "episode_count": 7,
+    "exercise_count": 0
+  },
   "001": {
     "kind": "episode",
     "counter": 1,
@@ -37,7 +42,8 @@
         "token": "1003"
       },
       "After variants."
-    ]
+    ],
+    "adventure": 1
   },
   "2002": "1002",
   "1002": {
@@ -53,7 +59,8 @@
         "result_head": "",
         "token": "1004"
       }
-    ]
+    ],
+    "adventure": 1
   },
   "0102": {
     "kind": "hint",
@@ -90,7 +97,8 @@
         "result_head": "",
         "token": "1002"
       }
-    ]
+    ],
+    "adventure": 1
   },
   "2003": "1003",
   "1004": "2004",
@@ -100,7 +108,8 @@
     "context": "End of one adventure",
     "statement": "no question asked!",
     "salt": "004",
-    "solutions": []
+    "solutions": [],
+    "adventure": 1
   },
   "011": {
     "kind": "episode",
@@ -120,7 +129,8 @@
         "result_head": "",
         "token": "1013"
       }
-    ]
+    ],
+    "adventure": 2
   },
   "1012": {
     "kind": "episode",
@@ -128,7 +138,8 @@
     "context": "End of another adventure",
     "statement": "no question asked either!",
     "salt": "012",
-    "solutions": []
+    "solutions": [],
+    "adventure": 2
   },
   "1013": {
     "kind": "episode",
@@ -136,6 +147,7 @@
     "context": "Alternative end of another adventure",
     "statement": "no question asked either!",
     "salt": "013",
-    "solutions": []
+    "solutions": [],
+    "adventure": 2
   }
 }

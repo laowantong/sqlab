@@ -63,6 +63,9 @@ class MessageGenerator:
         solutions_by_token = defaultdict(list)
         for (entry_token, record) in records.items():
 
+            if entry_token == "info":
+                continue
+
             if isinstance(record, str): # an alias, i.e. an alternative token to access the same record
                 continue
 
@@ -122,9 +125,11 @@ class MessageGenerator:
 
         return self.rows
 
-    def compile_plot(self, records):
+    def compile_storyline(self, records):
         result = []
-        for record in records.values():
+        for (token, record) in records.items():
+            if token == "info":
+                continue
             if isinstance(record, str) or record["kind"] != "episode":
                 continue
             result.append(f"\n{record['context']}\n")
@@ -141,7 +146,9 @@ class MessageGenerator:
 
     def compile_exercises(self, records):
         result = []
-        for record in records.values():
+        for (token, record) in records.items():
+            if token == "info":
+                continue
             if isinstance(record, str) or record["kind"] != "exercise":
                 continue
             if section := record.get("section"):
@@ -158,6 +165,8 @@ class MessageGenerator:
     def compile_cheat_sheet(self, records):
         result = []
         for (token, record) in records.items():
+            if token == "info":
+                continue
             if isinstance(record, str):
                 continue
             if record["kind"] == "hint":

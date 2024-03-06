@@ -16,9 +16,9 @@ class Database(AbstractDatabase):
                 # Print a message with the PostgreSQL server version and the database name
                 cursor.execute("SELECT version(), current_database()")
                 db_info = cursor.fetchone()
-                db_version = db_info[0].split()[1]
+                self.dbms_version = db_info[0].split()[1]
                 db_name = db_info[1]
-                print(f"{OK}Connected to PostgreSQL {db_version} with database {repr(db_name)}.{RESET}")
+                print(f"{OK}Connected to PostgreSQL {self.dbms_version} with database {repr(db_name)}.{RESET}")
         except (psycopg2.DatabaseError, Exception) as error:
             print(error)
 
