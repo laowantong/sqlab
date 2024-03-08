@@ -2,14 +2,15 @@
 
 ![SQL adventure builder logo](assets/logo/color.svg)
 
-An SQLab adventure is a text-based game in which the player creates SQL queries to solve 
-It consists itself in a self-contained database, which includes the core dataset, a handful of stored procedures and all the accompanying messages (statements of the questions, answers, instructions, etc.). Each message is encrypted independently in an additional table `sqlab_msg`.
+An SQLab adventure is a text-based game where the player evolves through a series of isolated or interconnected puzzles by crafting SQL queries.
 
-Wrapping an SQLab adventure in a web application is not necessary (although still possible). The students can play under any generic GUI like [DBeaver](https://dbeaver.io), [phpMyAdmin](https://www.phpmyadmin.net), [pgAdmin](https://www.pgadmin.org), etc., or even in a bare command-line interface.
+It consists in a standalone database encompassing the core dataset, a handful of stored procedures, and a table of encrypted messages (such as narrative elements, puzzle statements, answers, explanations, etc.).
 
-The students are instructed to append to their `SELECT` clauses a given formula (e.g, `salt_042(sum(hash) OVER ()) AS token`) that will calculate a token. This token (a big integer) may enable them to decrypt the next episode or, in the case of a wrong query, to receive the appropriate hint (provided that the game creator anticipated it).
+There is no requirement to wrap a dedicated application around this database to “run” the game. It can be played on any generic GUI such as [DBeaver](https://dbeaver.io), [phpMyAdmin](https://www.phpmyadmin.net), [pgAdmin](https://www.pgadmin.org), or directly in a command-line interface.
 
-As a result, they can practice by themselves, without any supervision. To avoid boredom, we recommend that the instructor logs their queries, and updates the database on the fly with new hints, improving the game for everyone in the process.
+Each question comes with a unique formula, for example, `salt_042(sum(hash) OVER ())`. Appended to the `SELECT` clause, this formula calculates a decryption token, which may unlock the next episode or, if the query is incorrect, a tailored hint (assuming the game's creator has provided one).
+
+In an educational context, this setup enables the students to learn and practice SQL without constant oversight. The instructor might stave off boredom by logging their queries and injecting new hints as needed, improving the game for all involved.
 
 ## Examples on GitHub
 
@@ -22,10 +23,10 @@ As a result, they can practice by themselves, without any supervision. To avoid 
 
 ## How can I create my own SQLab adventure?
 
-The `sqlab` command-line tool is not required to play an adventure, but is necessary to create one.
+The `sqlab` command-line tool is not required to play, but is necessary to create a new adventure.
 
 ```
 pip install sqlab
 ```
 
-The documentation is not yet available. In the meantime, you may explore the repository of [SQLab Island](https://github.com/laowantong/sqlab_island). The provided dataset and Jupyter notebooks serve as source material for the creation of the adventure.
+The documentation is not yet available. In the meantime, you may explore the repository of [SQLab Island](https://github.com/laowantong/sqlab_island). The provided dataset and Jupyter notebooks serve as source material for the generation of the SQLab database.
