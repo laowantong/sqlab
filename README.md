@@ -1,4 +1,6 @@
-# SQL Adventure Builder (SQLab)
+# SQLab
+
+![SQL adventure builder logo](assets/logo/color.svg)
 
 ## Presentation
 
