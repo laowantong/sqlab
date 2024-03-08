@@ -2,8 +2,7 @@
 
 ![SQL adventure builder logo](assets/logo/color.svg)
 
-An SQLab adventure is a text-based game in which the player creates SQL queries to solve puzzles.
-
+An SQLab adventure is a text-based game in which the player creates SQL queries to solve 
 It consists itself in a self-contained database, which includes the core dataset, a handful of stored procedures and all the accompanying messages (statements of the questions, answers, instructions, etc.). Each message is encrypted independently in an additional table `sqlab_msg`.
 
 Wrapping an SQLab adventure in a web application is not necessary (although still possible). The students can play under any generic GUI like [DBeaver](https://dbeaver.io), [phpMyAdmin](https://www.phpmyadmin.net), [pgAdmin](https://www.pgadmin.org), etc., or even in a bare command-line interface.
