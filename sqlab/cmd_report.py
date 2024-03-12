@@ -80,7 +80,7 @@ def run(config: dict):
     timestamps_and_queries = parse_tsv(log_path)
     for (timestamp, query) in timestamps_and_queries:
         day = timestamp[:10]
-        if m:= re.match(r"(?is)call decrypt.+?(\d+)\)", query):
+        if m:= re.match(r"(?is)select\b.+?\bdecrypt\b.+?(\d+)\)", query):
             token = m[1]
             if token in ignored_tokens:
                 continue

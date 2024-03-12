@@ -10,8 +10,10 @@ from .text_tools import OK, RESET, WARNING, FAIL
 class Shell(Cmd):
     """
     An SQL shell specialized for an SQL Adventure Builder database.
-    Added value: when a query returns a table having a column 'token', the corresponding
-    message is automatically displayed (no need to call decrypt()).
+    Added value:
+    - When a query returns a table having a column 'token', the corresponding
+    message is automatically displayed.
+    - A command containing only digits is interpreted as a call to `decrypt`.
     """
 
     def __init__(self, db):
@@ -56,20 +58,11 @@ class Shell(Cmd):
         else:
             n = self.db.execute_non_select(full_command)
             self.poutput(f"\n{n} row{'s'[:n^1]} affected")
-    
-    def do_decrypt(self, statement: Statement):
-        """
-        Called when the user types 'decrypt a b c'. The `statement` object has an `args`
-        attribute containing the whole list of arguments as a string (here, 'a b c').
-        The first argument is the token, and the rest is ignored.
-        """
-        token = statement.args.partition(" ")[0]
-        self.decrypt(token)
 
     def decrypt(self, token):
-        """Execute the `decrypt` stored procedure with the given token."""
-        result = self.db.call_procedure("decrypt", [token])
-        self.poutput(result[0][0])
+        """Execute the `decrypt` function with the given token."""
+        result = self.db.call_function("decrypt", token)
+        self.poutput(result[0].replace("\\n", "\n").replace("''", "'"))
 
     # https://github.com/PyMySQL/PyMySQL/blob/main/pymysql/constants/FIELD_TYPE.py
     NUMERIC_TYPE_CODES = {

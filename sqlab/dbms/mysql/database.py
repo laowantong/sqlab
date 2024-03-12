@@ -56,20 +56,6 @@ class Database(AbstractDatabase):
             self.cnx.commit()
         return total_affected_rows
     
-    def execute_select(self, query):
-        with self.cnx.cursor() as cursor:
-            cursor.execute(query)
-            rows = cursor.fetchall()
-            headers = [d[0] for d in cursor.description]
-            datatypes = [d[1] for d in cursor.description]
-            return (headers, datatypes, rows)
-    
-    def call_procedure(self, name, args):
-        with self.cnx.cursor() as cursor:
-            cursor.callproc(name, args)
-            result = next(cursor.stored_results())
-            return result.fetchall()
-
     def parse_ddl(self, queries):
         triple = re.split(r"(?mi)^(?:USE .+|-- FK\b.*)", queries, 2)
         self.create_db_queries = triple[0]

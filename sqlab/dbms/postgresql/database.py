@@ -60,21 +60,6 @@ class Database(AbstractDatabase):
                 rowcounts.append(cursor.rowcount)
         return sum(rowcounts)
     
-    def execute_select(self, query):
-        with self.cnx.cursor() as cursor:
-            cursor.execute(query)
-            rows = cursor.fetchall()
-            headers = [desc[0] for desc in cursor.description]
-            datatypes = [desc[1] for desc in cursor.description]
-            return (headers, datatypes, rows)
-
-    def call_procedure(self, name, args):
-        with self.cnx.cursor() as cursor:
-            cursor.callproc(name, args)
-            # For functions returning a result set, fetch the results directly.
-            # Note: This assumes the function returns a single result set.
-            return cursor.fetchall()
-    
     def parse_ddl(self, queries):
         triple = re.split(r"(?mi)^(?:\\c .+|-- FK\b.*)", queries, 2)
         self.create_db_queries = triple[0]

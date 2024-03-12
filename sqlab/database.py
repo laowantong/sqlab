@@ -3,9 +3,8 @@ import importlib
 
 def database_factory(config: dict):
     """Return a Database object according to the vendor specified in the configuration."""
-    vendor = config["vendor"].lower()
-    db = importlib.import_module(".database", package=f"sqlab.dbms.{vendor}").Database
-    return db(config)
+    db = importlib.import_module(".database", package=f"sqlab.dbms.{config['vendor_slug']}")
+    return db.Database(config)
 
 
 class AbstractDatabase:
@@ -46,11 +45,20 @@ class AbstractDatabase:
 
     def execute_select(self, query: str) -> tuple[list[str], list[str], list[tuple]]:
         """Execute the given query and return the headers, datatypes and rows of the result."""
-        raise NotImplementedError
+        with self.cnx.cursor() as cursor:
+            cursor.execute(query)
+            rows = cursor.fetchall()
+            headers = [desc[0] for desc in cursor.description]
+            datatypes = [desc[1] for desc in cursor.description]
+            return (headers, datatypes, rows)
 
-    def call_procedure(self, name: str, args: list[str]):
-        """Call the given procedure with the given arguments."""
-        raise NotImplementedError
+    def call_function(self, function_name, *args):
+        """Call the given function with the given arguments and return the first row of the result."""
+        with self.cnx.cursor() as cursor:
+            placeholders = ', '.join(['%s'] * len(args))
+            query = f"SELECT {function_name}({placeholders});"
+            cursor.execute(query, args)
+            return cursor.fetchone()
 
     @staticmethod
     def parse_ddl(self, queries: str):
