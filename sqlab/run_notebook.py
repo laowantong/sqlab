@@ -7,8 +7,8 @@ from .text_tools import FAIL, OK, RESET, WARNING, SQLFormatter
 
 def run_notebook(config: dict) -> bool:
     ipynb_path = config["source_path"]
-    record_path = config["output_dir"] / "records.json"
-    if record_path.is_file() and ipynb_path.stat().st_mtime < record_path.stat().st_mtime:
+    records_path = config["records_path"]
+    if records_path.is_file() and ipynb_path.stat().st_mtime < records_path.stat().st_mtime:
         if input(f"{WARNING}The notebook is older than 'records.json'. Run and update it anyway (y/)? {RESET}").lower() != 'y':
             return True
     nb = nbformat.read(ipynb_path, as_version=4)

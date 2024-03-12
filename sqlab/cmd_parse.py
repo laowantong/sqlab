@@ -17,7 +17,7 @@ def run(config: dict):
     records = parser(ipynb["cells"])
     print(f"{OK}The records are up to date.{RESET}")
     text = json.dumps(records, indent=2, ensure_ascii=False)
-    Path(config["output_dir"], "records.json").write_text(text, encoding="utf-8")
+    Path(config["records_path"]).write_text(text, encoding="utf-8")
     return records
 
 class NoDataFieldError(Exception):
@@ -32,7 +32,11 @@ class NotebookParser:
         for (k, v) in config["strings"].items():
             if k.endswith("_label"):
                 self.labels_to_kinds[v.lower()] = k[:-6]
-        self.graph_path = Path(config["output_dir"], "graph.gv")
+        self.graph_gv_path = config["graph_gv_path"]
+        self.graph_format_path = {
+            "pdf": config["graph_pdf_path"],
+            "svg": config["graph_svg_path"],
+        }
 
         
     def __call__(self, cells):
@@ -375,17 +379,17 @@ class NotebookParser:
         }}
         """
         template = re.sub(r"(?m)^ {8}", "", template)
-        data["engine"] = "twopi" if has_exercises else "dot\n  rankdir=LR"
+        data["engine"] = "twopi" if has_exercises else "dot\n    rankdir=LR"
         text = template.format(**data)
-        self.graph_path.write_text(text)
-        print(f"Graph written to '{self.graph_path}'.")
+        self.graph_gv_path.write_text(text)
+        print(f"Graph written to '{self.graph_gv_path}'.")
         with contextlib.suppress(ImportError):
             graphviz = importlib.import_module("graphviz")
             source = graphviz.Source(text)
             for format in ("pdf", "svg"):
                 source.render(
-                    filename=self.graph_path.stem,
-                    directory=self.graph_path.parent,
+                    filename=self.graph_format_path[format].stem,
+                    directory=self.graph_format_path[format].parent,
                     format=format,
                     cleanup=True
                 )

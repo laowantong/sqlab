@@ -1,6 +1,5 @@
 
 from collections import defaultdict
-from pathlib import Path
 
 from .text_tools import TextWrapper, transform_markdown, join_non_empty, WARNING, RESET, OK, FAIL
 
@@ -11,8 +10,8 @@ class MessageGenerator:
         self.strings = config["strings"]
         self.column_width = config.get("column_width") or 100
         self.hr = "-" * self.column_width
-        if "output_dir" in config:
-            log_path = Path(config["output_dir"], "msg.log")
+        if "log_path" in config:
+            log_path = config["log_path"]
             log_path.unlink(missing_ok=True)
             self.log = log_path.open("a", encoding="utf-8").write
             print(f"Logging messages to '{log_path.name}'...")

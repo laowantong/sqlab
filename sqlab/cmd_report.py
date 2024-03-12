@@ -151,5 +151,4 @@ def run(config: dict):
     report["sql_errors"] = dict(Counter(sorted(sql_errors)).most_common())
     report["no_token_errors"] = no_token_errors
     report["empty_result_errors"] = empty_result_errors
-    report_path = Path(config["output_dir"], "report.json")
-    report_path.write_text(json.dumps(report, indent=2, ensure_ascii=False))
+    Path(config["report_path"]).write_text(json.dumps(report, indent=2, ensure_ascii=False))

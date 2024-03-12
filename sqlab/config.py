@@ -1,18 +1,28 @@
 import getpass
 import importlib
+import os
 import pydoc
 from pathlib import Path
 import configparser
 
 # fmt: off
 defaults = { # Not a JSON object because it contains comments and Python lambda functions.
-    "vendor": NotImplementedError("Vendor configuration is mandatory. Possible values: 'MySQL', 'PostgreSQL' (case-insensitive)."),
+    "vendor": NotImplementedError("Vendor configuration is mandatory. Possible values: 'MySQL', 'PostgreSQL' (case and spaces are ignored)."),
     "cnx_path": NotImplementedError("Connection configuration is mandatory. It must be the path of an INI file for SQLAlchemy."),
     "language": NotImplementedError("Language configuration is mandatory. Example values: 'fr', 'en'."),
     "ddl_path": NotImplementedError("DDL configuration is mandatory. It must be the path of a .sql file."),
     "dataset_dir": NotImplementedError("Dataset configuration is mandatory. It must be the path of a folder containing TSV files."),
     "source_path": NotImplementedError("Source configuration is mandatory. It must be the path of either a .ipynb or .json file."),
-    "output_dir": NotImplementedError("Output dir configuration is mandatory."),
+    "cheat_sheet_path": "./output/cheat_sheet.md",
+    "sql_dump_path": "./output/dump.sql",
+    "exercises_path": "./output/exercises.md",
+    "graph_gv_path": "./output/graph.gv",
+    "graph_pdf_path": "./output/graph.pdf",
+    "graph_svg_path": "./output/graph.svg",
+    "log_path": "./output/msg.log",
+    "records_path": "./output/records.json",
+    "report_path": "./output/report.json",
+    "storyline_path": "./output/storyline.md",
     "salt_seed": 42,
     "salt_bound": 100,
     "column_width": 100, # for wrapping text in the `sqlab_msg` table
@@ -108,11 +118,17 @@ def get_config(args):
     # Create a entry "strings" with the appropriate language, defaulting to English.
     config["strings"] = config.get(f"strings_{config['language']}", config[f"strings_en"])
 
-    # Transform paths relative to the user configuration file parent into absolute paths.
+    # Transform paths relative to the user configuration file parent into Path objects
+    # relative to the current working directory. Create the directories if needed.
     for key, value in config.items():
-        if isinstance(value, str) and key.endswith(("_path", "_dir")) and value.startswith("."):
-            config[key] = config_dir / value
-    config["output_dir"].mkdir(parents=True, exist_ok=True)
+        if key.endswith(("_path", "_dir")):
+            if isinstance(value, str) and value.startswith("."):
+                config[key] = config_dir / value
+            config[key] = Path(os.path.relpath(config[key], Path.cwd()))
+            if key.endswith("_dir"):
+                config[key].mkdir(parents=True, exist_ok=True)
+            else:
+                config[key].parent.mkdir(parents=True, exist_ok=True)
 
     # Read the cnx.ini file and update the configuration with its content.
     cnx_parser = configparser.ConfigParser()

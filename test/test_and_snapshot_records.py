@@ -10,7 +10,10 @@ base_dir = Path("test", "snapshots")
 base_dir.mkdir(parents=True, exist_ok=True)
 
 config = {
-    "output_dir": "test/snapshots",
+    "records_path": Path("test/snapshots/records.json"),
+    "graph_gv_path": Path("test/snapshots/graph.gv"),
+    "graph_pdf_path": Path("test/snapshots/graph.pdf"),
+    "graph_svg_path": Path("test/snapshots/graph.svg"),
     "strings": {
         "exercise_label": "Exercise",
         "statement_label": "Statement",
