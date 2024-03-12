@@ -50,8 +50,12 @@ class Shell(Cmd):
     
     def default(self, statement: Statement):
         """Called when the command is not recognized as a do_* method."""
-        n = self.db.execute_non_select(statement.command_and_args)
-        self.poutput(f"\n{n} row{'s'[:n^1]} affected")
+        full_command = statement.command_and_args.rstrip(";")
+        if full_command.isdigit():
+            self.decrypt(full_command)
+        else:
+            n = self.db.execute_non_select(full_command)
+            self.poutput(f"\n{n} row{'s'[:n^1]} affected")
     
     def do_decrypt(self, statement: Statement):
         """
