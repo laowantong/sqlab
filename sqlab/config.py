@@ -51,13 +51,14 @@ defaults = { # Not a JSON object because it contains comments and Python lambda 
         "formula_label": "Formula",
         "solution_label": "Solution",
         "annotation_label": "Annotation",
+        "action_label": "Action",
         "preamble_adventure": "Welcome!",
-        "preamble_correct": "Your query is right, congratulations! Please note the official correction:",
-        "preamble_hint": "You are not far from the expected result.",
-        "preamble_no_hint": "🔴 No specific message is planned for this token. Possible reasons:\n1. Copy-paste accident (double-click on the token to facilitate selection).\n2. Formula for calculating the token not updated.\n3. Emoji 👀 left at zero or replaced by the wrong value.\n4. New logical error. Congratulations on your creativity! Now read the statement carefully and, if the symptoms persist, ask your teacher.",
+        "preamble_accepted": "Your query is accepted, congratulations! Please note the official correction:",
+        "preamble_rejected": "You are not far from the expected result.",
+        "preamble_default": "🔴 No specific message is planned for this token. Possible reasons:\\n1. Copy-paste accident (double-click on the token to facilitate selection).\\n2. Formula for calculating the token not updated.\\n3. Emoji 👀 left at zero or replaced by the wrong value.\\n4. New logical error. Congratulations on your creativity! Now read the statement carefully and, if the symptoms persist, ask your teacher.",
         "close_dialog": "If you see this window, press Esc without touching anything else.",
         "emoji_instruction": "replace the emoji 👀 with {repl}",
-        "full_statement": "Full statement",
+        "exercise_tokens": "Full statement: {salt}. Solution: {token}.",
         "adventure_label": "Adventure",
         "exercises_label": "Exercises",
     },
@@ -69,13 +70,14 @@ defaults = { # Not a JSON object because it contains comments and Python lambda 
         "formula_label": "Formule",
         "solution_label": "Solution",
         "annotation_label": "Annotation",
+        "action_label": "Action",
         "preamble_adventure": "Bienvenue !",
-        "preamble_correct": "Votre requête est juste, bravo ! Notez la correction officielle :",
-        "preamble_hint": "Vous n'êtes pas loin du résultat attendu.",
-        "preamble_no_hint": "🔴 Aucun message spécifique n''est prévu pour ce token.\nRaisons possibles :\n1. Accident de copier-coller (double-cliquez sur le token pour en faciliter la sélection).\n2. Formule de calcul du token non mise à jour.\n3. Emoji 👀 laissé à zéro ou remplacé par la mauvaise valeur.\n4. Erreur logique inédite. Bravo pour votre créativité ! Maintenant relisez attentivement l''énoncé et, si les symptômes persistent, consultez votre enseignant.",
+        "preamble_accepted": "Votre requête est acceptée, bravo ! Notez la correction officielle :",
+        "preamble_rejected": "Vous n'êtes pas loin du résultat attendu.",
+        "preamble_default": "🔴 Aucun message spécifique n''est prévu pour ce token.\\nRaisons possibles :\\n1. Accident de copier-coller (double-cliquez sur le token pour en faciliter la sélection).\\n2. Formule de calcul du token non mise à jour.\\n3. Emoji 👀 laissé à zéro ou remplacé par la mauvaise valeur.\\n4. Erreur logique inédite. Bravo pour votre créativité ! Maintenant relisez attentivement l''énoncé et, si les symptômes persistent, consultez votre enseignant.",
         "close_dialog": "Si vous voyez cette fenêtre, appuyez sur Esc sans rien toucher d'autre.",
         "emoji_instruction": "remplacez l'emoji 👀 par {repl}",
-        "full_statement": "Énoncé complet",
+        "exercise_tokens": "Énoncé complet : {salt}. Solution : {token}.",
         "adventure_label": "Aventure",
         "exercises_label": "Exercices",
     },
@@ -149,6 +151,8 @@ def get_config(args):
                 password = getpass.getpass(prompt)
         cnx["password"] = password
     
+    # Complete the configuration with calculated values.
     config["cnx"] = cnx
+    config["vendor_slug"] = config["vendor"].lower().replace(" ", "")
 
     return config

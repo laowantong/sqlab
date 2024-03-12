@@ -21,9 +21,9 @@ config = {
         "episode_label": "Episode",
         "formula_label": "Formula",
         "annotation_label": "Annotation",
-        "preamble_correct": "Correct",
+        "preamble_accepted": "Correct",
         "emoji_instruction": "replace 👀 by {repl}",
-        "preamble_hint": "Almost there!",
+        "preamble_rejected": "Almost there!",
         "preamble_adventure": "Welcome!",
         "solution_label": "Solution",
     }

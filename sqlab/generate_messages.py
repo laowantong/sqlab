@@ -70,7 +70,7 @@ class MessageGenerator:
 
             if record["kind"] == "hint":
                 self.log(f"    Hint ({entry_token}): {repr(record['text'][:100])}\n")
-                preamble = f"🟠 {counter}. {self.strings['preamble_hint']}"
+                preamble = f"🟠 {counter}. {self.strings['preamble_rejected']}"
                 hint = self.format_text("➥ " + record["text"])
                 self.rows[entry_token] = join_non_empty(preamble, hint)
                 continue
@@ -83,7 +83,7 @@ class MessageGenerator:
                 if counter == 1:
                     preamble = f"⚪️ {counter}. {self.strings['preamble_adventure']}"
                 else:
-                    preamble = f"🟢 {counter}. {self.strings['preamble_correct']}"
+                    preamble = f"🟢 {counter}. {self.strings['preamble_accepted']}"
                 current_token = self.get_first_token_from_solutions(record["solutions"])
                 if current_token: # All episodes should have at least one solution, except for the last one
                     for solution in record["solutions"]:
@@ -103,7 +103,7 @@ class MessageGenerator:
                 self.log(f"Exercise {counter} ({entry_token}): {repr(record['statement'][:100])}\n")
                 statement = self.format_text(f"⚪️ **{self.strings['exercise_label']} {counter}**. {record['statement']}")
                 self.rows[entry_token] = join_non_empty(statement, formula)
-                preamble = f"🟢 {counter}. {self.strings['preamble_correct']}"
+                preamble = f"🟢 {counter}. {self.strings['preamble_accepted']}"
                 plain_text = join_non_empty(preamble, self.compose_solutions(record["solutions"]))
                 for solution in self.actual_solutions(record["solutions"]):
                     next_token = solution["token"]
@@ -156,7 +156,7 @@ class MessageGenerator:
             i = record["counter"]
             result.append(f"- **{self.strings['exercise_label']} {i}**. {statement_start}  ")
             first_token = self.get_first_token_from_solutions(record["solutions"])
-            result.append(f"  {self.strings['full_statement']} : `call decrypt({record['salt']})`. {self.strings['solution_label']} : `call decrypt({first_token})`.")
+            result.append("  " + self.strings["exercise_tokens"].format(salt=record["salt"], token=first_token))
         if result:
             result.append("")
             return "\n".join(result)
@@ -192,6 +192,8 @@ class MessageGenerator:
                 if isinstance(solution, str):
                     result.append(f"{solution}\n")
                 else:
+                    if solution_preamble := solution.get("solution_preamble"):
+                        result.append(f"{solution_preamble}\n")
                     result.append(f"```sql\n{solution['query']}\n```\n")
         if result:
             result.insert(0, f"# Cheat sheet\n")
