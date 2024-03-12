@@ -2,14 +2,14 @@ import importlib
 
 
 def database_factory(config: dict):
-    """Return a Database object according to the vendor specified in the configuration."""
-    db = importlib.import_module(".database", package=f"sqlab.dbms.{config['vendor_slug']}")
+    """Return a Database object according to the dbms specified in the configuration."""
+    db = importlib.import_module(".database", package=f"sqlab.dbms.{config['dbms_slug']}")
     return db.Database(config)
 
 
 class AbstractDatabase:
     """
-    To be inherited by the vendor-specific database classes.
+    To be inherited by the dbms-specific database classes.
     Just a contract to ensure that all the necessary methods are implemented.
     """
 

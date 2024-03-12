@@ -45,7 +45,7 @@ def run(config: dict):
     db.execute_non_select(db.create_tables_queries)
     print(f"Core tables created.")
 
-    resource_id = f"sqlab.dbms.{config['vendor_slug']}"
+    resource_id = f"sqlab.dbms.{config['dbms_slug']}"
 
     # Create the structure of the additional sqlab tables.
     sqlab_ddl_queries = resources.read_text(resource_id, "sqlab_ddl.sql")
@@ -147,7 +147,7 @@ def run(config: dict):
         **records["info"],
         message_count=len(rows),
         sqlab_database_language=config["language"],
-        dbms_vendor=config["vendor"],
+        dbms=config["dbms"],
         dbms_version=db.get_version(),
         sqlab_version=__version__,
         created_at=datetime.now().isoformat()
@@ -158,7 +158,7 @@ def run(config: dict):
     sql_dump.close()
 
     db.close()
-    print(f"""{OK}{config["vendor"]} database '{db_name}' created and populated.{RESET}\n""")
+    print(f"""{OK}{config["dbms"]} database '{db_name}' created and populated.{RESET}\n""")
 
 
 class Dump:

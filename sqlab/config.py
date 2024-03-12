@@ -7,7 +7,7 @@ import configparser
 
 # fmt: off
 defaults = { # Not a JSON object because it contains comments and Python lambda functions.
-    "vendor": NotImplementedError("Vendor configuration is mandatory. Possible values: 'MySQL', 'PostgreSQL' (case and spaces are ignored)."),
+    "dbms": NotImplementedError("DBMS configuration is mandatory. Possible values: 'MySQL', 'PostgreSQL' (case and spaces are ignored)."),
     "cnx_path": NotImplementedError("Connection configuration is mandatory. It must be the path of an INI file for SQLAlchemy."),
     "language": NotImplementedError("Language configuration is mandatory. Example values: 'fr', 'en'."),
     "ddl_path": NotImplementedError("DDL configuration is mandatory. It must be the path of a .sql file."),
@@ -147,12 +147,12 @@ def get_config(args):
             try:  # The password may be stored in a secrets.py file
                 password = importlib.import_module(".secrets", package="sqlab").password
             except ModuleNotFoundError:  # If not, ask the user to type it
-                prompt = f"{config['vendor']} password for user {cnx['user']}: "
+                prompt = f"{config['dbms']} password for user {cnx['user']}: "
                 password = getpass.getpass(prompt)
         cnx["password"] = password
     
     # Complete the configuration with calculated values.
     config["cnx"] = cnx
-    config["vendor_slug"] = config["vendor"].lower().replace(" ", "")
+    config["dbms_slug"] = config["dbms"].lower().replace(" ", "")
 
     return config
