@@ -3,9 +3,9 @@
 -- and return the first NOT NULL decrypted message, if any. If the token is invalid,
 -- the function will return a fallback message.
 
-CREATE OR REPLACE FUNCTION pgp_sym_decrypt_null_on_err(data bytea, psw text) RETURNS text AS $$
+CREATE OR REPLACE FUNCTION pgp_sym_decrypt_null_on_err(msg bytea, token text) RETURNS text AS $$
 BEGIN
-  RETURN pgp_sym_decrypt(data, psw, 'cipher-algo=aes256'); -- non-splitting semicolon
+  RETURN pgp_sym_decrypt(msg, token, 'cipher-algo=aes256'); -- non-splitting semicolon
 EXCEPTION
   WHEN external_routine_invocation_exception THEN
     RETURN NULL; -- non-splitting semicolon

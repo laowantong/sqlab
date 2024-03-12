@@ -39,15 +39,22 @@ class Database(AbstractDatabase):
             headers = [row[0] for row in cursor.fetchall()]
         return headers
 
-    def encrypt(self, plain, token):
-        # NB. The E prefix is for escaping single quote with a \' in the plain text
-        query = f"SELECT encode(pgp_sym_encrypt(E{repr_single(plain)}, {repr(token)}, 'cipher-algo=aes'), 'hex')"
+    def encrypt(self, clear_text, token):
+        """
+        In PostgreSQL, the function pgp_sym_encrypt() takes a textual key, not a numeric one.
+        Since the user passes a numeric token to our SQL function decrypt, we need to normalize
+        this number by stripping the leading zeros before casting it to string.
+        """
+        clear_text = f"E{repr_single(clear_text)}" # E prefix for escaping single quote with a \'
+        token = repr(token.lstrip("0"))
+        query = f"SELECT encode(pgp_sym_encrypt({clear_text}, {token}, 'cipher-algo=aes'), 'hex')"
         with self.cnx.cursor() as cursor:
             cursor.execute(query)
             encrypted_hex = cursor.fetchone()[0]
             return fr"'\x{encrypted_hex}'"
     
     def decrypt(self, encrypted, token):
+        token = token.lstrip("0")
         query = fr"SELECT pgp_sym_decrypt({encrypted}, {repr(token)}, 'cipher-algo=aes')"
         return self.execute_select(query)[2][0][0]
 
