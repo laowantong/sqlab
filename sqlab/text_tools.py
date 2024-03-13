@@ -36,7 +36,7 @@ transform_bold = markdown_transformer(r"\*\*(.+?)\*\*", "𝗔𝗕𝗖𝗗𝗘�
 
 def transform_markdown(text: str, column_width=100) -> str:
     """Simulate some Mardown tags with Unicode."""
-    text = re.sub("(?m)^```.*", "-" * column_width, text)
+    text = re.sub(r"(?m)^```\w*\n?$", "", text)
     text = transform_mono(text)
     text = transform_italic(text)
     text = transform_bold(text)

@@ -29,7 +29,7 @@ def main():
 
     msg = """\
         • create: create or recreate a database and populate it using the TSV files of the subfolder "dataset" (if any). All dataset tables are extended with a column containing a hash of each row. Parse the notebook (if any). Generate the messages (if any), encrypt and insert them in the added table "sqlab_msg".
-        • shell: launch a shell connected to the database. The added value is that, when a query produces a token, the corresponding message is decrypted and displayed without needing to copy-paste it into a CALL decrypt() command.
+        • shell: launch a shell connected to the database. The added value is that, when a query produces a token, the corresponding message is decrypted directly.
         • report: take as an input the file "logs.tsv" resulting from the students' interactions with the database, generate "report.json", and print to the standard output the unexpected queries with their corresponding tokens.
         • parse: parse the notebook containing the SQL exercises and adventures (if any). Extract the required records in a file named "records.json".
     """

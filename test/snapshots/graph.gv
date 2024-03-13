@@ -1,6 +1,6 @@
 digraph G {
     layout=dot
-  rankdir=LR
+    rankdir=LR
     bgcolor="#FDFEFF"
     edge [color="#34262B" penwidth=0.75]
     node [
@@ -30,23 +30,23 @@ digraph G {
         shape=circle
         fillcolor="#FFC19C"
     ]
-    003 003 003 002 003 004 002 004 002 012 013
+    002 002 002 003 002 003 004 003 004 012 013
     node [fillcolor="#DBDE92"]
     
-    001 -> 003
-    001 -> 003
-    001 -> 003
+    001 -> 002
+    001 -> 002
     001 -> 002
     001 -> 003
+    001 -> 002
+    002 -> 003
     002 -> 004
-    003 -> 002
+    002 -> 003
     003 -> 004
-    003 -> 002
     011 -> 012
     011 -> 013
     node [style=invisible label=""]
     0102 0202
     edge [arrowhead=odot]
-    002 -> 0102
-    002 -> 0202
+    003 -> 0102
+    003 -> 0202
 }

@@ -8,54 +8,116 @@
     "kind": "episode",
     "counter": 1,
     "context": "First episode of one adventure",
-    "statement": "how?",
+    "statement": "how 001?",
     "salt": "001",
     "formula": "salt_001 as token",
     "solutions": [
-      "Before 1003.",
       {
-        "query": "SELECT foo",
+        "query": "SELECT r1002a",
         "result_head": "",
-        "token": "1003"
+        "token": "1002"
       },
       {
-        "query": "SELECT bar",
+        "query": "SELECT r1002b",
         "result_head": "",
-        "token": "1003"
+        "token": "1002"
       },
-      "Before 2003.",
       {
-        "query": "SELECT bizz",
-        "result_head": "",
-        "token": "2003"
-      },
-      "Before 2002.",
-      {
-        "query": "SELECT buzz",
+        "query": "SELECT r2002",
         "result_head": "",
         "token": "2002"
       },
-      "Before variant without token.",
       {
-        "query": "SELECT no_token\nFROM table",
+        "query": "SELECT r2003",
         "result_head": "",
-        "token": "1003"
+        "token": "2003"
       },
-      "After variants."
+      {
+        "query": "SELECT r1002c",
+        "result_head": "",
+        "token": "1002"
+      }
     ],
     "adventure": 1
   },
-  "2002": "1002",
   "1002": {
     "kind": "episode",
     "counter": 2,
     "context": "blah blah",
-    "statement": "how?",
+    "statement": "how 002?",
     "salt": "002",
     "formula": "salt_002 as token",
     "solutions": [
       {
-        "query": "SELECT qux",
+        "query": "SELECT r1003a",
+        "result_head": "",
+        "token": "1003"
+      },
+      {
+        "query": "SELECT r2004",
+        "result_head": "",
+        "token": "2004"
+      },
+      {
+        "query": "SELECT r1003b",
+        "result_head": "",
+        "token": "1003"
+      }
+    ],
+    "adventure": 1
+  },
+  "2002": {
+    "kind": "episode",
+    "counter": 2,
+    "context": "blah blah",
+    "statement": "how 002?",
+    "salt": "002",
+    "formula": "salt_002 as token",
+    "solutions": [
+      {
+        "query": "SELECT r1003a",
+        "result_head": "",
+        "token": "1003"
+      },
+      {
+        "query": "SELECT r2004",
+        "result_head": "",
+        "token": "2004"
+      },
+      {
+        "query": "SELECT r1003b",
+        "result_head": "",
+        "token": "1003"
+      }
+    ],
+    "adventure": 1
+  },
+  "1003": {
+    "kind": "episode",
+    "counter": 3,
+    "context": "blah blah",
+    "statement": "how 003?",
+    "salt": "003",
+    "formula": "salt_003 as token",
+    "solutions": [
+      {
+        "query": "SELECT r1004",
+        "result_head": "",
+        "token": "1004"
+      }
+    ],
+    "adventure": 1
+  },
+  "2003": {
+    "kind": "episode",
+    "counter": 3,
+    "context": "blah blah",
+    "statement": "how 003?",
+    "salt": "003",
+    "formula": "salt_003 as token",
+    "solutions": [
+      {
+        "query": "SELECT r1004",
         "result_head": "",
         "token": "1004"
       }
@@ -64,44 +126,25 @@
   },
   "0102": {
     "kind": "hint",
-    "counter": 2,
+    "counter": 3,
     "text": "Wrong",
-    "query": "SELECT bar, salt_002 as token"
+    "query": "SELECT r0102, salt_003 as token"
   },
   "0202": {
     "kind": "hint",
-    "counter": 2,
-    "text": "Bad",
-    "query": "SELECT bizz, salt_002 as token"
-  },
-  "1003": {
-    "kind": "episode",
     "counter": 3,
-    "context": "blah blah",
-    "statement": "how?",
-    "salt": "003",
-    "formula": "salt_003 as token",
-    "solutions": [
-      {
-        "query": "SELECT quux",
-        "result_head": "",
-        "token": "1002"
-      },
-      {
-        "query": "SELECT bozo",
-        "result_head": "",
-        "token": "2004"
-      },
-      {
-        "query": "SELECT baz",
-        "result_head": "",
-        "token": "1002"
-      }
-    ],
+    "text": "Bad",
+    "query": "SELECT r0202, salt_003 as token"
+  },
+  "1004": {
+    "kind": "episode",
+    "counter": 4,
+    "context": "End of one adventure",
+    "statement": "no question asked!",
+    "salt": "004",
+    "solutions": [],
     "adventure": 1
   },
-  "2003": "1003",
-  "1004": "2004",
   "2004": {
     "kind": "episode",
     "counter": 4,
@@ -120,12 +163,12 @@
     "formula": "salt_011 as token",
     "solutions": [
       {
-        "query": "SELECT foo",
+        "query": "SELECT r1012",
         "result_head": "",
         "token": "1012"
       },
       {
-        "query": "SELECT foo",
+        "query": "SELECT r1013",
         "result_head": "",
         "token": "1013"
       }

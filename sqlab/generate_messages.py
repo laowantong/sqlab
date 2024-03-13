@@ -39,6 +39,8 @@ class MessageGenerator:
             if isinstance(solution, str):
                 result.append(self.format_text(solution))
             else:
+                if solution_preamble := solution.get("solution_preamble"):
+                    result.append(self.format_text(solution_preamble))
                 result.append(solution["query"])
         result.append(self.hr)
         return "\n\n".join(result)
@@ -87,11 +89,13 @@ class MessageGenerator:
                 current_token = self.get_first_token_from_solutions(record["solutions"])
                 if current_token: # All episodes should have at least one solution, except for the last one
                     for solution in record["solutions"]:
-                        if isinstance(solution, str):
+                        if isinstance(solution, str): # an annotation
                             solutions_by_token[current_token].append(self.format_text(solution))
                         else:
                             current_token = solution["token"]
-                            solutions_by_token[current_token].append(solution["query"])
+                            # When the same episode has several entries, avoid duplicating its solutions
+                            if solution["query"] not in solutions_by_token[current_token]:
+                                solutions_by_token[current_token].append(solution["query"])
                 solutions = self.compose_solutions(solutions_by_token[entry_token])
                 context = self.format_text(record["context"])
                 statement = self.format_text(f"**{self.strings['statement_label']}**. {record['statement']}")
@@ -179,9 +183,7 @@ class MessageGenerator:
                     result.append(f"## {self.strings['exercises_label']}\n")
                     label = self.strings['exercise_label']
             result.append(f"### {label} {counter}\n")
-            if record.get("solutions"):
-                solution = record["solutions"][0]
-                result.append(f"**Token.** `call decrypt({token})`\n")
+            result.append(f"**Token.** {token}.\n")
             result.append(record['statement'].replace("\\n", "\n"))
             if record.get("formula"):
                 if tweak := record.get("tweak", ""):

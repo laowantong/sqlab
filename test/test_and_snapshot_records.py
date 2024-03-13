@@ -66,7 +66,7 @@ class TestRecordCreationErrors(unittest.TestCase):
     def test_salt_mismatch_in_solutions(self):
         cells = [
             markdown("**Exercise [001].** how?"),
-            sql("SELECT foo, salt_002 as token", "4547"),
+            sql("SELECT foo, salt_003 as token", "4547"),
         ]
         self.assertRaisesRegex(AssertionError, r"Salt mismatch", parse_nb, cells)
     
@@ -124,7 +124,7 @@ class TestRecordCreationErrors(unittest.TestCase):
         cells = [
             markdown("**Exercise [001].** First episode of one adventure"),
             code("x = 1234 # the largest value\n"),
-            sql("SELECT foo, salt_001 {{x}} as token", "1003"),
+            sql("SELECT foo, salt_001 {{x}} as token", "1002"),
             code("x = 3456 # the smallest value\n"),
         ]
         self.assertRaisesRegex(AssertionError, r"already .* tweak", parse_nb, cells)
@@ -137,8 +137,8 @@ class TestRecordCreationErrors(unittest.TestCase):
         cells = [
             markdown("**Episode [001].** First episode of one adventure"),
             markdown("**Statement.** how?"),
-            sql("SELECT foo, salt_001 as token\n--> Episod [003]", "1003"),
-            sql("SELECT bar, salt_001 as token", "1003"),
+            sql("SELECT foo, salt_001 as token\n--> Episod [002]", "1002"),
+            sql("SELECT bar, salt_001 as token", "1002"),
             markdown("**Statement.** why?"),
         ]
         self.assertRaisesRegex(AssertionError, r"already .* statement", parse_nb, cells)
@@ -146,7 +146,7 @@ class TestRecordCreationErrors(unittest.TestCase):
     def test_missing_statement(self):
         cells = [
             markdown("**Episode [001].** First episode of one adventure"),
-            sql("SELECT foo, salt_001 as token\n--> Episod [003]", "1003"),
+            sql("SELECT foo, salt_001 as token\n--> Episod [002]", "1002"),
         ]
         self.assertRaisesRegex(AssertionError, r"Missing statement", parse_nb, cells)
     
@@ -165,7 +165,7 @@ class TestRecordCreationErrors(unittest.TestCase):
     def test_missing_tweak_definition(self):
         cells = [
             markdown("**Episode [001].** First episode of one adventure"),
-            sql("SELECT foo, salt_001 {{x}} as token", "1003"),
+            sql("SELECT foo, salt_001 {{x}} as token", "1002"),
         ]
         self.assertRaisesRegex(AssertionError, r"Missing tweak", parse_nb, cells)
     
@@ -173,7 +173,7 @@ class TestRecordCreationErrors(unittest.TestCase):
         cells = [
             markdown("**Episode [001].** First episode of one adventure"),
             code(("x = 1234 # the largest value\n")),
-            sql("SELECT foo, salt_001 as token", "1003"),
+            sql("SELECT foo, salt_001 as token", "1002"),
         ]
         self.assertRaisesRegex(AssertionError, r"Missing {{x}}", parse_nb, cells)
 
@@ -181,7 +181,7 @@ class TestRecordCreationErrors(unittest.TestCase):
         cells = [
             markdown("**Episode [001].** First episode of one adventure"),
             markdown("**Statement.** how?"),
-            sql("SELECT foo, salt_001 as token\n--> Episod [001]", "1003"),
+            sql("SELECT foo, salt_001 as token\n--> Episod [001]", "1002"),
         ]
         self.assertRaisesRegex(AssertionError, r"Self-reference", parse_nb, cells)
     
@@ -189,7 +189,7 @@ class TestRecordCreationErrors(unittest.TestCase):
         cells = [
             markdown("**Episode [001].** First episode of one adventure"),
             markdown("**Statement.** how?"),
-            sql("SELECT foo, salt_001 as token", "1003"),
+            sql("SELECT foo, salt_001 as token", "1002"),
             sql("-- Hint. This is wrong\nSELECT bar, salt_001 as token", "1004"),
             sql("-- Hint. This is bad\nSELECT bizz, salt_001 as token", "1004"),
         ]
@@ -199,7 +199,7 @@ class TestRecordCreationErrors(unittest.TestCase):
         cells = [
             markdown("**Episode [001].** First episode of one adventure"),
             markdown("**Statement.** how?"),
-            sql("SELECT foo, salt_001 as token", "1003"),
+            sql("SELECT foo, salt_001 as token", "1002"),
             sql("-- Hint. This is wrong\nSELECT bar, salt_001 as token", ""),
         ]
         self.assertRaisesRegex(AssertionError, r"Missing token for hint", parse_nb, cells)
@@ -293,45 +293,44 @@ def create_records():
     path = Path(base_dir, "complex_graph.json")
     cells = [
         #         ________     ___________________
-        #       /   2003   \ /     2004            \
-        #  --> 001 ≡≡≡≡≡≡≡> 003 ======> 002 ------> 004
-        #       \   1003        1002   / \  1004
-        #        \____________________/   \________ _ _ _
-        #                  2002            \  0102
-        #                                   \________ _ _ _
+        #       /   2002   \ /     2004            \
+        #  --> 001 ≡≡≡≡≡≡≡> 002 ======> 003 ------> 004
+        #       \   1002         1003  / \   1004
+        #        \____________________/   \____________.
+        #                  2003            \  0102
+        #                                   \____________.
         #                                       0202
-        markdown("**Episode [001].** First episode of one adventure"),      # --> 001
-        markdown("**Statement.** how?"),
-        markdown("**Annotation.** Before 1003."),
-        sql("SELECT foo, salt_001 as token\n--> Episod [003]", "1003"),   # 001 --- 1003 ---> 003
-        sql("SELECT bar, salt_001 as token", "1003"),                     # 001 --- 1003 ---> 003
-        markdown("**Annotation.** Before 2003."),
-        sql("SELECT bizz, salt_001 as token", "2003"),                    # 001 --- 2003 ---> 003
-        markdown("**Annotation.** Before 2002."),
-        sql("SELECT buzz, salt_001 as token\n--> Episode [002]", "2002"), # 001 --- 2002 ---> 002
-        markdown("**Annotation.** Before variant without token."),
-        sql("SELECT no_token\nFROM table", "a variant without token"),    # 001 ------------> 003
-        markdown("**Annotation.** After variants."),
+        markdown("**Episode [001].** First episode of one adventure"),    #               --> 001
+        markdown("**Statement.** how 001?"),
+        sql("SELECT r1002a, salt_001 as token\n--> Episod [002]", "1002"),   # 001 --- 1002 ---> 002 (r1002a)
+        sql("SELECT r1002b, salt_001 as token", "1002"),                     # 001 --- 1002 ---> 002 (r1002b)
+        sql("SELECT r2002, salt_001 as token", "2002"),                      # 001 --- 2002 ---> 002 (r2002)
+        sql("SELECT r2003, salt_001 as token\n--> Episode [003]", "2003"),   # 001 --- 2003 ---> 003 (r2003)
+        sql("SELECT r1002c", "a variant without token"),                     # 001 ------------> 002 (no token)
+
         markdown("**Episode [002].** blah blah"),
-        markdown("**Statement.** how?"),
-        sql("SELECT qux, salt_002 as token\n--> Epilog [004]", "1004"),   # 002 --- 1004 ---> 004
-        sql("-- Hint. Wrong\nSELECT bar, salt_002 as token", "0102"),     # 002 --- 0102
-        sql("-- Hint. Bad\nSELECT bizz, salt_002 as token", "0202"),      # 002 --- 0202
+        markdown("**Statement.** how 002?"),
+        sql("SELECT r1003a, salt_002 as token\n--> Episode [003]", "1003"),  # 002 --- 1003 ---> 003 (r1003a)
+        sql("SELECT r2004, salt_002 as token\n--> Episode [004]", "2004"),   # 002 --- 2004 ---> 004 (r2004)
+        sql("SELECT r1003b, salt_002 as token", "1003"),                     # 002 --- 1003 ---> 003 (r1003b)
+
         markdown("**Episode [003].** blah blah"),
-        markdown("**Statement.** how?"),
-        sql("SELECT quux, salt_003 as token\n--> Episode [002]", "1002"), # 003 --- 1002 ---> 002
-        sql("SELECT bozo, salt_003 as token\n--> Episode [004]", "2004"), # 003 --- 2004 ---> 004
-        sql("SELECT baz, salt_003 as token", "1002"),                     # 003 --- 1002 ---> 002
+        markdown("**Statement.** how 003?"),
+        sql("SELECT r1004, salt_003 as token\n--> Epilog [004]", "1004"),    # 003 --- 1004 ---> 004 (r1004)
+        sql("-- Hint. Wrong\nSELECT r0102, salt_003 as token", "0102"),      # 003 --- 0102
+        sql("-- Hint. Bad\nSELECT r0202, salt_003 as token", "0202"),        # 003 --- 0202
+
         markdown("**Episode [004].** End of one adventure"),
         markdown("**Statement.** no question asked!"),
+
         #  --> 011 ------> 012       013
         #         \ 1012             /
         #          \________________/
         #                 1013
-        markdown("**Episode [011].** First episode of another adventure"),  # --> 011
+        markdown("**Episode [011].** First episode of another adventure"),   # --> 011
         markdown("**Statement.** how?"),
-        sql("SELECT foo, salt_011 as token\n--> Episod [012]", "1012"),   # 011 --- 1012 ---> 012
-        sql("SELECT foo, salt_011 as token\n--> Episod [013]", "1013"),   # 011 --- 1013 ---> 013
+        sql("SELECT r1012, salt_011 as token\n--> Episod [012]", "1012"),    # 011 --- 1012 ---> 012 (r1012)
+        sql("SELECT r1013, salt_011 as token\n--> Episod [013]", "1013"),    # 011 --- 1013 ---> 013 (r1013)
         markdown("**Episode [012].** End of another adventure"),
         markdown("**Statement.** no question asked either!"),
         markdown("**Episode [013].** Alternative end of another adventure"),

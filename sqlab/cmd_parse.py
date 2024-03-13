@@ -123,6 +123,8 @@ class NotebookParser:
                 source = "".join(source[1:])  # strips the magic command
                 (label, text, raw_query, next_salt) = split_sql_source(source)
                 kind = self.labels_to_kinds.get(label.lower(), "")
+                if kind == "action": # This query is not meant to be recorded, but to bring the DB to a certain state
+                    continue
                 (query, formula, salt) = separate_query_formula_and_salt(raw_query)
                 token = self.extract_first_token_from_output(cell)
 
@@ -161,14 +163,16 @@ class NotebookParser:
                     token = token or segments[-1]["default_token"]
                     if label:
                         text = f"{label}. {text}"
-                    if text:
-                        segments[-1]["solutions"].append(text)
-                    segments[-1]["solutions"].append({
+                    solution = {
+                        "solution_preamble": text, # a "sticky" annotation, useful for a variant with a different token
                         "query": query,
                         "result_head": self.extract_result_head(cell),
                         "next_salt": next_salt,
                         "token": token
-                    })
+                    }
+                    if not text:
+                        solution.pop("solution_preamble")
+                    segments[-1]["solutions"].append(solution)
 
         # The segments are now complete, we can resolve the associations between salts and tokens.
 
@@ -221,9 +225,9 @@ class NotebookParser:
             salt = segment["salt"]
             main_token = salt  # the salt serves as its own token in an exercise or a first episode
             if tokens := tokens_by_salt.get(salt):
-                main_token = tokens.pop()  # an episode (after the first one) is accessed by at least one token
-                for token in tokens: # the remaining tokens are aliases
-                    records[token] = main_token
+                main_token, *tokens = tokens  # an episode (after the first one) is accessed by at least one token
+                for token in tokens: # the remaining tokens are variants
+                    records[token] = segment  # keep a dynamic reference for future updates
                     non_hint_tokens.add(token)
             non_hint_tokens.update(solution["token"] for solution in self.actual_solutions(segment))
             records[main_token] = segment
@@ -302,7 +306,12 @@ class NotebookParser:
             "hint_ends": [],
         }
         has_exercises = False
+        seen_records = set()
         for (token, record) in records.items():
+            record_hash = hash(str(record))
+            if record_hash in seen_records:
+                continue
+            seen_records.add(record_hash)
             if token == "info":
                 continue
             if isinstance(record, str):
