@@ -40,9 +40,9 @@ class TestSeparateQueryAndFormula(unittest.TestCase):
         self.assertEqual(actual, ("SELECT foo", "salt_042 as token", "042"))
     
     def test_query_with_x_formula(self):
-        query = """SELECT *, salt_025(sum(crc32("{{x}}")) OVER ()) AS token FROM table"""
+        query = """SELECT *, salt_025(sum(string_hash("{{x}}")) OVER ()) AS token FROM table"""
         actual = separate_query_formula_and_salt(query)
-        self.assertEqual(actual, ("SELECT * FROM table", "salt_025(sum(crc32(\"👀\")) OVER ()) AS token", "025"))
+        self.assertEqual(actual, ("SELECT * FROM table", "salt_025(sum(string_hash(\"👀\")) OVER ()) AS token", "025"))
 
 
 class TestSplitSqlSource(unittest.TestCase):

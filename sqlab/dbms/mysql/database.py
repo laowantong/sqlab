@@ -14,8 +14,8 @@ class Database(AbstractDatabase):
         else:
             raise mysql.connector.Error.ConnectionError(f"{FAIL}Could not connect to MySQL{RESET}")
 
-    def get_headers(self, table: str, keep_auto_increment=False) -> list[str]:
-        # Note that in MySQL, contrarily to PostgreSQL, keep_auto_increment defaults to False.
+    def get_headers(self, table: str, keep_auto_increment_columns=False) -> list[str]:
+        # Note that in MySQL, contrarily to PostgreSQL, keep_auto_increment_columns defaults to False.
         # This will exclude the auto incremented columns from the hash  calculation, since
         # the final value of these columns cannot be used in a before_insert trigger, and an
         # after_insert trigger cannot update the just-inserted row. It would work as intended
@@ -29,7 +29,7 @@ class Database(AbstractDatabase):
                 AND extra NOT LIKE "%auto_increment%" -- Exclude auto_increment columns
             ORDER BY ordinal_position
         """
-        if keep_auto_increment:
+        if keep_auto_increment_columns:
             query = re.sub(r"(?m)^.* -- Exclude auto_increment columns\n", "", query)
         headers = []
         with self.cnx.cursor() as cursor:

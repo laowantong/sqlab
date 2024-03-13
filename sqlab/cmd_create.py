@@ -52,23 +52,13 @@ def run(config: dict):
     sql_dump.write(sqlab_ddl_queries)
     db.execute_non_select(sqlab_ddl_queries)
 
-    # Add the `string_hash` function.
-    string_hash_queries = resources.read_text(resource_id, "string_hash.sql")
-    sql_dump.write(string_hash_queries)
-    db.execute_non_select(string_hash_queries)
+    # Define various SQL functions: nn, string_hash, decrypt, etc.
+    functions = resources.read_text(resource_id, "udf.sql")
+    functions = functions.format(**config["strings"])
+    sql_dump.write(functions)
+    db.execute_non_select(functions)
 
-    # Add the `decrypt` function.
-    decrypt_queries = resources.read_text(resource_id, "decrypt.sql")
-    decrypt_queries = decrypt_queries.format(**config["strings"])
-    sql_dump.write(decrypt_queries)
-    db.execute_non_select(decrypt_queries)
-
-    # Execute other queries (commodity functions, ...).
-    other_queries = resources.read_text(resource_id, "goodies.sql")
-    sql_dump.write(other_queries)
-    db.execute_non_select(other_queries)
-
-    # Add a few random salt functions to the database.
+    # Define a few random SQL salt functions.
     random.seed(config["salt_seed"])
     salt_template = resources.read_text(resource_id, "salt.sql")
     salts = []

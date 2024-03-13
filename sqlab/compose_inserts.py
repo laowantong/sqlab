@@ -40,7 +40,11 @@ def compose_message_inserts(db, rows: list[str]) -> str:
 def compose_data_inserts(config: dict, db, trigger_template) -> str:
     """ Return a string of SQL commands to insert the data_from the TSV files into the database.
     No actual insertion is performed. The db argument is only used to retrieve the colum names
-    of the database just created from the `ddl.sql` file. """
+    of the database just created from the `ddl.sql` file. Note that the triggers convert the
+    values of a row to hash by building a JSON array. An alternative has been considered: use
+    concat_ws(), but it skips the NULL values, which requires to coalesce() them first into the
+    string 'NULL'. Under PostgreSQL, this requires to cast each value to TEXT. All in all, the
+    JSON array seems to be the most straightforward solution. """
     dataset_dir = Path(config["dataset_dir"])
     tsv_row_to_sql_values = TsvRowToSqlValues(config)
     result = []
@@ -48,7 +52,7 @@ def compose_data_inserts(config: dict, db, trigger_template) -> str:
         table = unicodedata.normalize('NFC', tsv_path.stem) # On macOS, the filenames use NFD, while MySQL is expecting NFC.
         headers = db.get_headers(table) # Columns to be hashed.
         triggers = trigger_template.format(table=table, columns=', NEW.'.join(headers))
-        headers = db.get_headers(table, keep_auto_increment=False) # Columns to be inserted.
+        headers = db.get_headers(table, keep_auto_increment_columns=False) # Columns to be inserted.
         tsv_row_to_sql_values.set_wrappers(headers)
         insertions = [f"INSERT INTO {table} ({', '.join(headers)}) VALUES"]
         for row in tsv_path.read_text().splitlines():

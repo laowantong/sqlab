@@ -22,7 +22,7 @@ class Database(AbstractDatabase):
         except (psycopg2.DatabaseError, Exception) as error:
             print(error)
 
-    def get_headers(self, table, keep_auto_increment=True):
+    def get_headers(self, table, keep_auto_increment_columns=True):
         query = f"""
             SELECT column_name, column_default
             FROM information_schema.columns
@@ -31,7 +31,7 @@ class Database(AbstractDatabase):
                 AND (column_default IS NULL OR NOT column_default LIKE 'nextval(%') -- Exclude auto_increment columns
             ORDER BY ordinal_position
         """
-        if keep_auto_increment:
+        if keep_auto_increment_columns:
             query = re.sub(r"(?m)^.* -- Exclude auto_increment columns\n", "", query)
         headers = []
         with self.cnx.cursor() as cursor:
@@ -59,11 +59,15 @@ class Database(AbstractDatabase):
         return self.execute_select(query)[2][0][0]
 
     def execute_non_select(self, query):
-        statements = [stmt.strip() for stmt in re.split(r";\s*\n+", query) if stmt.strip()]  # Split on semicolons and remove empty strings
+        statements = [
+            s
+            for statement in re.split(r";\s*\n+", query)  # Split on trailing semicolons
+            if (s := statement.strip()) # and remove empty strings
+        ]
         rowcounts = []
         with self.cnx.cursor() as cursor:
-            for stmt in statements:
-                cursor.execute(stmt)
+            for statement in statements:
+                cursor.execute(statement)
                 rowcounts.append(cursor.rowcount)
         return sum(rowcounts)
     

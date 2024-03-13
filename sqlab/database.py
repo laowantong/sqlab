@@ -27,7 +27,7 @@ class AbstractDatabase:
     def get_version(self) -> str:
         return self.dbms_version
 
-    def get_headers(self, table: str, keep_auto_increment=True) -> list[str]:
+    def get_headers(self, table: str, keep_auto_increment_columns=True) -> list[str]:
         """
         Retrieve the column names of the given table. Always exclude the hash column.
         On demand, exclude the auto_increment columns (for insertion and, in MySQL,
