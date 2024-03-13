@@ -5,3 +5,4 @@ dist/
 cnx.ini
 *.amdc
 *.amdn
+update_outputs.sh
