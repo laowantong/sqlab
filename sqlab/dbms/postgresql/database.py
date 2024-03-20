@@ -58,32 +58,35 @@ class Database(AbstractDatabase):
         query = fr"SELECT pgp_sym_decrypt({encrypted}, {repr(token)}, 'cipher-algo=aes')"
         return self.execute_select(query)[2][0][0]
 
-    def execute_non_select(self, query):
+    def execute_non_select(self, text):
         statements = [
             s
-            for statement in re.split(r";\s*\n+", query)  # Split on trailing semicolons
+            for statement in re.split(r";\s*\n+", text)  # Split on trailing semicolons
             if (s := statement.strip()) # and remove empty strings
         ]
-        rowcounts = []
+        total_affected_rows = 0
         with self.cnx.cursor() as cursor:
             for statement in statements:
                 cursor.execute(statement)
-                rowcounts.append(cursor.rowcount)
-        return sum(rowcounts)
+                total_affected_rows += cursor.rowcount
+        return total_affected_rows
     
     def parse_ddl(self, queries):
         triple = re.split(r"(?mi)^(?:\\c .+|-- FK\b.*)", queries, 2)
-        self.create_db_queries = triple[0]
-        self.create_tables_queries = triple[1]
+        self.db_creation_queries = triple[0]
+        self.tables_creation_queries = triple[1]
         try:
-            self.add_fk_constraints_queries = triple[2]
+            self.fk_constraints_queries = triple[2]
         except IndexError:
             print(f"{FAIL}The foreign key constraints definitions must be separated from the previous parts with a -- FK comment.{RESET}")
         self.drop_fk_constraints_queries = re.sub(
             r"(?s)\bADD CONSTRAINT\s+(.+?)\s+FOREIGN KEY\b.+?([,;]\n)",
             r"DROP CONSTRAINT \1\2",
-            self.add_fk_constraints_queries,
+            self.fk_constraints_queries,
         )
+    
+    def create_database(self):
+        self.execute_non_select(self.db_creation_queries)
     
     @staticmethod
     def reset_table_statement(table: str) -> str:

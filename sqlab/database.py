@@ -39,26 +39,26 @@ class AbstractDatabase:
         """Return the encrypted version of the given plain text."""
         raise NotImplementedError
 
-    def execute_non_select(self, query: str) -> int:
-        """Execute the given query and return the number of affected rows."""
+    def execute_non_select(self, text) -> int:
+        """Execute the queries of the given text and return the number of affected rows."""
         raise NotImplementedError
 
-    def execute_select(self, query: str) -> tuple[list[str], list[str], list[tuple]]:
+    def execute_select(self, query_text: str) -> tuple[list[str], list[str], list[tuple]]:
         """Execute the given query and return the headers, datatypes and rows of the result."""
-        with self.cnx.cursor() as cursor:
-            cursor.execute(query)
-            rows = cursor.fetchall()
-            headers = [desc[0] for desc in cursor.description]
-            datatypes = [desc[1] for desc in cursor.description]
-            return (headers, datatypes, rows)
+        cursor = self.cnx.cursor()
+        cursor.execute(query_text)
+        rows = cursor.fetchall()
+        headers = [desc[0] for desc in cursor.description]
+        datatypes = [desc[1] for desc in cursor.description]
+        return (headers, datatypes, rows)
 
     def call_function(self, function_name, *args):
         """Call the given function with the given arguments and return the first row of the result."""
-        with self.cnx.cursor() as cursor:
-            placeholders = ', '.join(['%s'] * len(args))
-            query = f"SELECT {function_name}({placeholders});"
-            cursor.execute(query, args)
-            return cursor.fetchone()
+        cursor = self.cnx.cursor()
+        placeholders = ', '.join(['%s'] * len(args))
+        query = f"SELECT {function_name}({placeholders});"
+        cursor.execute(query, args)
+        return cursor.fetchone()
 
     @staticmethod
     def parse_ddl(self, queries: str):
@@ -69,6 +69,9 @@ class AbstractDatabase:
         3. Foreign key creation
         And create a query for dropping the foreign key constraints.
         """
+        raise NotImplementedError
+    
+    def create_database(self):
         raise NotImplementedError
 
     @staticmethod

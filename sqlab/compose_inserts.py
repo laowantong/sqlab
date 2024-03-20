@@ -52,7 +52,9 @@ def compose_data_inserts(config: dict, db, trigger_template) -> str:
     for tsv_path in dataset_dir.glob("*.tsv"):
         table = unicodedata.normalize('NFC', tsv_path.stem) # On macOS, the filenames use NFD, while MySQL is expecting NFC.
         headers = db.get_headers(table) # Columns to be hashed.
-        triggers = trigger_template.format(table=table, columns=', NEW.'.join(headers))
+        columns = ", ".join(headers)
+        new_columns = ", ".join(f"NEW.{header}" for header in headers)
+        triggers = trigger_template.format(table=table, columns=columns, new_columns=new_columns)
         headers = db.get_headers(table, keep_auto_increment_columns=False) # Columns to be inserted.
         tsv_row_to_sql_values.set_wrappers(headers)
         insertions = [f"INSERT INTO {table} ({', '.join(headers)}) VALUES"]

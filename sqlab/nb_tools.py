@@ -47,15 +47,18 @@ def may_create_connection_file(**kwargs):
             file.write(f"{key} = {value}\n")
     print(f"{OK}The connection file '{cnx_name}' has been created.{RESET}")
 
-
-def show_tables():
+def get_engine():
     cnx_path = Path("cnx.ini")
     parameters = {}
     for line in cnx_path.read_text().splitlines():
         (k, _, v) = line.partition(" = ")
         parameters[k] = v
     url = "{drivername}://{username}:{password}@{host}:{port}/{database}".format(**parameters)
-    engine = sqlalchemy.create_engine(url)
+    return sqlalchemy.create_engine(url)
+
+def show_tables(engine=None):
+    if engine is None:
+        engine = get_engine()
     metadata = sqlalchemy.MetaData()
     metadata.reflect(engine)
     results = []

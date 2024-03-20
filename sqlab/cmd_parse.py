@@ -143,6 +143,7 @@ class NotebookParser:
                     })
 
                 else: # Regard the query as a solution, whatever the label ("solution", "variant", "", etc.)
+                    assert segments, f"{FAIL}A solution must be preceded by an exercise or an episode.\n{source}.{RESET}"
                     if not segments[-1]["formula"]: # We are in the first solution of the segment
                         assert formula, f"{FAIL}Missing formula for {segments[-1]['kind']} [{segments[-1]['salt']}].{RESET}\n{source}."
                         if "👀" in formula:
@@ -266,26 +267,18 @@ class NotebookParser:
             if "data" in output:
                 table = "".join(output["data"]["text/html"])
                 if table.startswith("<table>"):
+                    n = table.count("<tr>") - 1  # Don't rely on the number of affected rows
+                                                 # displayed by MySQL or PostgreSQL, since SQLite
+                                                 # displays it only for the DML statements.
                     break
         else:
             print(f"{WARNING}No table in the output.{RESET}")
             print(code_cell["outputs"])
             print()
             return ""
-        # Find the first output which contains the number of rows affected.
-        for output in code_cell["outputs"]:
-            if "text" in output:
-                count = output["text"][0]
-                break
-            elif "data" in output and "text/plain" in output["data"]:
-                count = output["data"]["text/plain"][0]
-                break
-        else:
-            print(f"{WARNING}No text field in the output.{RESET}")
-            print(code_cell["outputs"])
-            return ""
         # Keep only the first two rows
-        return re.sub(r"(?s)(<table>\n(?: *<tr>.+?</tr>\n){,3}).*(</table>)", fr"\1\2\nTotal: {count}", table)
+        count_str = f"\nTotal: {n} row{'s'[:n^1]} affected."
+        return re.sub(r"(?s)(<table>\n(?: *<tr>.+?</tr>\n){,3}).*(</table>)", fr"\1\2{count_str}", table)
     
     @staticmethod
     def actual_solutions(segment_or_record):

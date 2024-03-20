@@ -124,7 +124,7 @@ class MessageGenerator:
             assert token in self.rows, f"{FAIL}Missing output token: {token}. Check that the adventure's last episode has no query.{RESET}"
 
         markup = OK if self.rows else WARNING
-        print(f"{markup}{len(self.rows)} messages generated.")
+        print(f"{markup}{len(self.rows)} messages generated.{RESET}")
 
         return self.rows
 

@@ -24,25 +24,27 @@ def run(config: dict):
     db = database_factory(config)
 
     # Parse the DDL of core tables into four string attributes of the database object:
-    # • create_db_queries
-    # • create_tables_queries
-    # • add_fk_constraints_queries
+    # • db_creation_queries
+    # • tables_creation_queries
+    # • fk_constraints_queries
     # • drop_fk_constraints_queries
     ddl_queries = Path(config["ddl_path"]).read_text()
     db.parse_ddl(ddl_queries)
-    sql_dump.write(ddl_queries.replace(db.add_fk_constraints_queries, ""))
+    if db.fk_constraints_queries:
+        ddl_queries = ddl_queries.replace(db.fk_constraints_queries, "")
+    sql_dump.write(ddl_queries)
 
     # Drop the database if it exists, and recreate it.
     db_name = config["cnx"].pop("database")  # Don't try to connect to a non-existing database.
     db.connect()
-    db.execute_non_select(db.create_db_queries)
+    config["cnx"]["database"] = db_name  # Restore the database name.
+    db.create_database()
     print(f"Database '{db_name}' created.")
     db.close()
 
     # Connect to the freshly created database and create the core tables.
-    config["cnx"]["database"] = db_name  # Restore the database name.
     db.connect()
-    db.execute_non_select(db.create_tables_queries)
+    db.execute_non_select(db.tables_creation_queries)
     print(f"Core tables created.")
 
     resource_id = f"sqlab.dbms.{config['dbms_slug']}"
@@ -77,6 +79,8 @@ def run(config: dict):
     sql_dump.write(data_inserts_queries)
     db.execute_non_select(data_inserts_queries)
 
+    sql_dump.write(db.fk_constraints_queries)
+
     # If the source is a notebook, parse it and populate the `records` list.
     # Otherwise, load the records from the `records.json` file.
     source_path = Path(config["source_path"])
@@ -85,7 +89,7 @@ def run(config: dict):
         if source_path.suffix == ".ipynb":
             # Add temporarily the foreign key constraints to the core tables, before executing the
             # notebook, in case they are exploited by some question or exercise.
-            db.execute_non_select(db.add_fk_constraints_queries)
+            db.execute_non_select(db.fk_constraints_queries)
             notebook_is_up_to_date = run_notebook(config)
             # In case the adventure contains queries like `INSERT INTO`, `UPDATE`, `DELETE FROM`, etc.,
             # the core tables may have been changed. Restore them. This requires the foreign key
@@ -101,8 +105,7 @@ def run(config: dict):
             records = json.loads(source_path.read_text())
 
     # Finally, add the foreign key constraints to the core tables, now definitely populated.
-    sql_dump.write(db.add_fk_constraints_queries)
-    db.execute_non_select(db.add_fk_constraints_queries)
+    db.execute_non_select(db.fk_constraints_queries)
 
     message_generator = MessageGenerator(config)
 
@@ -165,6 +168,7 @@ class Dump:
         text = re.sub(r"\n\n\n+", "\n\n", text)  # Remove empty lines
         text = text.strip() + "\n\n\n"
         self.file.write(text)
+        self.file.flush()
 
     def close(self):
         self.file.close()

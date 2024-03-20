@@ -1,7 +1,7 @@
 CREATE OR REPLACE FUNCTION before_insert_or_update_{table}()
 RETURNS TRIGGER AS $$
 BEGIN
-    NEW.hash := string_hash(json_build_array('{table}', NEW.{columns})::TEXT); -- [...]
+    NEW.hash := string_hash(json_build_array('{table}', {new_columns})::TEXT); -- [...]
     RETURN NEW; -- [...]
 END; -- [...]
 $$ LANGUAGE plpgsql;

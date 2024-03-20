@@ -12,7 +12,7 @@ class Database(AbstractDatabase):
             self.dbms_version = self.cnx.get_server_info()
             print(f"{OK}Connected to MySQL {self.dbms_version} with database {repr(self.cnx.database)}.{RESET}")
         else:
-            raise mysql.connector.Error.ConnectionError(f"{FAIL}Could not connect to MySQL{RESET}")
+            raise mysql.connector.Error.ConnectionError(f"{FAIL}Could not connect to MySQL.{RESET}")
 
     def get_headers(self, table: str, keep_auto_increment_columns=False) -> list[str]:
         # Note that in MySQL, contrarily to PostgreSQL, keep_auto_increment_columns defaults to False.
@@ -47,29 +47,32 @@ class Database(AbstractDatabase):
         query = f"SELECT CONVERT(AES_DECRYPT({encrypted}, {token}) USING utf8mb4)"
         return self.execute_select(query)[2][0][0]
     
-    def execute_non_select(self, query):
-        query = re.sub(r"(?m)^DELIMITER (\$\$|;).*", "", query)  # Remove delimiter directives
-        query = re.sub(r"(?m)^\$\$.*", "", query)  # Remove // delimiter
+    def execute_non_select(self, text):
+        text = re.sub(r"(?m)^DELIMITER (\$\$|;).*", "", text)  # Remove delimiter directives
+        text = re.sub(r"(?m)^\$\$.*", "", text)  # Remove // delimiter
         total_affected_rows = 0
         with self.cnx.cursor() as cursor:
-            for _ in cursor.execute(query, multi=True):
+            for _ in cursor.execute(text, multi=True):
                 total_affected_rows += cursor.rowcount
             self.cnx.commit()
         return total_affected_rows
     
     def parse_ddl(self, queries):
         triple = re.split(r"(?mi)^(?:USE .+|-- FK\b.*)", queries, 2)
-        self.create_db_queries = triple[0]
-        self.create_tables_queries = triple[1]
+        self.db_creation_queries = triple[0]
+        self.tables_creation_queries = triple[1]
         try:
-            self.add_fk_constraints_queries = triple[2]
+            self.fk_constraints_queries = triple[2]
         except IndexError:
             print(f"{FAIL}The foreign key constraints definitions must be separated from the previous parts with a -- FK comment.{RESET}")
         self.drop_fk_constraints_queries = re.sub(
             r"(?s)\bADD CONSTRAINT\s+(.+?)\s+FOREIGN KEY\b.+?([,;]\n)",
             r"DROP FOREIGN KEY \1\2",
-            self.add_fk_constraints_queries,
+            self.fk_constraints_queries,
         )
+    
+    def create_database(self):
+        self.execute_non_select(self.db_creation_queries)
 
     @staticmethod
     def reset_table_statement(table: str) -> str:
