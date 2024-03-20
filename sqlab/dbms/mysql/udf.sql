@@ -9,9 +9,9 @@ RETURN COALESCE(x, 42);
 --
 -- Intended usages and examples:
 -- 1. Create a cross-table row identifier by hashing a concatenation of the row's fields.
---      select string_hash(concat_ws(',', 1, 'Paul Backerman', 1, 'm'))
+--      string_hash(CAST(JSON_ARRAY(1, 'Paul Backerman', 1, 'm') AS CHAR))
 -- 2. Check the replacement string of the emoji placeholder 👀.
---      select salt_009(string_hash('Joplette') + sum(hash) OVER ()) AS token
+--      salt_009(string_hash('Joplette') + sum(hash) OVER ()) AS token
 --
 -- Algorithm: from the 64 hexadecimal characters of the SHA2 hash, take the leftmost 10 (which
 -- correspond to 40 bits, since each character represents 4 bits), and convert them from base 16
@@ -24,8 +24,8 @@ RETURN CONV(LEFT(SHA2(string, 256), 10), 16, 10);
 
 
 -- Decrypt a message of the sqlab_msg table. Being given a token, attempt to decrypt all the
--- messages in the table and return the first NOT NULL decrypted message, if any. If the token
--- is invalid, return a fallback message.
+-- messages in the table and return the first NOT NULL decrypted message, if any. Otherwise,
+-- return a fallback message.
 
 DELIMITER $$
 

@@ -22,10 +22,11 @@ def compose_message_inserts(db, rows: list[str]) -> str:
         decrypted = db.decrypt(encrypted, token)
         if decrypted != plain:
             if decrypted is None:
-                print(f"{WARNING}Unable to decrypt the message for token {token}\n{RESET}")
+                print(f"{WARNING}Unable to decrypt the message for token {token}{RESET}")
             else:
-                print(f"{WARNING}Unable to round-trip the message for token {token}\n{RESET}")
-            print(plain)
+                print(f"{WARNING}Unable to round-trip the message for token {token}{RESET}")
+                print(f"Original: {plain}")
+                print(f"Decrypted: {decrypted}")
             round_trip_errors += 1
     if round_trip_errors:
         print(f"{WARNING}Round-trip errors have been detected (see above).")

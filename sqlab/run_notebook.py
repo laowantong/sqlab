@@ -13,10 +13,10 @@ def run_notebook(config: dict) -> bool:
             return True
     nb = nbformat.read(ipynb_path, as_version=4)
     print(f"Running '{ipynb_path}'...")
-    run_notebook = ExecutePreprocessor(kernel_name='python3', timeout=None).preprocess
+    run = ExecutePreprocessor(kernel_name='python3', timeout=None).preprocess
     success = True
     try:
-        run_notebook(nb, {"metadata": {"path": ipynb_path.parent}})
+        run(nb, {"metadata": {"path": ipynb_path.parent}})
     except CellExecutionError as e:
         if not "EOFError" in str(e):
             print(f"{FAIL}Error: {e}{RESET}")
