@@ -40,11 +40,11 @@ class Database(AbstractDatabase):
     def encrypt(self, clear_text, token):
         """In MySQL, the function aes_encrypt() takes a numeric key."""
         with self.cnx.cursor() as cursor:
-            cursor.execute(f"SELECT AES_ENCRYPT({repr(clear_text)}, {token})")
+            cursor.execute(f"SELECT AES_ENCRYPT(COMPRESS({repr(clear_text)}), {token})")
             return hex(int.from_bytes(next(cursor)[0], byteorder="big"))
     
     def decrypt(self, encrypted, token):
-        query = f"SELECT CONVERT(AES_DECRYPT({encrypted}, {token}) USING utf8mb4)"
+        query = f"SELECT CONVERT(UNCOMPRESS(AES_DECRYPT({encrypted}, {token})) USING utf8mb4)"
         return self.execute_select(query)[2][0][0]
     
     def execute_non_select(self, text):
