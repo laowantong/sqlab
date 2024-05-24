@@ -1,4 +1,4 @@
-
+import json
 from collections import defaultdict
 
 from .text_tools import TextWrapper, transform_markdown, join_non_empty, WARNING, RESET, OK, FAIL
@@ -167,6 +167,11 @@ class MessageGenerator:
     
     def compile_cheat_sheet(self, records):
         result = []
+        previous_records_hashes = set() # When a variant produces a different token than the first
+                                        # query, the next episode needs to be accessed through the
+                                        # two tokens. In records.json, the episode dictionary is
+                                        # duplicated and associated with these two tokens. In
+                                        # cheat_sheet.md, this duplication is avoided.
         for (token, record) in records.items():
             if token == "info":
                 continue
@@ -174,6 +179,10 @@ class MessageGenerator:
                 continue
             if record["kind"] == "hint":
                 continue
+            record_hash = hash(json.dumps(record, sort_keys=True, ensure_ascii=False))
+            if record_hash in previous_records_hashes:
+                continue
+            previous_records_hashes.add(record_hash)
             counter = record["counter"]
             if counter == 1:
                 if record["kind"] == "episode":
