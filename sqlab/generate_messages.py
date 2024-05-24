@@ -130,11 +130,16 @@ class MessageGenerator:
 
     def compile_storyline(self, records):
         result = []
+        previous_records_hashes = set() # Cf. compile_cheat_sheet
         for (token, record) in records.items():
             if token == "info":
                 continue
             if isinstance(record, str) or record["kind"] != "episode":
                 continue
+            record_hash = hash(json.dumps(record, sort_keys=True, ensure_ascii=False))
+            if record_hash in previous_records_hashes:
+                continue
+            previous_records_hashes.add(record_hash)
             result.append(f"\n{record['context']}\n")
             if solutions := record["solutions"]:
                 result.append(f"<details><summary>{self.strings['statement_label']}</summary>{record['statement']}<br><br>")
