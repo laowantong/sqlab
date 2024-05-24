@@ -1,1 +1,1 @@
-SELECT define('salt_{i:03d}', '(?1 | {y}) - (?1 & {y})');
+SELECT define('salt_{i:03d}', '(nn(?1) | {y}) - (nn(?1) & {y})');
