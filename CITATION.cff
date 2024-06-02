@@ -1,0 +1,30 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: SQLab
+message: 'If you use this software, please cite it as below.'
+type: software
+authors:
+  - given-names: Aristide
+    family-names: Grange
+    email: aristide.grange@univ-lorraine.fr
+    affiliation: 'LCOMS EA7306, Université de Lorraine, Metz, France'
+    orcid: 'https://orcid.org/0000-0001-5777-4603'
+repository-code: 'https://github.com/laowantong/sqlab'
+repository-artifact: 'https://pypi.org/project/sqlab/'
+abstract: >-
+  SQL Adventure Builder: Transform a dataset and a
+  collection of SQL exercises into a self-contained
+  database, and embark your students on a journey through
+  encrypted puzzles, with automatic validation of correct
+  answers and hints provided for incorrect attempts.
+keywords:
+  - education
+  - games
+  - sql
+  - database
+  - game-engine
+  - text-adventure
+license: MIT
+date-released: '2024-03-03'
