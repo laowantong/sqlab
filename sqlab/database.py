@@ -35,6 +35,12 @@ class AbstractDatabase:
         """
         raise NotImplementedError
 
+    def get_table_names(self) -> list[str]:
+        """Return the names of all the tables in the DB, except the utility tables.
+        These include those starting with "sqlab_", and, in SQLite, the virtual tables
+        decrypt and sqlean_define."""
+        raise NotImplementedError
+
     def encrypt(self, plain: str, token: int) -> str:
         """Return the encrypted version of the given plain text."""
         raise NotImplementedError

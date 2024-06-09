@@ -37,6 +37,17 @@ class Database(AbstractDatabase):
             headers = [row[0] for row in cursor]
         return headers
     
+    def get_table_names(self) -> list[str]:
+        query = f"""
+            SELECT table_name
+            FROM information_schema.tables
+            WHERE table_schema = "{self.cnx.database}"
+                AND table_name NOT LIKE 'sqlab_%';
+        """
+        with self.cnx.cursor() as cursor:
+            cursor.execute(query)
+            return [row[0] for row in cursor]
+    
     def encrypt(self, clear_text, token):
         """In MySQL, the function aes_encrypt() takes a numeric key."""
         with self.cnx.cursor() as cursor:

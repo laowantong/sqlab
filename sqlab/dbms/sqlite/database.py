@@ -44,6 +44,18 @@ class Database(AbstractDatabase):
         headers = [header for header in headers if header != "hash"]
         return headers
     
+    def get_table_names(self) -> list[str]:
+        query = """
+            SELECT name
+            FROM sqlite_master
+            WHERE type = 'table'
+                AND name NOT LIKE 'sqlab_%'
+                AND name NOT IN ('sqlean_define', 'decrypt');
+        """
+        cursor = self.cnx.cursor()
+        cursor.execute(query)
+        return [row[0] for row in cursor.fetchall()]
+
     def encrypt(self, clear_text, token):
         query = f"SELECT encode(sha256({token}), 'hex') || encode(brotli({repr(clear_text)}), 'hex');"
         return repr(self.execute_select(query)[2][0][0])

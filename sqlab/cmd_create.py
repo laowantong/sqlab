@@ -79,6 +79,25 @@ def run(config: dict):
     sql_dump.write(data_inserts_queries)
     db.execute_non_select(data_inserts_queries)
 
+    # Check that the hash columns contain unique values across all tables. An alternative would be
+    # to declare each hash column as UNIQUE, but:
+    # 1. The uniqueness would not be cross-table.
+    # 2. In MySQL, the hash column is calculated from all other columns except the auto-incremented
+    #    primary key column. In a stateful game like SQL Island, the player is instructed to insert
+    #    a row in the table inhabitant. If they repeat the same insertion, the hash will be the
+    #    same (although the personid will be different), raising an IntegrityError.
+
+    seen_hashes = {}  # use a dictionary for better warning messages
+    for table_name in db.get_table_names():
+        query = f"SELECT * FROM {table_name};"
+        (_, _, rows) = db.execute_select(query)
+        for row in rows:
+            if (hash := row[-1]) in seen_hashes:
+                (t1, v1) = seen_hashes[hash]
+                (t2, v2) = (table_name, row[:-1])
+                print(f"{WARNING}Hash collision:\n    {t1}: {v1}\n    {t2}: {v2}\nhave same hash {hash}.{RESET}")
+            seen_hashes[hash] = (table_name, row[:-1])
+
     sql_dump.write(db.fk_constraints_queries)
 
     # If the source is a notebook, parse it and populate the `records` list.

@@ -39,6 +39,17 @@ class Database(AbstractDatabase):
             headers = [row[0] for row in cursor.fetchall()]
         return headers
 
+    def get_table_names(self) -> list[str]:
+        query = """
+            SELECT table_name
+            FROM information_schema.tables
+            WHERE table_schema = 'public'
+                AND table_name NOT LIKE 'sqlab_%';
+        """
+        with self.cnx.cursor() as cursor:
+            cursor.execute(query)
+            return [row[0] for row in cursor]
+
     def encrypt(self, clear_text, token):
         """
         In PostgreSQL, the function pgp_sym_encrypt() takes a textual key, not a numeric one.
