@@ -108,8 +108,8 @@ class NotebookParser:
                 if source[0].startswith("raise EOFError"):
                     break
 
-                # If the cell starts with a Python assignement of the form x = ... # ...,
-                # store the instruction for replacing the Eyes emoji with the value of x.
+                # If the cell starts with a Python assignement of the form x = ... # ..., store
+                # the instruction for replacing the (0.0) placeholder with the value of x.
                 if m := re.match(r"x *= *.+ *# *(.+)", source[0]):
                     assert segments, f"{FAIL}A tweak must be preceded by an exercise or an episode.\n{source}.{RESET}"
                     assert not segments[-1]["tweak"], f"{FAIL}{segments[-1]['kind']} [{segments[-1]['salt']}] already has a tweak.\n{source}.{RESET}"
@@ -146,7 +146,7 @@ class NotebookParser:
                     assert segments, f"{FAIL}A solution must be preceded by an exercise or an episode.\n{source}.{RESET}"
                     if not segments[-1]["formula"]: # We are in the first solution of the segment
                         assert formula, f"{FAIL}Missing formula for {segments[-1]['kind']} [{segments[-1]['salt']}].{RESET}\n{source}."
-                        if "👀" in formula:
+                        if "(0.0)" in formula:
                             assert segments[-1]["tweak"], f"{FAIL}Missing tweak for {segments[-1]['kind']} [{segments[-1]['salt']}].{RESET}\n{source}."
                         else:
                             assert not segments[-1]["tweak"], f"{FAIL}Missing {{{{x}}}} in the formula of a first solution.{RESET}\n{source}."

@@ -22,7 +22,7 @@ config = {
         "formula_label": "Formula",
         "annotation_label": "Annotation",
         "preamble_accepted": "Correct",
-        "emoji_instruction": "replace 👀 by {repl}",
+        "tweak_instruction": "replace (0.0) by {repl}",
         "preamble_rejected": "Almost there!",
         "preamble_adventure": "Welcome!",
         "solution_label": "Solution",

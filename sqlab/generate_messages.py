@@ -27,7 +27,7 @@ class MessageGenerator:
         if not record.get("formula"):
             return ""
         if tweak := record.get("tweak", ""):
-            tweak = f" ({self.strings['emoji_instruction'].format(repl=tweak)})"
+            tweak = f" ({self.strings['tweak_instruction'].format(repl=tweak)})"
         title = self.format_text(f"**{self.strings['formula_label']}**{tweak}.")
         return f"{title}\n, {record['formula']}"
     
@@ -201,8 +201,8 @@ class MessageGenerator:
             result.append(record['statement'].replace("\\n", "\n"))
             if record.get("formula"):
                 if tweak := record.get("tweak", ""):
-                    tweak = f" ({self.strings['emoji_instruction'].format(repl=tweak)})"
-                formula = record["formula"].replace("{{x}}", "👀")
+                    tweak = f" ({self.strings['tweak_instruction'].format(repl=tweak)})"
+                formula = record["formula"].replace("{{x}}", "(0.0)")
                 result.append(f"\n**{self.strings['formula_label']}**{tweak}. `{formula}`\n")
             for solution in record["solutions"]:
                 if isinstance(solution, str):

@@ -13,7 +13,7 @@ SELECT define('nn', 'coalesce(?1, 42)');
 -- Intended usages and examples:
 -- 1. Create a cross-table row identifier by hashing a concatenation of the row's fields.
 --      select string_hash(concat_ws(',', 1, 'Paul Backerman', 1, 'm'))
--- 2. Check the replacement string of the emoji placeholder 👀.
+-- 2. Check the replacement string of the tweak placeholder (0.0).
 --      select salt_009(string_hash('Joplette') + sum(hash) OVER ()) AS token
 --
 -- Algorithm: this function first computes the SHA-256 hash of the input, encodes it as a

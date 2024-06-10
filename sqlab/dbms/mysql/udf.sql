@@ -10,7 +10,7 @@ RETURN COALESCE(x, 42);
 -- Intended usages and examples:
 -- 1. Create a cross-table row identifier by hashing a concatenation of the row's fields.
 --      string_hash(CAST(JSON_ARRAY(1, 'Paul Backerman', 1, 'm') AS CHAR))
--- 2. Check the replacement string of the emoji placeholder 👀.
+-- 2. Check the replacement string of the tweak placeholder (0.0).
 --      salt_009(string_hash('Joplette') + sum(hash) OVER ()) AS token
 --
 -- Algorithm: from the 64 hexadecimal characters of the SHA2 hash, take the leftmost 10 (which
