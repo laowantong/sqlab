@@ -21,17 +21,18 @@ def compose_message_inserts(db, rows: list[str]) -> str:
         # Check the round trip
         decrypted = db.decrypt(encrypted, token)
         if decrypted != plain:
+            print(f"Original: {repr(plain)}")
+            print(f"Encrypted: {repr(encrypted)}")
             if decrypted is None:
                 print(f"{WARNING}Unable to decrypt the message for token {token}{RESET}")
             else:
-                print(f"{WARNING}Unable to round-trip the message for token {token}{RESET}")
-                print(f"Original: {plain}")
-                print(f"Decrypted: {decrypted}")
+                print(f"{WARNING}Unexpected decrypted message for token {token}{RESET}")
+                print(f"Decrypted: {repr(decrypted)}")
             round_trip_errors += 1
     if round_trip_errors:
-        print(f"{WARNING}Round-trip errors have been detected (see above).")
-        print(f"The origin of the problem is currently unknown, but it usually disappears")
-        print(f"by picking another salt function.{RESET}")
+        print(f"{WARNING}Round-trip errors have been detected (see above).{RESET}")
+    else:
+        print(f"{OK}Round-trip test successful.{RESET}")
 
     commands[-1] = commands[-1].rstrip(",")
     commands.append(";")
