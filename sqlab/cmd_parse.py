@@ -32,10 +32,10 @@ class NotebookParser:
         for (k, v) in config["strings"].items():
             if k.endswith("_label"):
                 self.labels_to_kinds[v.lower()] = k[:-6]
-        self.graph_gv_path = config["graph_gv_path"]
+        self.activity_map_gv_path = config["activity_map_gv_path"]
         self.graph_format_path = {
-            "pdf": config["graph_pdf_path"],
-            "svg": config["graph_svg_path"],
+            "pdf": config["activity_map_pdf_path"],
+            "svg": config["activity_map_svg_path"],
         }
 
         
@@ -383,8 +383,8 @@ class NotebookParser:
         template = re.sub(r"(?m)^ {8}", "", template)
         data["engine"] = "twopi" if has_exercises else "dot\n    rankdir=LR"
         text = template.format(**data)
-        self.graph_gv_path.write_text(text)
-        print(f"Graph written to '{self.graph_gv_path}'.")
+        self.activity_map_gv_path.write_text(text)
+        print(f"Graph written to '{self.activity_map_gv_path}'.")
         with contextlib.suppress(ImportError):
             graphviz = importlib.import_module("graphviz")
             source = graphviz.Source(text)
@@ -395,5 +395,5 @@ class NotebookParser:
                     format=format,
                     cleanup=True
                 )
-                print(f"Graph converted into {format.upper()}.")
+                print(f"Activity map converted into {format.upper()}.")
 

@@ -11,9 +11,9 @@ base_dir.mkdir(parents=True, exist_ok=True)
 
 config = {
     "records_path": Path("test/snapshots/records.json"),
-    "graph_gv_path": Path("test/snapshots/graph.gv"),
-    "graph_pdf_path": Path("test/snapshots/graph.pdf"),
-    "graph_svg_path": Path("test/snapshots/graph.svg"),
+    "activity_map_gv_path": Path("test/snapshots/activity_map.gv"),
+    "activity_map_pdf_path": Path("test/snapshots/activity_map.pdf"),
+    "activity_map_svg_path": Path("test/snapshots/activity_map.svg"),
     "strings": {
         "exercise_label": "Exercise",
         "statement_label": "Statement",
@@ -337,7 +337,7 @@ def create_records():
         markdown("**Statement.** no question asked either!"),
     ]
     path.write_text(dumps(cells))
-    Path("test", "snapshots", "graph.pdf").unlink()
+    Path("test", "snapshots", "activity_map.pdf").unlink()
 
 
 def create_messages():
