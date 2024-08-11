@@ -68,3 +68,22 @@ BEGIN
     ); -- [...]
 END; -- [...]
 $$ LANGUAGE plpgsql IMMUTABLE;
+
+-- Create a user-defined aggregate function that calculates the bitwise XOR of a series of
+-- NUMERIC values. The built-in bitwise function bit_xor() only works with integer types, which
+-- causes an error with the formulas using bit_xor(sum(...)) in the SQL queries. PostgreSQL
+-- allows function overloading by argument types, so defining bit_xor(NUMERIC) does not interfere
+-- with the built-in bit_xor(INTEGER).
+
+CREATE OR REPLACE FUNCTION bit_xor_accum(state BIGINT, value NUMERIC)
+RETURNS BIGINT AS $$
+BEGIN
+    RETURN state # CAST(value AS BIGINT); -- [...]
+END; -- [...]
+$$ LANGUAGE plpgsql IMMUTABLE;
+
+CREATE AGGREGATE bit_xor(NUMERIC) (
+    SFUNC = bit_xor_accum,
+    STYPE = BIGINT,
+    INITCOND = '0'
+);
