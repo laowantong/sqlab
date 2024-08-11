@@ -102,7 +102,7 @@ def run(config: dict):
 
     # If the source is a notebook, parse it and populate the `records` list.
     # Otherwise, load the records from the `records.json` file.
-    source_path = Path(config["source_path"])
+    source_path = Path(config.get("source_path", ""))
     records = {"info": {}}
     if source_path.is_file():
         if source_path.suffix == ".ipynb":

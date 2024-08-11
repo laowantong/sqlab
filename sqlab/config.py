@@ -12,7 +12,6 @@ defaults = { # Not a JSON object because it contains comments and Python lambda 
     "language": NotImplementedError("Language configuration is mandatory. Example values: 'fr', 'en'."),
     "ddl_path": NotImplementedError("DDL configuration is mandatory. It must be the path of a .sql file."),
     "dataset_dir": NotImplementedError("Dataset configuration is mandatory. It must be the path of a folder containing TSV files."),
-    "source_path": NotImplementedError("Source configuration is mandatory. It must be the path of either a .ipynb or .json file."),
     "cheat_sheet_path": "./output/cheat_sheet.md",
     "sql_dump_path": "./output/dump.sql",
     "exercises_path": "./output/exercises.md",
