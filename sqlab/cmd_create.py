@@ -20,18 +20,29 @@ def run(config: dict):
     # Open and initialize the file to dump the SQL queries.
     sql_dump = Dump(config)
 
-    # Create the database object.
+    # Create the database object and read the raw DDL
     db = database_factory(config)
+    ddl_queries = Path(config["ddl_path"]).read_text()
 
-    # Parse the DDL of core tables into four string attributes of the database object:
+    # Replace the temporary hash column definitions with a generated column expression.
+    ddl_queries = db.add_generated_hashes(ddl_queries)
+
+    # Parse the DDL of core tables into four string attributes of the `database` object:
     # • db_creation_queries
     # • tables_creation_queries
     # • fk_constraints_queries
     # • drop_fk_constraints_queries
-    ddl_queries = Path(config["ddl_path"]).read_text()
     db.parse_ddl(ddl_queries)
     if db.fk_constraints_queries:
         ddl_queries = ddl_queries.replace(db.fk_constraints_queries, "")
+
+    # Inject the definition of `string_hash` before the first CREATE TABLE statement.
+    resource_id = f"sqlab.dbms.{config['dbms_slug']}"
+    string_hash = resources.read_text(resource_id, "string_hash.sql")
+    string_hash = string_hash.format(**config["strings"])
+    ddl_queries = ddl_queries.replace("CREATE TABLE", f"{string_hash}\n\nCREATE TABLE", 1)
+
+    # Start the SQL dump with the DDL queries.
     sql_dump.write(ddl_queries)
 
     # Drop the database if it exists, and recreate it.
@@ -47,14 +58,12 @@ def run(config: dict):
     db.execute_non_select(db.tables_creation_queries)
     print(f"Core tables created.")
 
-    resource_id = f"sqlab.dbms.{config['dbms_slug']}"
-
     # Create the structure of the additional sqlab tables.
     sqlab_ddl_queries = resources.read_text(resource_id, "sqlab_ddl.sql")
     sql_dump.write(sqlab_ddl_queries)
     db.execute_non_select(sqlab_ddl_queries)
 
-    # Define various SQL functions: nn, string_hash, decrypt, etc.
+    # Define the remaining SQL functions: nn, decrypt, etc.
     functions = resources.read_text(resource_id, "udf.sql")
     functions = functions.format(**config["strings"])
     sql_dump.write(functions)

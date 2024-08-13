@@ -1,5 +1,5 @@
 import unittest
-from sqlab.text_tools import repr_single, separate_query_formula_and_salt, split_sql_source, separate_label_salt_and_text
+from sqlab.text_tools import *
 
 class TestReprSingle(unittest.TestCase):
 
@@ -149,3 +149,65 @@ class TestSeparateLabelSaltAndText(unittest.TestCase):
         actual = separate_label_salt_and_text(source)
         print(actual)
         self.assertEqual(actual, ("", "", "Some text"))
+
+
+class TestAddGeneratedHashes(unittest.TestCase):
+
+    source = """
+            CREATE TABLE item (
+            item varchar(255) NOT NULL,
+            owner int(11) DEFAULT NULL,
+            hash bigint NULL,
+            PRIMARY KEY (item)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+            CREATE TABLE village (
+            villageid int(11) NOT NULL AUTO_INCREMENT,
+            name varchar(255) DEFAULT NULL,
+            chief int(11) DEFAULT NULL,
+            hash bigint NULL,
+            PRIMARY KEY (villageid)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+        """
+
+    def test_run_with_hash_exemption(self):
+        actual = list(add_generated_hashes(self.source, "auto_increment"))
+        expected = """
+            CREATE TABLE item (
+            item varchar(255) NOT NULL,
+            owner int(11) DEFAULT NULL,
+            hash bigint AS (string_hash('item', item, owner)),
+            PRIMARY KEY (item)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+            CREATE TABLE village (
+            villageid int(11) NOT NULL AUTO_INCREMENT,
+            name varchar(255) DEFAULT NULL,
+            chief int(11) DEFAULT NULL,
+            hash bigint AS (string_hash('village', name, chief)),
+            PRIMARY KEY (villageid)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+        """
+        for (a, e) in zip(actual, expected.splitlines()):
+            self.assertEqual(a, e)
+
+    def test_run_without_hash_exemption(self):
+        actual = list(add_generated_hashes(self.source))
+        expected = """
+            CREATE TABLE item (
+            item varchar(255) NOT NULL,
+            owner int(11) DEFAULT NULL,
+            hash bigint AS (string_hash('item', item, owner)),
+            PRIMARY KEY (item)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+            CREATE TABLE village (
+            villageid int(11) NOT NULL AUTO_INCREMENT,
+            name varchar(255) DEFAULT NULL,
+            chief int(11) DEFAULT NULL,
+            hash bigint AS (string_hash('village', villageid, name, chief)),
+            PRIMARY KEY (villageid)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+        """
+        for (a, e) in zip(actual, expected.splitlines()):
+            self.assertEqual(a, e)

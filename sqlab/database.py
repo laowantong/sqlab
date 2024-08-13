@@ -1,4 +1,5 @@
 import importlib
+from .text_tools import add_generated_hashes
 
 
 def database_factory(config: dict):
@@ -12,6 +13,9 @@ class AbstractDatabase:
     To be inherited by the dbms-specific database classes.
     Just a contract to ensure that all the necessary methods are implemented.
     """
+
+    generated_hash_template = "fill me in the children"  # template for the hash column generation
+    hash_exemption = "" # '|' separated list of substrings of column definitions that should be excluded from the hash
 
     def __init__(self, config: dict):
         """Just store the configuration. The connection will be created later."""
@@ -66,7 +70,6 @@ class AbstractDatabase:
         cursor.execute(query, args)
         return cursor.fetchone()
 
-    @staticmethod
     def parse_ddl(self, queries: str):
         """
         Separate the query in three parts:
@@ -76,6 +79,13 @@ class AbstractDatabase:
         And create a query for dropping the foreign key constraints.
         """
         raise NotImplementedError
+    
+    def add_generated_hashes(self, queries: str) -> str:
+        return "\n".join(add_generated_hashes(
+            queries,
+            hash_exemption=self.hash_exemption,
+            generated_hash_template=self.generated_hash_template
+        ))
     
     def create_database(self):
         raise NotImplementedError

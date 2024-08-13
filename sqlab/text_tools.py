@@ -124,3 +124,38 @@ def separate_label_salt_and_text(
 def join_non_empty(*strings: str) -> str:
     """Joins the given strings with two newlines, skipping the empty ones."""
     return "\n\n".join(filter(None, strings))
+
+def add_generated_hashes(
+    source,
+    hash_exemption="", # A '|'-separated list of keywords such as auto_increment, rowid, etc.
+    generated_hash_template="hash bigint AS (string_hash('{table}', {columns}))",
+    match_create_table=re.compile(r"(?i) *CREATE TABLE.* ([^ (]+) *\(").match,
+    match_column=re.compile(r"( *)([^ ]+)(.+?)(,?)$").match,
+    is_hash=re.compile(r"(?i)\W?hash\W?$").match,
+):
+    """Echo every line of the DDL as is, except for the hash column that is defined as generated."""
+    hash_exempted = lambda s: False
+    if hash_exemption:
+        hash_exempted = re.compile(fr"(?i)\b({hash_exemption})\b").search
+    lines = iter(source.splitlines())
+    for line in lines:  # search for a CREATE TABLE line
+        yield line
+        match = match_create_table(line)
+        if not match:
+            continue
+        table = match.group(1)  # store the table name
+        columns = []
+        for line in lines:  # continue to iterate over the lines to find the columns
+            match = match_column(line)
+            if not match:
+                yield line
+                continue
+            (indent, column, definition, comma) = match.groups()
+            if not is_hash(column):  # if the column is not a hash column,
+                yield line
+                if not hash_exempted(definition):
+                    columns.append(column)  # accumulate the column names to be used in the hash
+                continue
+            definition = generated_hash_template.format(table=table, columns=", ".join(columns))
+            yield f"{indent}{definition}{comma}"
+            break  # assume the hash column is the last one

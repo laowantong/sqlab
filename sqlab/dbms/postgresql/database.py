@@ -7,6 +7,8 @@ from ...text_tools import repr_single
 
 class Database(AbstractDatabase):
 
+    generated_hash_template = "hash BIGINT GENERATED ALWAYS AS (string_hash(json_build_array_imm('{table}'::TEXT)::TEXT)) STORED"
+
     def connect(self):
         try:
             self.cnx = psycopg2.connect(**self.config["cnx"])
@@ -91,7 +93,7 @@ class Database(AbstractDatabase):
         except IndexError:
             print(f"{FAIL}The foreign key constraints definitions must be separated from the previous parts with a -- FK comment.{RESET}")
         self.drop_fk_constraints_queries = re.sub(
-            r"(?s)\bADD CONSTRAINT\s+(.+?)\s+FOREIGN KEY\b.+?([,;]\n)",
+            r"(?ms)\bADD CONSTRAINT\s+(.+?)\s+FOREIGN KEY\b.+?([,;])",
             r"DROP CONSTRAINT \1\2",
             self.fk_constraints_queries,
         )

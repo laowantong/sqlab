@@ -6,6 +6,22 @@ from ...text_tools import FAIL, OK, RESET, WARNING
 
 class Database(AbstractDatabase):
 
+    generated_hash_template = "hash BIGINT GENERATED ALWAYS AS (CONV(LEFT(SHA2(CAST(JSON_ARRAY('{table}', {columns}) AS CHAR), 256), 10), 16, 10)) STORAGE_PLACEHOLDER"
+    hash_exemption = "AUTO_INCREMENT"
+    # Restrictions on generated columns in MySQL:
+    # 1. A foreign key constraint on the base column of a STORED generated column cannot use
+    #    CASCADE, SET NULL, or SET DEFAULT as ON UPDATE or ON DELETE referential actions.
+    # 2. Stored functions and loadable functions are not permitted.
+    # 3. An AUTO_INCREMENT column cannot be used as a base column in a generated column definition.
+    # Workarounds:
+    # 1. In config.py, the user must declare generated_column_storage as VIRTUAL instead of STORED.
+    # 2. We inline string_hash() in the generated column definition.
+    # 3. We exclude the AUTO_INCREMENT columns from the hash calculation.
+
+    def __init__(self, config):
+        super().__init__(config)
+        self.generated_hash_template = self.generated_hash_template.replace("STORAGE_PLACEHOLDER", self.config["generated_column_storage"])
+
     def connect(self):
         self.cnx = mysql.connector.connect(**self.config["cnx"])
         if self.cnx.is_connected():
@@ -77,7 +93,7 @@ class Database(AbstractDatabase):
         except IndexError:
             print(f"{FAIL}The foreign key constraints definitions must be separated from the previous parts with a -- FK comment.{RESET}")
         self.drop_fk_constraints_queries = re.sub(
-            r"(?s)\bADD CONSTRAINT\s+(.+?)\s+FOREIGN KEY\b.+?([,;]\n)",
+            r"(?ms)\bADD CONSTRAINT\s+(.+?)\s+FOREIGN KEY\b.+?([,;])$",
             r"DROP FOREIGN KEY \1\2",
             self.fk_constraints_queries,
         )

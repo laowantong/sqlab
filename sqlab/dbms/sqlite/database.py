@@ -7,6 +7,9 @@ from ...text_tools import FAIL, OK, RESET, WARNING
 
 class Database(AbstractDatabase):
 
+    generated_hash_template = "hash BIGINT GENERATED ALWAYS AS (string_hash(json_array('{table}', {columns}))) STORED"
+    hash_exemption = "ROWID"
+
     def connect(self):
         self.dbms_version = sqlite3.sqlite_version
         self.cnx = sqlite3.connect(":memory:")
