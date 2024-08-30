@@ -95,7 +95,7 @@ class MessageGenerator:
                             current_token = solution["token"]
                             # When the same episode has several entries, avoid duplicating its solutions
                             if solution["query"] not in solutions_by_token[current_token]:
-                                solutions_by_token[current_token].append(solution["query"])
+                                solutions_by_token[current_token].append(solution)
                 solutions = self.compose_solutions(solutions_by_token[entry_token])
                 context = self.format_text(record["context"])
                 statement = self.format_text(f"**{self.strings['statement_label']}**. {record['statement']}")
