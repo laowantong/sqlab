@@ -278,7 +278,7 @@ class NotebookParser:
             return ""
         # Keep only the first two rows
         count_str = f"\nTotal: {n} row{'s'[:n^1]} affected."
-        return re.sub(r"(?s)(<table>\n(?: *<tr>.+?</tr>\n){,3}).*(</table>)", fr"\1\2{count_str}", table)
+        return re.sub(r"(?s)(<table>\n(?:.*?<tr>.+?</tr>\n){,3}).*(</table>)", fr"\1\2{count_str}", table)
     
     @staticmethod
     def actual_solutions(segment_or_record):
