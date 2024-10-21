@@ -6,3 +6,5 @@ cnx.ini
 *.amdc
 *.amdn
 update_outputs.sh
+.ipynb_checkpoints/
+

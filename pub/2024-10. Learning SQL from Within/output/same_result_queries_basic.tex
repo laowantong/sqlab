@@ -1,0 +1,41 @@
+
+    \small\sffamily
+    \begin{tabular}{l|cc|l}
+    id. & $t_1$ & $t_2$ & raw query (before the injection of Formula~\ref{eqn:formulas:basic}) \\
+    \hline
+    $G_{1}$ & 1 &  & \lstinline[basicstyle=\scriptsize\ttfamily,keepspaces=true]|SELECT emp_name FROM employee A WHERE emp_id IN (SELECT emp_id FROM works_on WHERE etc.)| \\
+\cline{1-3}
+$G_{2}$ & 1 & 2 & \lstinline[basicstyle=\scriptsize\ttfamily,keepspaces=true]|SELECT A.emp_name FROM employee A JOIN works_on B USING (emp_id) WHERE hours = 5 AND prj_id = '30'| \\
+$G_{3}$ & 3 & 2 & \lstinline[basicstyle=\scriptsize\ttfamily,keepspaces=true]|SELECT B.emp_name FROM employee B JOIN works_on A USING (emp_id) WHERE hours = 5 AND prj_id = '30'| \\
+\cline{1-3}
+$G_{4}$ & 1 & 2 & \lstinline[basicstyle=\scriptsize\ttfamily,keepspaces=true]|SELECT A.emp_name FROM employee A, works_on B WHERE A.emp_id = B.emp_id AND etc.| \\
+$G_{5}$ & 3 & 2 & \lstinline[basicstyle=\scriptsize\ttfamily,keepspaces=true]|SELECT B.emp_name FROM employee B, works_on A WHERE A.emp_id = B.emp_id AND etc.| \\
+\hline
+$O_{1}$ & \textcolor{ACMOrange}{1} & \textcolor{ACMOrange}{2} & \lstinline[basicstyle=\scriptsize\ttfamily,keepspaces=true]|SELECT A.emp_name FROM employee A RIGHT JOIN works_on B USING (emp_id) WHERE etc.| \\
+$O_{2}$ & \textcolor{ACMOrange}{3} & \textcolor{ACMOrange}{2} & \lstinline[basicstyle=\scriptsize\ttfamily,keepspaces=true]|SELECT B.emp_name FROM employee B RIGHT JOIN works_on A USING (emp_id) WHERE etc.| \\
+\cline{1-3}
+$O_{3}$ & \textcolor{ACMOrange}{1} & 4 & \lstinline[basicstyle=\scriptsize\ttfamily,keepspaces=true]|SELECT A.emp_name FROM employee A JOIN employee B USING (emp_id) JOIN works_on O USING (emp_id) WHERE etc.| \\
+$O_{4}$ & \textcolor{ACMOrange}{3} & \textcolor{ACMOrange}{2} & \lstinline[basicstyle=\scriptsize\ttfamily,keepspaces=true]|SELECT B.emp_name FROM employee B JOIN employee O USING (emp_id) JOIN works_on A USING (emp_id) WHERE etc.| \\
+$O_{5}$ & \textcolor{ACMOrange}{1} & \textcolor{ACMOrange}{2} & \lstinline[basicstyle=\scriptsize\ttfamily,keepspaces=true]|SELECT O.emp_name FROM employee O JOIN employee A USING (emp_id) JOIN works_on B USING (emp_id) WHERE etc.| \\
+\cline{1-3}
+$O_{6}$ & \textcolor{ACMOrange}{1} & \textcolor{ACMOrange}{2} & \lstinline[basicstyle=\scriptsize\ttfamily,keepspaces=true]|SELECT A.emp_name FROM employee A JOIN works_on B USING (emp_id) JOIN project O USING (prj_id) WHERE etc.| \\
+$O_{7}$ & 5 & 6 & \lstinline[basicstyle=\scriptsize\ttfamily,keepspaces=true]|SELECT B.emp_name FROM employee B JOIN works_on O USING (emp_id) JOIN project A USING (prj_id) WHERE etc.| \\
+$O_{8}$ & \textcolor{ACMOrange}{3} & 8 & \lstinline[basicstyle=\scriptsize\ttfamily,keepspaces=true]|SELECT O.emp_name FROM employee O JOIN works_on A USING (emp_id) JOIN project B USING (prj_id) WHERE etc.| \\
+\hline
+$I_{1}$ & \textcolor{ACMRed}{1} & \textcolor{ACMRed}{2} & \lstinline[basicstyle=\scriptsize\ttfamily,keepspaces=true]|SELECT A.emp_name FROM employee A LEFT JOIN works_on B USING (emp_id) WHERE etc.| \\
+$I_{2}$ & \textcolor{ACMRed}{3} & \textcolor{ACMRed}{2} & \lstinline[basicstyle=\scriptsize\ttfamily,keepspaces=true]|SELECT B.emp_name FROM employee B LEFT JOIN works_on A USING (emp_id) WHERE etc.| \\
+\cline{1-3}
+$I_{3}$ &  &  & \lstinline[basicstyle=\scriptsize\ttfamily,keepspaces=true]|SELECT 'Ahmad V. Jabbar' | \\
+\cline{1-3}
+$I_{4}$ & \textcolor{ACMRed}{1} &  & \lstinline[basicstyle=\scriptsize\ttfamily,keepspaces=true]|SELECT emp_name FROM employee A WHERE emp_name = 'Ahmad V. Jabbar'| \\
+$I_{5}$ & \textcolor{ACMRed}{1} &  & \lstinline[basicstyle=\scriptsize\ttfamily,keepspaces=true]|SELECT emp_name FROM employee A WHERE emp_id = '987987987'| \\
+\cline{1-3}
+$I_{6}$ & 7 &  & \lstinline[basicstyle=\scriptsize\ttfamily,keepspaces=true]|SELECT DISTINCT 'Ahmad V. Jabbar' FROM employee A| \\
+$I_{7}$ & 9 & 10 & \lstinline[basicstyle=\scriptsize\ttfamily,keepspaces=true]|SELECT DISTINCT 'Ahmad V. Jabbar' FROM employee A, works_on B| \\
+\cline{1-3}
+$I_{8}$ & \textcolor{ACMRed}{1} & \textcolor{ACMRed}{2} & \lstinline[basicstyle=\scriptsize\ttfamily,keepspaces=true]|SELECT emp_name FROM employee A JOIN works_on B USING (emp_id) WHERE hours = 5| \\
+\cline{1-3}
+$I_{9}$ & \textcolor{ACMRed}{1} & 6 & \lstinline[basicstyle=\scriptsize\ttfamily,keepspaces=true]|SELECT A.emp_name FROM employee A JOIN project B USING (dpt_id) WHERE prj_id = '30' and sex = 'M'| \\
+$I_{10}$ & 5 & 6 & \lstinline[basicstyle=\scriptsize\ttfamily,keepspaces=true]|SELECT B.emp_name FROM employee B JOIN project A USING (dpt_id) WHERE prj_id = '30' and sex = 'M'| \\
+    \end{tabular}
+    
