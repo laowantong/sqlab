@@ -1,6 +1,6 @@
 ## Accompanying material for _Learning SQL from Within_
 
-This directory contains the code for the paper _Learning SQL from Within: How to integrate exercises on a relational database into the database itself_ by [author names removed for review] (2024).
+This directory contains the code for the paper _Learning SQL from within: integrating database exercises into the database itself_ by [author names removed for review] (2024).
 
 It is organized as follows:
 
