@@ -4,7 +4,7 @@ This directory contains the code for the paper _Learning SQL from Within: How to
 
 It is organized as follows:
 
-- `code.ipynb`: A Jupyter notebook compiling all the working example queries of the paper, as well as the Python code to generate some tables and figures.
+- [`code.ipynb`](https://nbviewer.org/github/laowantong/sqlab/blob/main/pub/2024-10.%20Learning%20SQL%20from%20Within/code.ipynb): A Jupyter notebook compiling all the working example queries of the paper, as well as the Python code to generate some tables and figures.
 - `output`: A directory used by the notebook to store the generated files.
 - `README.md`: This file.
 - `sqlab_company.sql`: A SQL script that creates and populates a MySQL database for a fictional company, as defined in _Fundamentals of database systems, 7th edition_ by Ramez Elmasri and Shamkant B. Navathe (Addison-Wesley, 2017), and augmented with SQLab metadata (`hash` columns, triggers, etc.).
