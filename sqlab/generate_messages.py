@@ -203,7 +203,7 @@ class MessageGenerator:
             if record.get("formula"):
                 if tweak := record.get("tweak", ""):
                     tweak = f" ({self.strings['tweak_instruction'].format(repl=tweak)})"
-                formula = record["formula"].replace("{{x}}", "(0.0)")
+                formula = record["formula"].replace("{{x}}", "(0)")
                 result.append(f"\n**{self.strings['formula_label']}**{tweak}. `{formula}`\n")
             for solution in record["solutions"]:
                 if isinstance(solution, str):
@@ -231,6 +231,7 @@ class MessageGenerator:
         inserts = []
         for (token, d) in tokens.items():
             inserts.append("  ('{question}', '{kind}', {salt}, {token}),".format(token=token, **d))
-        inserts[-1] = inserts[-1].rstrip(",")
+        if inserts:
+            inserts[-1] = inserts[-1].rstrip(",")
         inserts = "\n".join(inserts)
         return f"{ddl}\n\nINSERT INTO token VALUES\n{inserts}\n;"
