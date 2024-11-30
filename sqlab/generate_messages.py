@@ -86,7 +86,7 @@ class MessageGenerator:
                 if counter == 1:
                     preamble = f"⚪️ {counter}. {self.strings['preamble_adventure']}"
                 else:
-                    preamble = f"🟢 {counter}. {self.strings['preamble_accepted']}"
+                    preamble = f"🟢 {counter}. {self.strings['preamble_accepted'].format(token=entry_token)}"
                 current_token = self.get_first_token_from_solutions(record["solutions"])
                 if current_token: # All episodes should have at least one solution, except for the last one
                     for solution in record["solutions"]:
@@ -108,7 +108,7 @@ class MessageGenerator:
                 self.log(f"Exercise {counter} ({entry_token}): {repr(record['statement'][:100])}\n")
                 statement = self.format_text(f"⚪️ **{self.strings['exercise_label']} {counter}**. {record['statement']}")
                 self.rows[entry_token] = join_non_empty(statement, formula)
-                preamble = f"🟢 {counter}. {self.strings['preamble_accepted']}"
+                preamble = f"🟢 {counter}. {self.strings['preamble_accepted'].format(token=entry_token)}"
                 plain_text = join_non_empty(preamble, self.compose_solutions(record["solutions"]))
                 for solution in self.actual_solutions(record["solutions"]):
                     next_token = solution["token"]
