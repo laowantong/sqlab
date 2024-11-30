@@ -65,7 +65,7 @@ class Database(AbstractDatabase):
         with self.cnx.cursor() as cursor:
             for _ in cursor.execute(text, multi=True):
                 total_affected_rows += cursor.rowcount
-            self.cnx.commit()
+        self.cnx.commit()
         return total_affected_rows
     
     def parse_ddl(self, queries):

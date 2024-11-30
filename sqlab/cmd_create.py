@@ -146,6 +146,12 @@ def run(config: dict):
         config["cheat_sheet_path"].write_text(cheat_sheet, encoding="utf-8")
         print(f"Cheat sheet compiled to '{config['cheat_sheet_path']}'.")
 
+    # Dump the token table to a dedicated file
+    tokens = records["info"].pop("tokens", {})
+    token_table = message_generator.compile_token_table(tokens)
+    config["token_table_path"].write_text(token_table, encoding="utf-8")
+    print(f"Token table compiled to '{config['token_table_path']}'.")
+
     # Populate the `sqlab_msg` table.
     rows = list(message_generator.run(records).items())
     if rows:

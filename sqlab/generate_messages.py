@@ -1,5 +1,6 @@
 import json
 from collections import defaultdict
+import re
 
 from .text_tools import TextWrapper, transform_markdown, join_non_empty, WARNING, RESET, OK, FAIL
 
@@ -216,3 +217,20 @@ class MessageGenerator:
             result.append("")
             return "\n".join(result)
 
+    def compile_token_table(self, tokens):
+        ddl = """\
+        DROP TABLE IF EXISTS token;
+        CREATE TABLE token (
+            question VARCHAR(32),
+            kind VARCHAR(5),
+            salt INT,
+            token BIGINT NOT NULL,
+            PRIMARY KEY (token)
+        );
+        """.replace("        ", "")
+        inserts = []
+        for (token, d) in tokens.items():
+            inserts.append("  ('{question}', '{kind}', {salt}, {token}),".format(token=token, **d))
+        inserts[-1] = inserts[-1].rstrip(",")
+        inserts = "\n".join(inserts)
+        return f"{ddl}\n\nINSERT INTO token VALUES\n{inserts}\n;"

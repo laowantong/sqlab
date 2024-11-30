@@ -244,6 +244,8 @@ class NotebookParser:
         collisions = non_hint_tokens & hint_tokens
         assert not collisions, f"{FAIL}Hint tokens {collisions} collide with other tokens.{RESET}"
 
+        records["info"]["tokens"] = self.create_token_dict(records)
+
         # Generate the graph and (side effect) pop the hint salts from records
         self.dump_graph(records)
 
@@ -287,6 +289,52 @@ class NotebookParser:
             if isinstance(solution, str): # An annotation
                 continue
             yield solution
+
+    def create_token_dict(self, records) -> dict:
+        """
+        Associate to each token:
+        - "question": either "exercise nnn" or "episode 0.nnn" where a is the adventure number
+        - "kind": either
+            - "entry" for an exercise or the first episode of an adventure
+            - "exit" for a solution of an exercise
+            - "answer" for a solution of an episode other than the first one
+            - "hint"
+        - "salt"
+        """
+        values = []
+        for (token, record) in records.items():
+            if token == "info":
+                continue
+            salt = record["salt"]
+            kind = record["kind"]
+            counter = record["counter"]
+            if kind == "episode":
+                adventure = f'{record["adventure"]}.'
+            elif kind == "exercise":
+                adventure = ""
+                for solution in record["solutions"]:
+                    if isinstance(solution, str):
+                        continue
+                    values.append((salt, "exit", adventure, counter, solution["token"]))
+            values.append((salt, kind, adventure, counter, token))
+                
+        values.sort()
+        questions = []
+        question = None
+        for (salt, kind, adventure, counter, token) in values:
+            if kind in ("exercise", "episode"):
+                question = kind
+                kind = "entry" if int(token) <= 999 else "answer"
+            questions.append((f"{question} {adventure}{counter:03d}", kind, salt, token))
+        questions.sort()
+        result = {}
+        for (question, kind, salt, token) in questions:
+            result[token] = {
+                "question": question,
+                "kind": kind,
+                "salt": salt,
+            }
+        return result
 
     def dump_graph(self, records):
         data = {
