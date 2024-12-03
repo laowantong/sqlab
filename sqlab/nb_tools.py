@@ -1,23 +1,11 @@
 from pathlib import Path
 import getpass
 import pydoc
-from IPython import get_ipython
 import pandas as pd
 import sqlalchemy
 
-ipython = get_ipython()
-
 from .nb_tools import *
 from .text_tools import OK, RESET, WARNING
-
-
-def col(label):
-    result = ipython.last_execution_result.result
-    return list(result.dict()[label])
-
-
-def print_assert(label):
-    print(f'assert col("{label}") == {col(label)}'.replace("Decimal('", "").replace(".00')", ""))
 
 def may_create_connection_file(**kwargs):
     cnx_path = Path("cnx.ini")
