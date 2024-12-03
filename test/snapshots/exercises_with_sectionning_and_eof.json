@@ -2,7 +2,39 @@
   "info": {
     "adventure_count": 0,
     "episode_count": 0,
-    "exercise_count": 3
+    "exercise_count": 3,
+    "tokens": {
+      "042": {
+        "question": "exercise 001",
+        "kind": "entry",
+        "salt": "042"
+      },
+      "5664": {
+        "question": "exercise 001",
+        "kind": "exit",
+        "salt": "042"
+      },
+      "043": {
+        "question": "exercise 002",
+        "kind": "entry",
+        "salt": "043"
+      },
+      "6877": {
+        "question": "exercise 002",
+        "kind": "exit",
+        "salt": "043"
+      },
+      "044": {
+        "question": "exercise 003",
+        "kind": "entry",
+        "salt": "044"
+      },
+      "9112": {
+        "question": "exercise 003",
+        "kind": "exit",
+        "salt": "044"
+      }
+    }
   },
   "042": {
     "kind": "exercise",
