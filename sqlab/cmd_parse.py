@@ -158,7 +158,8 @@ class NotebookParser:
                     
                     if formula: # The formula is explicitely stated
                         assert salt == segments[-1]["salt"], f"{FAIL}Salt mismatch.{RESET}\n{source}."
-                        assert formula == segments[-1]["formula"], f"{FAIL}Formula mismatch.{RESET}\n{source}."
+                        formula_with_dots = re.sub(r"(?<=\b[A-Z])_(?=hash\b)", ".", formula) # tolerate A_hash instead of A.hash
+                        assert formula_with_dots == segments[-1]["formula"], f"{FAIL}Formula mismatch.{RESET}\n{source}."
 
                     next_salt = next_salt or segments[-1]["default_next_salt"]
                     token = token or segments[-1]["default_token"]
