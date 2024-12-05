@@ -293,7 +293,9 @@ class NotebookParser:
     def create_token_dict(self, records) -> dict:
         """
         Associate to each token:
-        - "question": either "exercise nnn" or "episode 0.nnn" where a is the adventure number
+        - "adventure": the adventure number, or 0 for an exercise
+        - "task": either "exercise" or "episode"
+        - "counter": the number of the exercise or the episode
         - "kind": either
             - "entry" for an exercise or the first episode of an adventure
             - "exit" for a solution of an exercise
@@ -309,9 +311,9 @@ class NotebookParser:
             kind = record["kind"]
             counter = record["counter"]
             if kind == "episode":
-                adventure = f'{record["adventure"]}.'
+                adventure = record["adventure"]
             elif kind == "exercise":
-                adventure = ""
+                adventure = 0
                 for solution in record["solutions"]:
                     if isinstance(solution, str):
                         continue
@@ -319,18 +321,20 @@ class NotebookParser:
             values.append((salt, kind, adventure, counter, token))
                 
         values.sort()
-        questions = []
-        question = None
+        tasks = []
+        task = None
         for (salt, kind, adventure, counter, token) in values:
             if kind in ("exercise", "episode"):
-                question = kind
+                task = kind
                 kind = "entry" if int(token) <= 999 else "answer"
-            questions.append((f"{question} {adventure}{counter:03d}", kind, salt, token))
-        questions.sort()
+            tasks.append((task, adventure, counter, kind, salt, token))
+        tasks.sort()
         result = {}
-        for (question, kind, salt, token) in questions:
+        for (task, adventure, counter, kind, salt, token) in tasks:
             result[token] = {
-                "question": question,
+                "adventure": adventure,
+                "task": task,
+                "counter": counter,
                 "kind": kind,
                 "salt": salt,
             }
