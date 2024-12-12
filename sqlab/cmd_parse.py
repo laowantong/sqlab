@@ -1,4 +1,4 @@
-from collections import defaultdict
+from collections import defaultdict, Counter
 import contextlib
 import itertools
 import json
@@ -300,10 +300,20 @@ class NotebookParser:
             yield solution
 
     def dump_graph(self, records):
+        hints_by_salt = defaultdict(list)
+        for (token, record) in records.items():
+            if isinstance(record, str):
+                continue
+            if record.get("kind") == "hint":
+                x = record["salt"]
+                hints_by_salt[x].append(token)
+        middle_hints = {hints[len(hints) // 2]: len(hints) for hints in hints_by_salt.values()}
         data = {
             "exercise_edges": [],
+            "exercise_starts": set(),
             "exercise_ends": [],
             "episode_edges": [],
+            "episode_starts": set(),
             "episode_ends": [],
             "epilogues": [],
             "hint_edges": [],
@@ -325,11 +335,14 @@ class NotebookParser:
                 has_exercises = True
                 for solution in self.actual_solutions(record):
                     y = solution["token"]
+                    data["exercise_starts"].add(f"{x} [xlabel={record['counter']}]")
                     data["exercise_edges"].append(f"{x} -> {y}")
-                    data["exercise_ends"].append(f"{y}")
+                    data["exercise_ends"].append(f'{y}')
             elif record["kind"] == "episode":
                 for solution in self.actual_solutions(record):
                     x = record["salt"]
+                    if record["counter"] == 1:
+                        data["episode_starts"].add(f"{x} [xlabel=1]")
                     next_record = records.get(solution["token"])
                     if not next_record:
                         continue # A query without redirection
@@ -337,17 +350,20 @@ class NotebookParser:
                         next_record = records[next_record] # resolve the alias
                     y = next_record["salt"]
                     data["episode_edges"].append(f"{x} -> {y}")
-                    data["episode_ends"].append(y)
+                    data["episode_ends"].append(f'{y} [xlabel={next_record["counter"]}]')
                 if not record["solutions"]:
                     data["epilogues"].append(record["salt"])
             elif record["kind"] == "hint":
                 y = token
                 data["hint_edges"].append(f"{x} -> {y}")
-                data["hint_ends"].append(y)
+                hint_count = middle_hints.get(y, 0)
+                if hint_count:
+                    data["hint_ends"].append(f'{y} [xlabel={hint_count}]')
+                else:
+                    data["hint_ends"].append(y)
                 del record["salt"]
         for (key, value) in data.items():
-            sep = "\n    " if key.endswith("_edges") else " "
-            data[key] = sep.join(value)
+            data[key] = "\n    ".join(value)
 
         # Save the graph and convert it into pdf and svg if graphviz is installed
         template = """digraph G {{
@@ -368,32 +384,27 @@ class NotebookParser:
                 label=""
             ]
             {exercise_ends}
-            node [
-                width=1.2
-                height=1.2
-                fontname=Helvetica
-                label="\\N"
-            ]
+            node [width=1.2 height=1.2 fontname=Helvetica label="\\N"]
             {epilogues}
-            node [
-                width=0.6
-                height=0.6
-                shape=circle
-                fillcolor="#FFC19C"
-            ]
+            node [ width=0.6 height=0.6 shape=circle fillcolor="#FFC19C"]
             {episode_ends}
             node [fillcolor="#DBDE92"]
+            {exercise_starts}
+            {episode_starts}
             {exercise_edges}
             {episode_edges}
-            node [style=invisible label=""]
+            node [width=0.1 height=0.1 label="" fillcolor=none]
             {hint_ends}
-            edge [arrowhead=odot]
+            edge [arrowhead=none]
             {hint_edges}
         }}
         """
         template = re.sub(r"(?m)^ {8}", "", template)
         data["engine"] = "twopi" if has_exercises else "dot\n    rankdir=LR"
         text = template.format(**data)
+        previous_text = self.activity_map_gv_path.read_text()
+        if previous_text == text:
+            return # the graph has not changed, no need to update the files
         self.activity_map_gv_path.write_text(text)
         print(f"Graph written to '{self.activity_map_gv_path}'.")
         with contextlib.suppress(ImportError):
