@@ -20,6 +20,17 @@ def run(config: dict):
     Path(config["records_path"]).write_text(text, encoding="utf-8")
     return records
 
+def dequalified(formula: str) -> str:
+    """
+    Transform the formula by removing the qualification of the hash fields.
+    Tolerate the use of an underscore instead of a dot.
+    Examples of formulas equivalent after dequalification:
+    - salt_069(sum(nn(A.hash) + nn(B.hash)) OVER()) AS token
+    - salt_069(sum(nn(B.hash) + nn(A.hash)) OVER()) AS token
+    - salt_069(sum(nn(A_hash) + nn(B_hash)) OVER()) AS token
+    """
+    return re.sub(r"\b[A-Z][_\.]hash", "hash", formula)
+
 class NoDataFieldError(Exception):
     pass
 
@@ -158,8 +169,7 @@ class NotebookParser:
                     
                     if formula: # The formula is explicitely stated
                         assert salt == segments[-1]["salt"], f"{FAIL}Salt mismatch.{RESET}\n{source}."
-                        formula_with_dots = re.sub(r"(?<=\b[A-Z])_(?=hash\b)", ".", formula) # tolerate A_hash instead of A.hash
-                        assert formula_with_dots == segments[-1]["formula"], f"{FAIL}Formula mismatch.{RESET}\n{source}."
+                        assert dequalified(formula) == dequalified(segments[-1]["formula"]), f"{FAIL}Formula mismatch.{RESET}\n{source}."
 
                     next_salt = next_salt or segments[-1]["default_next_salt"]
                     token = token or segments[-1]["default_token"]
