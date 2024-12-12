@@ -21,6 +21,7 @@ defaults = { # Not a JSON object because it contains comments and Python lambda 
     "activity_map_svg_path": "./output/activity_map.svg",
     "log_path": "./output/msg.log",
     "records_path": "./output/records.json",
+    "token_table_path": "./output/token_table.tsv",
     "report_path": "./output/report.json",
     "storyline_path": "./output/storyline.md",
     "salt_seed": 42,
