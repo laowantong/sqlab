@@ -216,22 +216,3 @@ class MessageGenerator:
             result.insert(0, f"# Cheat sheet\n")
             result.append("")
             return "\n".join(result)
-
-    def compile_token_table(self, tokens):
-        ddl = """\
-        DROP TABLE IF EXISTS token;
-        CREATE TABLE token (
-            question VARCHAR(32),
-            kind VARCHAR(5),
-            salt INT,
-            token BIGINT NOT NULL,
-            PRIMARY KEY (token)
-        );
-        """.replace("        ", "")
-        inserts = []
-        for (token, d) in tokens.items():
-            inserts.append("  ('{question}', '{kind}', {salt}, {token}),".format(token=token, **d))
-        if inserts:
-            inserts[-1] = inserts[-1].rstrip(",")
-        inserts = "\n".join(inserts)
-        return f"{ddl}\n\nINSERT INTO token VALUES\n{inserts}\n;"

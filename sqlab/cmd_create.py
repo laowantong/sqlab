@@ -11,6 +11,7 @@ from .compose_inserts import compose_data_inserts, compose_message_inserts, comp
 from .database import database_factory
 from .generate_messages import MessageGenerator
 from .text_tools import OK, RESET, WARNING
+from .token_table import TokenTable
 from .run_notebook import run_notebook
 
 
@@ -122,6 +123,11 @@ def run(config: dict):
                 print(f"{WARNING}The notebook needs some work before I can convert it.{RESET}")
         elif source_path.name == "records.json":
             records = json.loads(source_path.read_text())
+    
+    # Create the token table from the records and write it to a TSV file.
+    token_table = TokenTable(records)
+    token_table_path = Path(config["token_table_path"])
+    token_table.write_as_tsv(token_table_path)
 
     # Finally, add the foreign key constraints to the core tables, now definitely populated.
     db.execute_non_select(db.fk_constraints_queries)
@@ -145,12 +151,6 @@ def run(config: dict):
     if cheat_sheet:
         config["cheat_sheet_path"].write_text(cheat_sheet, encoding="utf-8")
         print(f"Cheat sheet compiled to '{config['cheat_sheet_path']}'.")
-
-    # Dump the token table to a dedicated file
-    tokens = records["info"].pop("tokens", {})
-    token_table = message_generator.compile_token_table(tokens)
-    config["token_table_path"].write_text(token_table, encoding="utf-8")
-    print(f"Token table compiled to '{config['token_table_path']}'.")
 
     # Populate the `sqlab_msg` table.
     rows = list(message_generator.run(records).items())

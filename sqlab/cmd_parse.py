@@ -255,8 +255,6 @@ class NotebookParser:
         collisions = non_hint_tokens & hint_tokens
         assert not collisions, f"{FAIL}Hint tokens {collisions} collide with other tokens.{RESET}"
 
-        records["info"]["tokens"] = self.create_token_dict(records)
-
         # Generate the graph and (side effect) pop the hint salts from records
         self.dump_graph(records)
 
@@ -300,56 +298,6 @@ class NotebookParser:
             if isinstance(solution, str): # An annotation
                 continue
             yield solution
-
-    def create_token_dict(self, records) -> dict:
-        """
-        Associate to each token:
-        - "adventure": the adventure number, or 0 for an exercise
-        - "task": either "exercise" or "episode"
-        - "counter": the number of the exercise or the episode
-        - "kind": either
-            - "entry" for an exercise or the first episode of an adventure
-            - "exit" for a solution of an exercise
-            - "answer" for a solution of an episode other than the first one
-            - "hint"
-        - "salt"
-        """
-        values = []
-        for (token, record) in records.items():
-            if token == "info":
-                continue
-            salt = record["salt"]
-            kind = record["kind"]
-            counter = record["counter"]
-            if kind == "episode":
-                adventure = record["adventure"]
-            elif kind == "exercise":
-                adventure = 0
-                for solution in record["solutions"]:
-                    if isinstance(solution, str):
-                        continue
-                    values.append((salt, "exit", adventure, counter, solution["token"]))
-            values.append((salt, kind, adventure, counter, token))
-                
-        values.sort()
-        tasks = []
-        task = None
-        for (salt, kind, adventure, counter, token) in values:
-            if kind in ("exercise", "episode"):
-                task = kind
-                kind = "entry" if int(token) <= 999 else "answer"
-            tasks.append((task, adventure, counter, kind, salt, token))
-        tasks.sort()
-        result = {}
-        for (task, adventure, counter, kind, salt, token) in tasks:
-            result[token] = {
-                "adventure": adventure,
-                "task": task,
-                "counter": counter,
-                "kind": kind,
-                "salt": salt,
-            }
-        return result
 
     def dump_graph(self, records):
         data = {
