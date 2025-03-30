@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sqlab"
-version = "0" # actually dynamically set by poetry-version-plugin
+version = "0.6.5" # copy-past from __init__.py
 description = "SQL Adventure Builder: a command line tool for creating standalone SQL activities."
 authors = ["Aristide Grange"]
 license = "MIT"
@@ -33,10 +33,6 @@ packages = [
     { include = "sqlab", from = "." },
 ]
 exclude = ["sqlab/secrets.py"]
-
-# see https://github.com/tiangolo/poetry-version-plugin
-[tool.poetry-version-plugin]
-source = "init" # read version from __init__.py
 
 [tool.poetry.dependencies]
 python = "^3.8.0"
