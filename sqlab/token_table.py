@@ -1,20 +1,16 @@
 from pathlib import Path
-from csv import reader
+import csv
 from dataclasses import dataclass, fields
 import re
 
 @dataclass
 class Item:
     token: int  # the token number
-    adventure: int  # the adventure number, or 0 for an exercise
-    counter: int  # the number of the exercise or the episode
+    part: int  # 0 for an exercise, or a positive integer for an adventure
+    source: int  # the number of the exercise or the episode which produces the token
+    target: int  # the number of the exercise or the episode where the query leads
+    action: str  # either "enter", "move", "hint" or "exit" a task
     salt: str # three digits
-    task: str  # either "exercise" or "episode" or "N/A"
-    kind: str  # either "entry" for an exercise or the first episode of an adventure,
-    #                   "exit" for a solution of an exercise
-    #                   "answer" for a solution of an episode other than the first one
-    #                   "hint" for a hint
-
 
 class TokenTable:
 
@@ -28,54 +24,67 @@ class TokenTable:
 
     def init_table_from_path(self, path):
         with open(path) as f:
-            r = reader(f, delimiter="\t")
+            r = csv.reader(f, delimiter="\t")
             next(r)  # Skip the header
             self.token_table = []
-            for (token, adventure, counter, salt, task, kind) in r:
-                self.token_table.append(Item(
-                    int(token),
-                    int(adventure),
-                    int(counter),
-                    salt,
-                    task,
-                    kind))
+            for (token, part, source, target, action, salt) in r:
+                self.token_table.append(Item(int(token), int(part), int(source), int(target), action, salt))
 
     def init_table_from_records(self, records):
-        values = []
-        for token, record in records.items():
+        values = set()  # Most variants of a solution produce the same token: keep only one
+        epilogue_tokens = set()  # Tokens of the last episode of an adventure
+
+        for (token, record) in records.items():
             if token == "info":
                 continue
-            salt = record.get("salt")
-            if salt is None:
+
+            kind = record["kind"]
+            task_index = record["counter"]
+
+            if kind == "episode":
+                part = record["adventure"]
+                if task_index == 1: # The first episode of an adventure cannot be added as a solution
+                    values.add((part, 0, 1, "N/A", token))
+                elif not record["solutions"]: # Store the token of the last episode of an adventure
+                    epilogue_tokens.add(token)
+                for solution in record["solutions"]:
+                    if not isinstance(solution, str):
+                        values.add((part, task_index, task_index + 1, record["salt"], solution["token"]))
+
+            elif kind == "hint":
+                part = part  # Keep the previous value, since a hint is part of an exercise
                 if m := re.search(r"salt_(\d+)", record.get("query", "")):
                     salt = m.group(1)
-                else:
-                    salt = "N/A"  # e.g., when a hash is mistaken for a token
-            kind = record["kind"]
-            counter = record["counter"]
-            if kind == "episode":
-                adventure = record["adventure"]
+                else:  # A hash value or an example mistaken for a token
+                    salt = "N/A"
+                values.add((part, task_index, task_index, salt, token))
+
             elif kind == "exercise":
-                adventure = 0
+                part = 0
+                values.add((part, 0, task_index, "N/A", token))  # Each exercise is an entry point
                 for solution in record["solutions"]:
-                    if isinstance(solution, str):
-                        continue
-                    values.append((salt, "exit", adventure, counter, solution["token"]))
-            values.append((salt, kind, adventure, counter, token))
-        values.sort()
-        tasks = []
-        task = None
-        for (salt, kind, adventure, counter, token) in values:
-            if kind in ("exercise", "episode"):
-                task = kind
-                kind = "entry" if int(token) <= 999 else "answer"
-            if salt == "N/A":
-                task = "N/A"
-            tasks.append((task, adventure, counter, kind, salt, int(token)))
-        tasks.sort()
+                    if not isinstance(solution, str):
+                        values.add((part, task_index, 0, record["salt"], solution["token"]))
+            
+            else:
+                raise ValueError(f"Unknown kind: {kind}")
+
+        values= sorted(values, key=lambda x: (x[0], max(x[1], x[2]), x[1], -x[2], x[3], x[4]))
         self.token_table = []
-        for (task, adventure, counter, kind, salt, token) in tasks:
-            self.token_table.append(Item(token, adventure, counter, salt, task, kind))
+        for (part, source, target, salt, token) in values:
+            if token in epilogue_tokens: # The last episode of an adventure
+                target = 0  # The original value (task_index + 1) should be corrected
+            if source == target: # A loop
+                action = "hint"
+            elif source == 0: # An entry point (for an exercise or a a first episode)
+                action = "enter"
+            elif target == 0: # An exit point (for an exercise or a last episode)
+                action = "move"
+            elif source < target: # An internal forward move
+                action = "move"
+            else:
+                raise ValueError(f"Invalid source and target: {source} -> {target}")
+            self.token_table.append(Item(token, part, source, target, action, salt))
 
     def write_as_tsv(self, path):
         with open(path, "w") as f:
