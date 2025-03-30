@@ -1,7 +1,6 @@
 from pathlib import Path
 import getpass
 import pydoc
-import pandas as pd
 import sqlalchemy
 
 from .nb_tools import *
@@ -52,5 +51,9 @@ def show_tables(engine=None):
     results = []
     for table in metadata.tables.values():
         results.append([table.name, ", ".join([c.name for c in table.c])])
-    pd.set_option("display.max_colwidth", None)
-    return pd.DataFrame(results, columns=["Table", "Columns"])
+    table_width = max(len(row[0]) for row in results) + 2
+    columns_width = max(len(row[1]) for row in results) + 2
+    print(f"{'Table':<{table_width}} {'Columns':<{columns_width}}")
+    print("-" * (table_width + columns_width + 1))
+    for row in results:
+        print(f"{row[0]:<{table_width}} {row[1]:<{columns_width}}")
