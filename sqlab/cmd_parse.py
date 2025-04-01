@@ -314,7 +314,7 @@ class NotebookParser:
             "exercise_ends": [],
             "episode_edges": [],
             "episode_starts": set(),
-            "episode_ends": [],
+            "episode_ends": set(),
             "epilogues": [],
             "hint_edges": [],
             "hint_ends": [],
@@ -350,7 +350,7 @@ class NotebookParser:
                         next_record = records[next_record] # resolve the alias
                     y = next_record["salt"]
                     data["episode_edges"].append(f"{x} -> {y}")
-                    data["episode_ends"].append(f'{y} [xlabel={next_record["counter"]}]')
+                    data["episode_ends"].add(f'{y} [xlabel={next_record["counter"]}]')
                 if not record["solutions"]:
                     data["epilogues"].append(record["salt"])
             elif record["kind"] == "hint":
