@@ -2,69 +2,7 @@
   "info": {
     "adventure_count": 2,
     "episode_count": 7,
-    "exercise_count": 0,
-    "tokens": {
-      "001": {
-        "question": "episode 1.001",
-        "kind": "entry",
-        "salt": "001"
-      },
-      "1002": {
-        "question": "episode 1.002",
-        "kind": "answer",
-        "salt": "002"
-      },
-      "2002": {
-        "question": "episode 1.002",
-        "kind": "answer",
-        "salt": "002"
-      },
-      "1003": {
-        "question": "episode 1.003",
-        "kind": "answer",
-        "salt": "003"
-      },
-      "2003": {
-        "question": "episode 1.003",
-        "kind": "answer",
-        "salt": "003"
-      },
-      "0102": {
-        "question": "episode 1.003",
-        "kind": "hint",
-        "salt": "003"
-      },
-      "0202": {
-        "question": "episode 1.003",
-        "kind": "hint",
-        "salt": "003"
-      },
-      "1004": {
-        "question": "episode 1.004",
-        "kind": "answer",
-        "salt": "004"
-      },
-      "2004": {
-        "question": "episode 1.004",
-        "kind": "answer",
-        "salt": "004"
-      },
-      "011": {
-        "question": "episode 2.001",
-        "kind": "entry",
-        "salt": "011"
-      },
-      "1012": {
-        "question": "episode 2.002",
-        "kind": "answer",
-        "salt": "012"
-      },
-      "1013": {
-        "question": "episode 2.003",
-        "kind": "answer",
-        "salt": "013"
-      }
-    }
+    "exercise_count": 0
   },
   "001": {
     "kind": "episode",

@@ -1,0 +1,7 @@
+token	part	source	target	action	salt
+042	0	0	1	enter	N/A
+5664	0	1	0	move	042
+043	0	0	2	enter	N/A
+6877	0	2	0	move	043
+044	0	0	3	enter	N/A
+9112	0	3	0	move	044

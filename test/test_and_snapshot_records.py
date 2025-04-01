@@ -4,6 +4,7 @@ from pathlib import Path
 import re
 
 from sqlab.cmd_parse import NotebookParser
+from sqlab.token_table import TokenTable
 from sqlab.generate_messages import MessageGenerator
 
 base_dir = Path("test", "snapshots")
@@ -204,16 +205,22 @@ class TestRecordCreationErrors(unittest.TestCase):
         ]
         self.assertRaisesRegex(AssertionError, r"Missing token for hint", parse_nb, cells)
 
-def create_records():
+def output_records_and_tokens(path, cells):
+    dumps = lambda d: json.dumps(d, indent=2, ensure_ascii=False) + "\n"
+    records = parse_nb(cells)
+    path.write_text(dumps(records))
+    tokens = TokenTable(records)
+    path = Path(path.parent, path.name.replace(".json", "_tokens.tsv"))
+    tokens.write_as_tsv(path)
 
-    dumps = lambda cells: json.dumps(parse_nb(cells), indent=2, ensure_ascii=False) + "\n"
+def create_records_and_token_tables():
 
     path = Path(base_dir, "exercise_1_solution.json")
     cells = [
         markdown("**Exercise [042].** how?"),
         sql("SELECT foo, salt_042 as token", "4547"),
     ]
-    path.write_text(dumps(cells))
+    output_records_and_tokens(path, cells)
 
     path = Path(base_dir, "exercise_n_solutions_same_token.json")
     cells = [
@@ -221,7 +228,7 @@ def create_records():
         sql("SELECT foo, salt_042 as token", "4547"),
         sql("-- Variant.\nSELECT bar, salt_042 as token", "4547"),
     ]
-    path.write_text(dumps(cells))
+    output_records_and_tokens(path, cells)
 
     path = Path(base_dir, "exercise_n_solutions_various_tokens.json")
     cells = [
@@ -229,7 +236,7 @@ def create_records():
         sql("SELECT foo, salt_042 as token", "4547"),
         sql("SELECT bar, salt_042 as token", "3839"),
     ]
-    path.write_text(dumps(cells))
+    output_records_and_tokens(path, cells)
 
     path = Path(base_dir, "exercise_n_solutions_with_annotations.json")
     cells = [
@@ -243,14 +250,14 @@ def create_records():
         markdown("**Annotation.** After 3839."),
         markdown("**Annotation.** After all."),
     ]
-    path.write_text(dumps(cells))
+    output_records_and_tokens(path, cells)
 
     path = Path(base_dir, "exercise_with_useless_next_salt.json")
     cells = [
         markdown("**Exercise [042].** how?"),
         sql("SELECT foo, salt_042 as token\n--> Exercise [043]", "4547"),
     ]
-    path.write_text(dumps(cells))
+    output_records_and_tokens(path, cells)
 
     path = Path(base_dir, "exercise_with_hints.json")
     cells = [
@@ -259,7 +266,7 @@ def create_records():
         sql("-- Hint. This is wrong\nSELECT bar, salt_042 as token", "3839"),
         sql("-- Hint. This is bad\nSELECT bizz, salt_042 as token", "8968"),
     ]
-    path.write_text(dumps(cells))
+    output_records_and_tokens(path, cells)
 
     path = Path(base_dir, "exercises_with_tweak.json")
     cells = [
@@ -270,7 +277,7 @@ def create_records():
         markdown("**Exercise [043].** how?"), # tweak is reset
         sql("SELECT bizz, salt_043 as token", "1278"),
     ]
-    path.write_text(dumps(cells))
+    output_records_and_tokens(path, cells)
 
     path = Path(base_dir, "exercises_with_sectionning_and_eof.json")
     cells = [
@@ -288,7 +295,7 @@ def create_records():
         markdown("**Exercise [045].** This should not be kept."),
         sql("SELECT foo, salt_045 as token", "4547"),
     ]
-    path.write_text(dumps(cells))
+    output_records_and_tokens(path, cells)
 
     path = Path(base_dir, "complex_graph.json")
     cells = [
@@ -336,9 +343,10 @@ def create_records():
         markdown("**Episode [013].** Alternative end of another adventure"),
         markdown("**Statement.** no question asked either!"),
     ]
-    path.write_text(dumps(cells))
-    Path("test", "snapshots", "activity_map.pdf").unlink()
-
+    output_records_and_tokens(path, cells)
+    path = Path("test", "snapshots", "activity_map.pdf")
+    if path.exists():
+        path.unlink()
 
 def create_messages():
     sub = re.compile(r"\n----+\n?").sub
@@ -349,5 +357,6 @@ def create_messages():
         Path(base_dir, f"{path.stem}.tsv").write_text(messages + "\n")
 
 
-create_records()
+create_records_and_token_tables()
+
 create_messages()
