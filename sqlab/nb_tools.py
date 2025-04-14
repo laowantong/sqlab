@@ -3,10 +3,9 @@ import getpass
 import pydoc
 import sqlalchemy
 
-from .nb_tools import *
 from .text_tools import OK, RESET, WARNING
 
-def may_create_connection_file(**kwargs):
+def may_create_connection_file():
     cnx_path = Path("cnx.ini")
     cnx_name = f"{cnx_path.resolve().parent.name}/{cnx_path.name}"
     if cnx_path.exists():
@@ -16,12 +15,13 @@ def may_create_connection_file(**kwargs):
     # Use an undocumented feature simulating an import from anywhere,
     # cf. https://stackoverflow.com/a/68361215/173003.
     config = pydoc.importfile("config.py").config
-    username = kwargs["username"]
+    drivername = config["drivername"]
     database = Path(config["source_path"]).stem
-    host = kwargs["host"]
-    port = kwargs["port"]
+    username = config["username"]
+    host = config["host"]
+    port = config["port"]
     parameters = {
-        "drivername": kwargs["drivername"],
+        "drivername": drivername,
         "database": input(f"Database [{database}]: ") or database,
         "username": input(f"Username [{username}]: ") or username,
         "password": getpass.getpass("Password: "),
