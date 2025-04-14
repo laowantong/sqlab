@@ -18,7 +18,7 @@ class Database(AbstractDatabase):
                 path = str(Path(path).expanduser().resolve())
                 self.cnx.load_extension(path)
                 print(f"  {path}")
-            script = self.config["sql_dump_path"].read_text()
+            script = self.config["sql_dump_path"].read_text(encoding="utf8")
             self.cnx.executescript(script)
 
     def get_headers(self, table: str, keep_auto_increment_columns=True) -> list[str]:

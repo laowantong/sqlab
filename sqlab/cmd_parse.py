@@ -13,7 +13,7 @@ from .text_tools import separate_label_salt_and_text, split_sql_source, separate
 def run(config: dict):
     parser = NotebookParser(config)
     print(f"Updating the records...")
-    ipynb = json.loads(config["source_path"].read_text())
+    ipynb = json.loads(config["source_path"].read_text(encoding="utf8"))
     records = parser(ipynb["cells"])
     print(f"{OK}The records are up to date.{RESET}")
     text = json.dumps(records, indent=2, ensure_ascii=False)
@@ -402,7 +402,7 @@ class NotebookParser:
         template = re.sub(r"(?m)^ {8}", "", template)
         data["engine"] = "twopi" if has_exercises else "dot\n    rankdir=LR"
         text = template.format(**data)
-        previous_text = self.activity_map_gv_path.read_text()
+        previous_text = self.activity_map_gv_path.read_text(encoding="utf8")
         if previous_text == text:
             return # the graph has not changed, no need to update the files
         self.activity_map_gv_path.write_text(text)

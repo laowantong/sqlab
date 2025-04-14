@@ -29,7 +29,7 @@ def run(config: dict):
     # • tables_creation_queries
     # • fk_constraints_queries
     # • drop_fk_constraints_queries
-    ddl_queries = Path(config["ddl_path"]).read_text()
+    ddl_queries = Path(config["ddl_path"]).read_text(encoding="utf8")
     db.parse_ddl(ddl_queries)
     if db.fk_constraints_queries:
         ddl_queries = ddl_queries.replace(db.fk_constraints_queries, "")
@@ -122,7 +122,7 @@ def run(config: dict):
             else:
                 print(f"{WARNING}The notebook needs some work before I can convert it.{RESET}")
         elif source_path.name == "records.json":
-            records = json.loads(source_path.read_text())
+            records = json.loads(source_path.read_text(encoding="utf8"))
     
     # Create the token table from the records and write it to a TSV file.
     token_table = TokenTable(records)

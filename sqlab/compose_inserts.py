@@ -59,7 +59,7 @@ def compose_data_inserts(config: dict, db, trigger_template) -> str:
         headers = db.get_headers(table, keep_auto_increment_columns=False) # Columns to be inserted.
         tsv_row_to_sql_values.set_wrappers(headers)
         insertions = [f"INSERT INTO {table} ({', '.join(headers)}) VALUES"]
-        for row in tsv_path.read_text().splitlines():
+        for row in tsv_path.read_text(encoding="utf8").splitlines():
             if not row:
                 continue
             insertions.append(tsv_row_to_sql_values(row))

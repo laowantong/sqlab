@@ -37,7 +37,7 @@ def may_create_connection_file(**kwargs):
 def get_engine():
     cnx_path = Path("cnx.ini")
     parameters = {}
-    for line in cnx_path.read_text().splitlines():
+    for line in cnx_path.read_text(encoding="utf8").splitlines():
         (k, _, v) = line.partition(" = ")
         parameters[k] = v
     url = "{drivername}://{username}:{password}@{host}:{port}/{database}".format(**parameters)

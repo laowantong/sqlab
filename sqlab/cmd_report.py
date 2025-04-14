@@ -75,7 +75,7 @@ def run(config: dict):
     records = parse_notebook(config)
     report = init_report(records)
 
-    ignored_tokens = set(Path(config["ignored_tokens_path"]).read_text().split())
+    ignored_tokens = set(Path(config["ignored_tokens_path"]).read_text(encoding="utf8").split())
     unknown_decrypted_tokens = set()
     timestamps_and_queries = parse_tsv(log_path)
     for (timestamp, query) in timestamps_and_queries:

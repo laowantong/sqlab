@@ -351,7 +351,7 @@ def create_records_and_token_tables():
 def create_messages():
     sub = re.compile(r"\n----+\n?").sub
     for path in base_dir.glob("*.json"):
-        records = json.loads(path.read_text())
+        records = json.loads(path.read_text(encoding="utf8"))
         messages = message_generator.run(records)
         messages = "\n".join(f"{k:4s}\t{repr(sub('--', v))}" for (k, v) in messages.items())
         Path(base_dir, f"{path.stem}.tsv").write_text(messages + "\n")
