@@ -22,10 +22,10 @@ digraph G {
     012
     013
     node [ width=0.6 height=0.6 shape=circle fillcolor="#FFC19C"]
-    004 [xlabel=4]
     002 [xlabel=2]
-    012 [xlabel=2]
     003 [xlabel=3]
+    004 [xlabel=4]
+    012 [xlabel=2]
     013 [xlabel=3]
     node [fillcolor="#DBDE92"]
     
@@ -35,11 +35,11 @@ digraph G {
     001 -> 002
     001 -> 002
     001 -> 002
-    001 -> 003
     001 -> 002
+    001 -> 003
+    002 -> 003
     002 -> 003
     002 -> 004
-    002 -> 003
     003 -> 004
     011 -> 012
     011 -> 013

@@ -363,7 +363,7 @@ class NotebookParser:
                     data["hint_ends"].append(y)
                 del record["salt"]
         for (key, value) in data.items():
-            data[key] = "\n    ".join(value)
+            data[key] = "\n    ".join(sorted(value))
 
         # Save the graph and convert it into pdf and svg if graphviz is installed
         template = """digraph G {{
