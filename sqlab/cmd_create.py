@@ -48,7 +48,7 @@ def run(config: dict):
     db.execute_non_select(db.tables_creation_queries)
     print(f"Core tables created.")
 
-    resource_id = f"sqlab.dbms.{config['dbms_slug']}"
+    resource_id = f"sqlab.dbms.{config['sqlab_dbms_module']}"
 
     # Create the structure of the additional sqlab tables.
     sqlab_ddl_queries = resources.read_text(resource_id, "sqlab_ddl.sql")

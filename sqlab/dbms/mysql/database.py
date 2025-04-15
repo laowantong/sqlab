@@ -10,7 +10,7 @@ class Database(AbstractDatabase):
         self.cnx = mysql.connector.connect(**self.config["cnx"])
         if self.cnx.is_connected():
             self.dbms_version = self.cnx.get_server_info()
-            print(f"{OK}Connected to MySQL {self.dbms_version} with database {repr(self.cnx.database)}.{RESET}")
+            print(f"{OK}Connected to {self.config['dbms']} {self.dbms_version} with database {repr(self.cnx.database)}.{RESET}")
         else:
             raise mysql.connector.Error.ConnectionError(f"{FAIL}Could not connect to MySQL.{RESET}")
 

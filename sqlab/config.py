@@ -161,6 +161,9 @@ def get_config(args):
     
     # Complete the configuration with calculated values.
     config["cnx"] = cnx
-    config["dbms_slug"] = config["dbms"].lower().replace(" ", "")
+    dbms = config["dbms"].lower().replace(" ", "")
+    if dbms == "mariadb":
+        dbms = "mysql" # MariaDB is a fork of MySQL, so we use the same module.
+    config["sqlab_dbms_module"] = dbms
 
     return config

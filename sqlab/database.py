@@ -3,7 +3,7 @@ import importlib
 
 def database_factory(config: dict):
     """Return a Database object according to the dbms specified in the configuration."""
-    db = importlib.import_module(".database", package=f"sqlab.dbms.{config['dbms_slug']}")
+    db = importlib.import_module(".database", package=f"sqlab.dbms.{config['sqlab_dbms_module']}")
     return db.Database(config)
 
 
