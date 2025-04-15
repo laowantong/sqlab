@@ -134,8 +134,15 @@ def get_config(args):
                 config[key].parent.mkdir(parents=True, exist_ok=True)
 
     # Read the cnx.ini file and update the configuration with its content.
+    cnx_path = config.get("cnx_path")
+    if not cnx_path:
+        raise ValueError("Missing 'cnx_path' key in the configuration.")
+    if not Path(cnx_path).exists():
+        raise FileNotFoundError(f"Connection file '{cnx_path}' does not exist. You can create it using one of the project's existing cnx.ini files as a model.")
     cnx_parser = configparser.ConfigParser()
-    cnx_parser.read(config["cnx_path"])
+    cnx_parser.read(cnx_path)
+    if "cnx" not in cnx_parser:
+        raise ValueError(f"Missing [cnx] section in {config['cnx_path']}")
     cnx = dict(cnx_parser["cnx"])
     cnx.pop("drivername", None)  # Remove the SQLAlchemy drivername, if present.
     cnx["user"] = cnx.pop("username", None)  # Change the SQLAlchemy username, into user.
