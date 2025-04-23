@@ -14,8 +14,8 @@ class MessageGenerator:
         if "log_path" in config:
             log_path = config["log_path"]
             log_path.unlink(missing_ok=True)
-            self.log = log_path.open("a", encoding="utf-8").write
-            print(f"Logging messages to '{log_path.name}'...")
+            self.log = log_path.open("a", encoding="utf-8")
+            print(f"Logging messages to '{log_path}'...")
         else:
             self.log = lambda _: None
     
@@ -72,7 +72,7 @@ class MessageGenerator:
                 continue
 
             if record["kind"] == "hint":
-                self.log(f"    Hint ({entry_token}): {repr(record['text'][:100])}\n")
+                self.log.write(f"    Hint ({entry_token}): {repr(record['text'][:100])}\n")
                 preamble = f"🟠 {counter}. {self.strings['preamble_rejected']}"
                 hint = self.format_text("➥ " + record["text"])
                 self.rows[entry_token] = join_non_empty(preamble, hint)
@@ -82,7 +82,7 @@ class MessageGenerator:
             formula = self.compose_formula(record)
 
             if record["kind"] == "episode":
-                self.log(f"  Question {counter} ({entry_token}): {repr(record['statement'][:100])}\n")
+                self.log.write(f"  Question {counter} ({entry_token}): {repr(record['statement'][:100])}\n")
                 if counter == 1:
                     preamble = f"⚪️ {counter}. {self.strings['preamble_adventure']}"
                 else:
@@ -105,7 +105,7 @@ class MessageGenerator:
             else:
                 assert record["kind"] == "exercise", f"{FAIL}Unexpected kind: {record['kind']}.{RESET}"
 
-                self.log(f"Exercise {counter} ({entry_token}): {repr(record['statement'][:100])}\n")
+                self.log.write(f"Exercise {counter} ({entry_token}): {repr(record['statement'][:100])}\n")
                 statement = self.format_text(f"⚪️ **{self.strings['exercise_label']} {counter}**. {record['statement']}")
                 self.rows[entry_token] = join_non_empty(statement, formula)
                 preamble = f"🟢 {counter}. {self.strings['preamble_accepted'].format(token=entry_token)}"
@@ -126,7 +126,7 @@ class MessageGenerator:
 
         markup = OK if self.rows else WARNING
         print(f"{markup}{len(self.rows)} messages generated.{RESET}")
-
+        self.log.close()
         return self.rows
 
     def compile_storyline(self, records):
