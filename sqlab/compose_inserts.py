@@ -15,7 +15,7 @@ def compose_message_inserts(db, rows: list[str]) -> str:
     commands.append("\nINSERT INTO sqlab_msg (msg) VALUES")
     round_trip_errors = 0
     for (token, plain) in rows:
-        plain = plain.replace("\u00A0", " ") # Replace non-breaking spaces with normal spaces.
+        plain = plain.replace("\u00A0", " ") # Non-breaking spaces with normal spaces cause a round-trip error.
         encrypted = db.encrypt(plain, token)
         commands.append(f"  ({encrypted}),")
         # Check the round trip

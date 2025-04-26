@@ -10,6 +10,7 @@ from .cmd_parse import run as parse_notebook
 from .compose_inserts import compose_data_inserts, compose_message_inserts, compose_info_inserts
 from .database import database_factory
 from .generate_messages import MessageGenerator
+from .message_formatter import create_message_formatter
 from .text_tools import OK, RESET, WARNING
 from .token_table import TokenTable
 from .run_notebook import run_notebook
@@ -153,9 +154,12 @@ def run(config: dict):
         print(f"Cheat sheet compiled to '{config['cheat_sheet_path']}'.")
 
     # Populate the `sqlab_msg` table.
-    rows = list(message_generator.run(records).items())
-    if rows:
-        message_inserts = compose_message_inserts(db, rows)
+    messages = message_generator.run(records)
+    if messages:
+        format_message = create_message_formatter(config)
+        for (token, data) in messages.items():
+            messages[token] = format_message(data)
+        message_inserts = compose_message_inserts(db, messages.items())
         sql_dump.write(message_inserts)
         db.execute_non_select(message_inserts)
     
@@ -163,7 +167,7 @@ def run(config: dict):
     info_inserts = compose_info_inserts(
         **config["info"],
         **records["info"],
-        message_count=len(rows),
+        message_count=len(messages),
         sqlab_database_language=config["language"],
         dbms=config["dbms"],
         dbms_version=db.get_version(),

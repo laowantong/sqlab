@@ -39,6 +39,14 @@ def main():
 
     parser.add_argument("-p", "--password", help="MySQL password")
 
+    parser.add_argument(
+        "-m",
+        "--markdown_to",
+        choices=["html", "text", "json"],
+        default="text",
+        help="Format of the generated messages. Default: text.",
+    )
+
     args = parser.parse_args()
     module = importlib.import_module(f".cmd_{args.CMD}", package="sqlab")
     config = get_config(args)

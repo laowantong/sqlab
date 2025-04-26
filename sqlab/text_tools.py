@@ -9,40 +9,70 @@ WARNING = "\033[1m\033[38;5;166m"
 FAIL = "\033[1m\033[91m"
 RESET = "\033[0m"
 
+sub_mono = re.compile(r"`(.+?)`").sub
+sub_italic = re.compile(r"(?<!\w)_(.+?)_(?!\w)").sub
+sub_bold = re.compile(r"\*\*(.+?)\*\*").sub
+sub_code_block = re.compile(r'(?sm)^```(\w+?)\n(.*?)```').sub
+sub_list = re.compile(r"(?m)((?:^- .*\n)+)").sub
+sub_item = re.compile(r"(?m)^- (.+)").sub
+sub_br = re.compile(r"<br>\n?").sub
 
-def markdown_transformer(regex, chars):
-    """Returns a function that transforms text according to the given regex and character set."""
-    sub = re.compile(regex).sub
+def improved_html(s: str) -> str:
+    s = s.strip()
+    # s = s.replace("&", "&amp;")
+    # s = s.replace("<", "&lt;")
+    # s = s.replace(">", "&gt;")
+    s = s.replace("\n", "<br>")
+    s = s.replace("\u00A0", "&nbsp;")
+    s = sub_mono(r"<code>\1</code>", s)
+    s = sub_italic(r"<em>\1</em>", s)
+    s = sub_bold(r"<strong>\1</strong>", s)
+    s = sub_code_block(r"<pre><code>\2</code></pre>", s)
+    s = sub_list(r"<ul>\1</ul>", s)
+    s = sub_item(r"  <li>\1</li>", s)
+    return s
+
+def map_chars(sub: callable, chars: str) -> callable:
+    """
+    Creates a character mapping transformer that works with a substitution function.
+    
+    This function builds a translation mapping between ASCII characters and a provided
+    character set, then returns a new function that applies this mapping to text
+    matches found by the substitution function.
+    
+    Parameters:
+    -----------
+    sub : callable
+        A substitution function (like re.sub) that finds and replaces patterns in text.
+        Expected to accept a replacement function and input text as arguments.
+    
+    chars : str
+        A string of characters that will replace standard ASCII characters.
+        Should be the same length as the ASCII character set used for mapping.
+    
+    Returns:
+    --------
+    callable
+        A function that takes text as input and returns text with the character
+        mapping applied to any matches found by the substitution function.
+    """
     ascii_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
-    trans = str.maketrans(ascii_chars, chars)
+    translation_table = str.maketrans(ascii_chars, chars)
+    translation_function = lambda m: m[1].translate(translation_table)
+    return lambda text: sub(translation_function, text)
 
-    def transform(text):
-        """Transforms the given text according to the given regex and character set.
-        Example for transform_bold:
-        >>> transform_bold("This is **bold** text.")
-        'This is 𝗯𝗼𝗹𝗱 text.'
-        """
-        return sub(lambda m: m[1].translate(trans), text)
+map_mono = map_chars(sub_mono, "𝙰𝙱𝙲𝙳𝙴𝙵𝙶𝙷𝙸𝙹𝙺𝙻𝙼𝙽𝙾𝙿𝚀𝚁𝚂𝚃𝚄𝚅𝚆𝚇𝚈𝚉𝚊𝚋𝚌𝚍𝚎𝚏𝚐𝚑𝚒𝚓𝚔𝚕𝚖𝚗𝚘𝚙𝚚𝚛𝚜𝚝𝚞𝚟𝚠𝚡𝚢𝚣𝟶𝟷𝟸𝟹𝟺𝟻𝟼𝟽𝟾𝟿")
+map_italic = map_chars(sub_italic, "𝘈𝘉𝘊𝘋𝘌𝘍𝘎𝘏𝘐𝘑𝘒𝘓𝘔𝘕𝘖𝘗𝘘𝘙𝘚𝘛𝘜𝘝𝘞𝘟𝘠𝘡𝘢𝘣𝘤𝘥𝘦𝘧𝘨𝘩𝘪𝘫𝘬𝘭𝘮𝘯𝘰𝘱𝘲𝘳𝘴𝘵𝘶𝘷𝘸𝘹𝘺𝘻𝟢𝟣𝟤𝟥𝟦𝟧𝟨𝟩𝟪𝟫")
+map_bold = map_chars(sub_bold, "𝗔𝗕𝗖𝗗𝗘𝗙𝗚𝗛𝗜𝗝𝗞𝗟𝗠𝗡𝗢𝗣𝗤𝗥𝗦𝗧𝗨𝗩𝗪𝗫𝗬𝗭𝗮𝗯𝗰𝗱𝗲𝗳𝗴𝗵𝗶𝗷𝗸𝗹𝗺𝗻𝗼𝗽𝗾𝗿𝘀𝘁𝘂𝘃𝘄𝘅𝘆𝘇𝟬𝟭𝟮𝟯𝟰𝟱𝟲𝟳𝟴𝟵")
 
-    return transform
-
-
-# fmt: off
-transform_mono = markdown_transformer(r"`(.+?)`", "𝙰𝙱𝙲𝙳𝙴𝙵𝙶𝙷𝙸𝙹𝙺𝙻𝙼𝙽𝙾𝙿𝚀𝚁𝚂𝚃𝚄𝚅𝚆𝚇𝚈𝚉𝚊𝚋𝚌𝚍𝚎𝚏𝚐𝚑𝚒𝚓𝚔𝚕𝚖𝚗𝚘𝚙𝚚𝚛𝚜𝚝𝚞𝚟𝚠𝚡𝚢𝚣𝟶𝟷𝟸𝟹𝟺𝟻𝟼𝟽𝟾𝟿")
-transform_italic = markdown_transformer(r"(?<!\w)_(.+?)_(?!\w)", "𝘈𝘉𝘊𝘋𝘌𝘍𝘎𝘏𝘐𝘑𝘒𝘓𝘔𝘕𝘖𝘗𝘘𝘙𝘚𝘛𝘜𝘝𝘞𝘟𝘠𝘡𝘢𝘣𝘤𝘥𝘦𝘧𝘨𝘩𝘪𝘫𝘬𝘭𝘮𝘯𝘰𝘱𝘲𝘳𝘴𝘵𝘶𝘷𝘸𝘹𝘺𝘻𝟢𝟣𝟤𝟥𝟦𝟧𝟨𝟩𝟪𝟫")
-transform_bold = markdown_transformer(r"\*\*(.+?)\*\*", "𝗔𝗕𝗖𝗗𝗘𝗙𝗚𝗛𝗜𝗝𝗞𝗟𝗠𝗡𝗢𝗣𝗤𝗥𝗦𝗧𝗨𝗩𝗪𝗫𝗬𝗭𝗮𝗯𝗰𝗱𝗲𝗳𝗴𝗵𝗶𝗷𝗸𝗹𝗺𝗻𝗼𝗽𝗾𝗿𝘀𝘁𝘂𝘃𝘄𝘅𝘆𝘇𝟬𝟭𝟮𝟯𝟰𝟱𝟲𝟳𝟴𝟵")
-# fmt: on
-
-
-def transform_markdown(text: str, column_width=100) -> str:
-    """Simulate some Mardown tags with Unicode."""
-    text = re.sub(r"(?m)^```\w*\n?$", "", text)
-    text = transform_mono(text)
-    text = transform_italic(text)
-    text = transform_bold(text)
-    text = re.sub(r"(?m)^- ", "— ", text)
-    text = re.sub(r"<br>\n?", "\n", text)
-    return text
+def improved_text(s: str) -> str:
+    s = sub_code_block(r"\2", s)
+    s = map_mono(s)
+    s = map_italic(s)
+    s = map_bold(s)
+    s = sub_item("— ", s)
+    s = sub_br("\n", s)
+    return s
 
 
 class TextWrapper:
@@ -120,7 +150,3 @@ def separate_label_salt_and_text(
     if m := match(source):
         return m.groups()
     return ("", "", source)
-
-def join_non_empty(*strings: str) -> str:
-    """Joins the given strings with two newlines, skipping the empty ones."""
-    return "\n\n".join(filter(None, strings))

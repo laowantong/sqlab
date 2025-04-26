@@ -118,6 +118,8 @@ def get_config(args):
 
     validate_config(config)
 
+    config["markdown_to"] = args.markdown_to
+
     # Create a entry "strings" with the appropriate language, defaulting to English.
     config["strings"] = config.get(f"strings_{config['language']}", config[f"strings_en"])
 
