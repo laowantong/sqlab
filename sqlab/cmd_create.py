@@ -9,7 +9,7 @@ from . import __version__
 from .cmd_parse import run as parse_notebook
 from .compose_inserts import compose_data_inserts, compose_message_inserts, compose_info_inserts
 from .database import database_factory
-from .generate_messages import MessageGenerator
+from .message_builder import MessageBuilder
 from .message_formatter import create_message_formatter
 from .text_tools import OK, RESET, WARNING
 from .token_table import TokenTable
@@ -133,28 +133,28 @@ def run(config: dict):
     # Finally, add the foreign key constraints to the core tables, now definitely populated.
     db.execute_non_select(db.fk_constraints_queries)
 
-    message_generator = MessageGenerator(config)
+    message_builder = MessageBuilder(config)
 
     # Dump the compiled exercises to a dedicated file
-    exercises = message_generator.compile_exercises(records)
+    exercises = message_builder.compile_exercises(records)
     if exercises:
         config["exercises_path"].write_text(exercises, encoding="utf-8")
         print(f"Exercises compiled to '{config['exercises_path']}'.")
 
     # Dump the storyline to a dedicated file
-    storyline = message_generator.compile_storyline(records)
+    storyline = message_builder.compile_storyline(records)
     if storyline:
         config["storyline_path"].write_text(storyline, encoding="utf-8")
         print(f"Storyline compiled to '{config['storyline_path']}'.")
 
     # Dump the compiled cheat_sheet to a dedicated file
-    cheat_sheet = message_generator.compile_cheat_sheet(records)
+    cheat_sheet = message_builder.compile_cheat_sheet(records)
     if cheat_sheet:
         config["cheat_sheet_path"].write_text(cheat_sheet, encoding="utf-8")
         print(f"Cheat sheet compiled to '{config['cheat_sheet_path']}'.")
 
     # Populate the `sqlab_msg` table.
-    messages = message_generator.run(records)
+    messages = message_builder.run(records)
     if messages:
         format_message = create_message_formatter(config)
         for (token, data) in messages.items():

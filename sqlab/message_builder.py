@@ -4,7 +4,7 @@ from collections import defaultdict
 from .text_tools import WARNING, RESET, OK, FAIL
 
 
-class MessageGenerator:
+class MessageBuilder:
 
     def __init__(self, config):
         self.strings = config["strings"]
@@ -60,7 +60,7 @@ class MessageGenerator:
 
     @staticmethod
     def get_first_token_from_solutions(solutions):
-        for solution in MessageGenerator.actual_solutions(solutions):
+        for solution in MessageBuilder.actual_solutions(solutions):
             return solution["token"]
 
     def run(self, records):

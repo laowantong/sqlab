@@ -5,7 +5,7 @@ import re
 
 from sqlab.cmd_parse import NotebookParser
 from sqlab.token_table import TokenTable
-from sqlab.generate_messages import MessageGenerator
+from sqlab.message_builder import MessageBuilder
 from sqlab.message_formatter import create_message_formatter
 
 base_dir = Path("test", "snapshots")
@@ -33,7 +33,7 @@ config = {
 }
 
 parse_nb = NotebookParser(config)
-message_generator = MessageGenerator(config)
+message_builder = MessageBuilder(config)
 
 def sql(source, token):
     return {
@@ -354,7 +354,7 @@ def create_messages():
     sub = re.compile(r"\n----+\n?").sub
     for path in base_dir.glob("*.json"):
         records = json.loads(path.read_text(encoding="utf8"))
-        messages = message_generator.run(records)
+        messages = message_builder.run(records)
         format_message = create_message_formatter(config)
         for (token, data) in messages.items():
             messages[token] = format_message(data)
