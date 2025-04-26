@@ -166,4 +166,10 @@ def get_config(args):
         dbms = "mysql" # MariaDB is a fork of MySQL, so we use the same module.
     config["sqlab_dbms_module"] = dbms
 
+    # If the relational schema is provided as a SVG file, add its code as text
+    path = Path(config.get("relational_schema_path", ""))
+    print(path.absolute())
+    if path.is_file():
+        config["info"]["relational_schema"] = path.read_text(encoding="utf-8")
+
     return config

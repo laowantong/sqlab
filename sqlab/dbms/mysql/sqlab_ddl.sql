@@ -13,6 +13,6 @@ CREATE TABLE sqlab_msg (
 DROP TABLE IF EXISTS sqlab_info;
 CREATE TABLE sqlab_info (
   name varchar(64) NOT NULL,
-  value varchar(1024) NOT NULL,
+  value text NOT NULL,
   PRIMARY KEY (name)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
