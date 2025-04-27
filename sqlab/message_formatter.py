@@ -1,8 +1,12 @@
 from copy import deepcopy
 import json
 from .text_tools import TextWrapper, improved_html, improved_text
+from html import escape
+import re
 
 def create_message_formatter(config: dict) -> callable:
+
+    strings = config["strings"]
 
     def create_json_formatter() -> callable:
         return lambda data: json.dumps(data, ensure_ascii=False, indent=2)
@@ -10,24 +14,119 @@ def create_message_formatter(config: dict) -> callable:
 
     def create_html_formatter() -> callable:
 
-        def data_to_html(data, level=0):
-            indent = '  ' * level
-            if isinstance(data, dict):
-                return '\n'.join(
-                    f'{indent}<div class="{key}">\n{data_to_html(value, level + 1)}\n{indent}</div>'
-                    for key, value in data.items()
-                )
-            elif isinstance(data, list):
-                return '\n'.join(data_to_html(item, level) for item in data)
-            elif isinstance(data, str):
-                return improved_html(data)
-            else:
-                return str(data)
+        sub_indent = re.compile(r"(?m)^\s+(?=<)").sub
+        preamble_accepted = escape(strings["preamble_accepted_without_token"])
+
+        def format_text(text: str) -> str:
+            if not text:
+                return ""
+            text = text.replace("<br>", "")
+            text = "\n".join(f"<p>{escape(line.strip())}</p>" for line in text.splitlines())
+            return text.replace("<p></p>", "<br>")
+
+        def format_formula(d):
+            if "formula" not in d:
+                d["formula"] = ""
+                return
+            tweak = d['formula'].get("tweak", "")
+            code = d["formula"].get("code", "")
+            d["formula"] = f'''
+                <div class="formula">
+                    <div class="tweak">{escape(tweak)}</div>
+                    <div class="code">{escape(code)}</div>
+                </div>
+            '''
         
+        def format_solutions(d):
+            if "solutions" not in d:
+                d["solutions"] = ""
+                return
+            acc = ['<div class="solutions">']
+            for x in d["solutions"]:
+                if "solution" in x:
+                    acc.append('<div class="solution">')
+                    if preamble := x["solution"].get("preamble"):
+                        acc.append(f'<div class="intro">{format_text(preamble)}</div>')
+                    acc.append(f'<pre class="query">{escape(x["solution"]["query"])}</pre>')
+                    acc.append('</div>')
+                elif "annotation" in x:
+                    acc.append(f'<div class="annotation">{format_text(x["annotation"])}</div>')
+            acc.append('</div>')
+            d["solutions"] = "\n".join(acc)
+
+        def data_to_html(data):
+            if "hint" in data:
+                d = deepcopy(data["hint"])
+                html = f'''
+                    <div class="hint">
+                        <div class="label">{escape(d["label"])}</div>
+                        <div class="counter">{d["counter"]}</div>
+                        <div class="preamble">{escape(d["preamble"])}</div>
+                        <div class="text">
+                            {format_text(d["text"])}
+                        </div>
+                    </div>
+                '''
+            elif "exercise_statement" in data:
+                d = deepcopy(data["exercise_statement"])
+                format_formula(d)
+                html = f'''
+                    <div class="exercise-statement">
+                        <div class="label">{escape(d["label"])}</div>
+                        <div class="counter">{d["counter"]}</div>
+                        <div class="text">
+                            {format_text(d["statement"])}
+                        </div>
+                        {d["formula"]}
+                    </div>
+                '''
+            elif "exercise_correction" in data:
+                d = deepcopy(data["exercise_correction"])
+                format_solutions(d)
+                html = f'''
+                    <div class="exercise-correction">
+                        <div class="label">{escape(d["label"])}</div>
+                        <div class="counter">{d["counter"]}</div>
+                        <div class="preamble">{preamble_accepted}</div>
+                        {d["solutions"]}
+                    </div>
+                '''
+            elif "episode" in data:
+                d = deepcopy(data["episode"])
+                format_solutions(d)
+                format_formula(d)
+                html = f'''
+                    <div class="episode-statement">
+                        <div class="label">{escape(d["label"])}</div>
+                        <div class="counter">{d["counter"]}</div>
+                        <div class="text">
+                            {format_text(d["context"])}
+                        </div>
+                        <div class="statement">
+                            <div class="label">{escape(d["statement_label"])}</div>
+                            <div class="text">
+                                {format_text(d["statement"])}
+                            </div>
+                        </div>
+                        {d["formula"]}
+                    </div>
+                    <div class="episode-correction">
+                        <div class="label">{escape(d["label"])}</div>
+                        <div class="counter">{d["counter"]}</div>
+                        <div class="preamble">{preamble_accepted}</div>
+                        {d["solutions"]}
+                    </div>
+                '''
+            html = improved_html(html)
+            html = sub_indent("", html)
+            return html
+
         return data_to_html
 
 
     def create_text_formatter() -> callable:
+
+        preamble_accepted = strings["preamble_accepted"]
         
         def format_formula(d):
             if "formula" not in d:
@@ -45,8 +144,8 @@ def create_message_formatter(config: dict) -> callable:
             acc.append(hr)
             for x in d["solutions"]:
                 if "solution" in x:
-                    if x["solution"]["preamble"]:
-                        acc.append(x["solution"]["preamble"])
+                    if preamble := x["solution"].get("preamble"):
+                        acc.append(preamble)
                     acc.append(x["solution"]["query"])
                 else:
                     acc.append(x["annotation"])
@@ -56,7 +155,7 @@ def create_message_formatter(config: dict) -> callable:
         def data_to_text(data):
             if "hint" in data:
                 d = deepcopy(data["hint"])
-                template = "🟠 {counter}. {preamble}\n\n➥ {text}"
+                template = "🟠 **{label} {counter}**. {preamble}\n\n➥ {text}"
             elif "exercise_statement" in data:
                 d = deepcopy(data["exercise_statement"])
                 format_formula(d)
@@ -64,13 +163,15 @@ def create_message_formatter(config: dict) -> callable:
             elif "exercise_correction" in data:
                 d = deepcopy(data["exercise_correction"])
                 format_solutions(d)
-                template = "🟢 {counter}. {preamble}{solutions}\n"
+                d["preamble"] = preamble_accepted.format(token=d["token"])
+                template = "🟢 **{label} {counter}**. {preamble}{solutions}\n"
             elif "episode" in data:
                 d = deepcopy(data["episode"])
                 format_solutions(d)
                 format_formula(d)
                 d["emoji"] = "🟢" if d["counter"] > 1 else "⚪️"
-                template = "{emoji} {counter}. {preamble}{solutions}\n\n{context}\n\n**{statement_label}**. {statement}\n\n{formula}\n"
+                d["preamble"] = preamble_accepted.format(token=d["token"])
+                template = "{emoji} **{label} {counter}**. {preamble}{solutions}\n\n{context}\n\n**{statement_label}**. {statement}\n\n{formula}\n"
             text = template.format_map(d)
             text = improved_text(text)
             text = wrap_text(text)

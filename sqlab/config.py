@@ -55,6 +55,7 @@ defaults = { # Not a JSON object because it contains comments and Python lambda 
         "action_label": "Action",
         "preamble_adventure": "Welcome!",
         "preamble_accepted": "Your query yields the correct token ({token}), congratulations! Please note the official correction:",
+        "preamble_accepted_without_token": "Your query is accepted, congratulations! Please note the official correction:",
         "preamble_rejected": "You are not far from the expected result.",
         "preamble_default": "🔴 No specific message is planned for this token. Possible reasons:\n1. Copy-paste accident (double-click on the token to facilitate selection).\n2. Formula for calculating the token not updated.\n3. (0) still present, or replaced by the wrong value.\n4. New logical error. Congratulations on your creativity! Now read the statement carefully and, if the symptoms persist, ask your teacher.",
         "close_dialog": "If you see this window, press Esc without touching anything else.",
@@ -74,6 +75,7 @@ defaults = { # Not a JSON object because it contains comments and Python lambda 
         "action_label": "Action",
         "preamble_adventure": "Bienvenue !",
         "preamble_accepted": "Votre requête produit le bon token ({token}), bravo ! Notez la correction officielle :",
+        "preamble_accepted_without_token": "Votre requête est acceptée, bravo ! Notez la correction officielle :",
         "preamble_rejected": "Vous n'êtes pas loin du résultat attendu.",
         "preamble_default": "🔴 Aucun message spécifique n’est prévu pour ce token.\nRaisons possibles :\n1. Accident de copier-coller (double-cliquez sur le token pour en faciliter la sélection).\n2. Formule de calcul du token non mise à jour.\n3. (0) toujours présent, ou remplacé par la mauvaise valeur.\n4. Erreur logique inédite. Bravo pour votre créativité ! Maintenant relisez attentivement l’énoncé et, si les symptômes persistent, consultez votre enseignant.",
         "close_dialog": "Si vous voyez cette fenêtre, appuyez sur Esc sans rien toucher d'autre.",
@@ -118,7 +120,11 @@ def get_config(args):
 
     validate_config(config)
 
-    config["markdown_to"] = args.markdown_to
+    config["markdown_to"] = "text"
+    if args.html:
+        config["markdown_to"] = "html"
+    elif args.json:
+        config["markdown_to"] = "json"
 
     # Create a entry "strings" with the appropriate language, defaulting to English.
     config["strings"] = config.get(f"strings_{config['language']}", config[f"strings_en"])

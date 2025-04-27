@@ -40,11 +40,10 @@ def main():
     parser.add_argument("-p", "--password", help="MySQL password")
 
     parser.add_argument(
-        "-m",
-        "--markdown_to",
-        choices=["html", "text", "json"],
-        default="text",
-        help="Format of the generated messages. Default: text.",
+        "--html", action="store_true", help="With 'create', generate messages in HTML format."
+    )
+    parser.add_argument(
+        "--json", action="store_true", help="With 'create', generate messages in JSON format."
     )
 
     args = parser.parse_args()

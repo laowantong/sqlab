@@ -44,7 +44,7 @@ class MessageBuilder:
             else:
                 acc.append({
                     "solution": {
-                        "preamble": solution.get("solution_preamble", ""),
+                        "intro": solution.get("intro", ""),
                         "query": solution["query"],
                     }
                 })
@@ -78,6 +78,7 @@ class MessageBuilder:
                 self.log.write(f"    Hint ({entry_token}): {repr(record['text'][:100])}\n")
                 self.rows[entry_token] = {
                     "hint": {
+                        "label": task_label,  # defined on a previous iteration
                         "counter": counter,  # defined on a previous iteration
                         "preamble": self.strings["preamble_rejected"],
                         "text": record["text"]
@@ -89,6 +90,7 @@ class MessageBuilder:
             formula = self.compose_formula(record)
 
             if record["kind"] == "episode":
+                task_label = self.strings["episode_label"]
                 self.log.write(f"  Question {counter} ({entry_token}): {repr(record['statement'][:100])}\n")
                 current_token = self.get_first_token_from_solutions(record["solutions"])
                 if current_token: # All episodes should have at least one solution, except for the last one
@@ -102,8 +104,9 @@ class MessageBuilder:
                                 solutions_by_token[current_token].append(solution)
                 self.rows[entry_token] = {
                     "episode": {
+                        "label": task_label,
                         "counter": counter,
-                        "preamble": self.strings["preamble_adventure"] if counter == 1 else self.strings["preamble_accepted"].format(token=entry_token),
+                        "token": entry_token,
                         **self.compose_solutions(solutions_by_token[entry_token]),
                         "context": record["context"],
                         "statement_label": self.strings["statement_label"],
@@ -114,12 +117,13 @@ class MessageBuilder:
             
             else:
                 assert record["kind"] == "exercise", f"{FAIL}Unexpected kind: {record['kind']}.{RESET}"
+                task_label = self.strings["exercise_label"]
 
                 self.log.write(f"Exercise {counter} ({entry_token}): {repr(record['statement'][:100])}\n")
                 self.rows[entry_token] = {
                     "exercise_statement": {
+                        "label": task_label,
                         "counter": counter,
-                        "label": self.strings["exercise_label"],
                         "statement": record["statement"],
                         **formula,
                     }
@@ -127,8 +131,9 @@ class MessageBuilder:
 
                 exercise_correction = {
                     "exercise_correction": {
+                        "label": task_label,
                         "counter": counter,
-                        "preamble": self.strings["preamble_accepted"].format(token=entry_token),
+                        "token": entry_token,
                         **self.compose_solutions(record["solutions"]),
                     }
                 }
@@ -230,8 +235,8 @@ class MessageBuilder:
                 if isinstance(solution, str):
                     result.append(f"{solution}\n")
                 else:
-                    if solution_preamble := solution.get("solution_preamble"):
-                        result.append(f"{solution_preamble}\n")
+                    if intro := solution.get("intro"):
+                        result.append(f"{intro}\n")
                     result.append(f"```sql\n{solution['query']}\n```\n")
         if result:
             result.insert(0, f"# Cheat sheet\n")
