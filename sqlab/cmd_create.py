@@ -158,7 +158,11 @@ def run(config: dict):
     if messages:
         format_message = create_message_formatter(config)
         for (token, data) in messages.items():
-            messages[token] = format_message(data)
+            messages[token] = format_message(data)        
+        # Path(f"messages.{config['markdown_to']}").write_text(
+        #     "\n".join(f"[{token}]\n\n{message}\n\n" for (token, message) in messages.items()),
+        #     encoding="utf-8",
+        # )
         message_inserts = compose_message_inserts(db, messages.items())
         sql_dump.write(message_inserts)
         db.execute_non_select(message_inserts)

@@ -101,7 +101,7 @@ class NotebookParser:
                     segment["section"] = "\n".join(section_buffer)
                     section_buffer.clear()
                 if kind == "episode":
-                    segment["context"] = text
+                    segment["context"] = text.strip()
                 segment["statement"] = "" if kind == "episode" else text
                 segment["salt"] = salt
                 segment["formula"] = None  # to be filled on a later iteration

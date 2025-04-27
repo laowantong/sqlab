@@ -74,7 +74,6 @@ def create_message_formatter(config: dict) -> callable:
             text = template.format_map(d)
             text = improved_text(text)
             text = wrap_text(text)
-            text = text.replace(" ", " ") # Remove non-breaking spaces to prevent a round-trip error
             return text
 
         wrap_text = TextWrapper(config)

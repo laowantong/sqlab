@@ -45,7 +45,7 @@ class MessageBuilder:
                 acc.append({
                     "solution": {
                         "preamble": solution.get("solution_preamble", ""),
-                        "query": solution["query"]
+                        "query": solution["query"],
                     }
                 })
         return {"solutions": acc}

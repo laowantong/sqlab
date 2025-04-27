@@ -12,17 +12,13 @@ RESET = "\033[0m"
 sub_mono = re.compile(r"`(.+?)`").sub
 sub_italic = re.compile(r"(?<!\w)_(.+?)_(?!\w)").sub
 sub_bold = re.compile(r"\*\*(.+?)\*\*").sub
-sub_code_block = re.compile(r'(?sm)^```(\w+?)\n(.*?)```').sub
+sub_code_block = re.compile(r'(?sm)^```(\w+?)\n(.*?)```\n').sub
 sub_list = re.compile(r"(?m)((?:^- .*\n)+)").sub
 sub_item = re.compile(r"(?m)^- (.+)").sub
 sub_br = re.compile(r"<br>\n?").sub
 
 def improved_html(s: str) -> str:
     s = s.strip()
-    # s = s.replace("&", "&amp;")
-    # s = s.replace("<", "&lt;")
-    # s = s.replace(">", "&gt;")
-    s = s.replace("\n", "<br>")
     s = s.replace("\u00A0", "&nbsp;")
     s = sub_mono(r"<code>\1</code>", s)
     s = sub_italic(r"<em>\1</em>", s)
@@ -82,7 +78,6 @@ class TextWrapper:
 
     def __call__(self, text: str, prefix: str = "") -> str:
         """Wraps the given text to the column width."""
-        text = text.replace("\\n", "\n")
         wrapped_lines = []
         for line in text.splitlines():
             wrapped_line = textwrap.wrap(
