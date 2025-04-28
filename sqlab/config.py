@@ -120,11 +120,13 @@ def get_config(args):
 
     validate_config(config)
 
-    config["markdown_to"] = "text"
-    if args.html:
-        config["markdown_to"] = "html"
+    config["markdown_to"] = "txt"
+    if args.web:
+        config["markdown_to"] = "web"
+        config["sql_dump_path"] = config["sql_dump_path"].replace(".sql", "_web.sql")
     elif args.json:
         config["markdown_to"] = "json"
+        config["sql_dump_path"] = config["sql_dump_path"].replace(".sql", "_json.sql")
 
     # Create a entry "strings" with the appropriate language, defaulting to English.
     config["strings"] = config.get(f"strings_{config['language']}", config[f"strings_en"])

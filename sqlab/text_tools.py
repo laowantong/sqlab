@@ -9,7 +9,7 @@ WARNING = "\033[1m\033[38;5;166m"
 FAIL = "\033[1m\033[91m"
 RESET = "\033[0m"
 
-sub_mono = re.compile(r"`(.+?)`").sub
+sub_mono = re.compile(r"`([^`\n]+)`").sub
 sub_italic = re.compile(r"(?<!\w)_(.+?)_(?!\w)").sub
 sub_bold = re.compile(r"\*\*(.+?)\*\*").sub
 sub_code_block = re.compile(r'(?sm)^```(\w+?)\n(.*?)```\n').sub
@@ -23,7 +23,7 @@ def improved_html(s: str) -> str:
     s = sub_mono(r"<code>\1</code>", s)
     s = sub_italic(r"<em>\1</em>", s)
     s = sub_bold(r"<strong>\1</strong>", s)
-    s = sub_code_block(r"<pre><code>\2</code></pre>", s)
+    s = sub_code_block(r"<pre><code class='\1'>\2</code></pre>\n", s)
     s = sub_list(r"<ul>\1</ul>", s)
     s = sub_item(r"  <li>\1</li>", s)
     return s

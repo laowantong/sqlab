@@ -160,8 +160,8 @@ def run(config: dict):
         for (token, data) in messages.items():
             messages[token] = format_message(data)
         
-        # Uncomment the next 4 lines to debug the output
-        # Path(f"messages.{config['markdown_to']}").write_text(
+        # Uncomment the next 4 lines to help debugging the output
+        # Path(f"../messages.{config['markdown_to']}").write_text(
         #     "\n".join(f"[{token}]\n\n{message}\n\n" for (token, message) in messages.items()),
         #     encoding="utf-8",
         # )
