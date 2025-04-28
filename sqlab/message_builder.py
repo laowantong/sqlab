@@ -1,50 +1,54 @@
 import json
 from collections import defaultdict
-import re
 
-from .text_tools import TextWrapper, transform_markdown, join_non_empty, WARNING, RESET, OK, FAIL
+from .text_tools import WARNING, RESET, OK, FAIL
 
 
-class MessageGenerator:
+class MessageBuilder:
+
     def __init__(self, config):
-        self.wrap_text = TextWrapper(config)
         self.strings = config["strings"]
-        self.column_width = config.get("column_width") or 100
-        self.hr = "-" * self.column_width
         if "log_path" in config:
             log_path = config["log_path"]
             log_path.unlink(missing_ok=True)
             self.log = log_path.open("a", encoding="utf-8")
             print(f"Logging messages to '{log_path}'...")
         else:
-            self.log = lambda _: None
-    
-    def format_text(self, text):
-        text = transform_markdown(text, self.column_width)
-        text = self.wrap_text(text)
-        return text
+            class NullLog:
+                def write(self, _): pass
+                def close(self): pass
+            self.log = NullLog()
 
     def compose_formula(self, record):
         if not record.get("formula"):
-            return ""
+            return {}
         if tweak := record.get("tweak", ""):
-            tweak = f" ({self.strings['tweak_instruction'].format(repl=tweak)})"
-        title = self.format_text(f"**{self.strings['formula_label']}**{tweak}.")
-        return f"{title}\n-- , {record['formula']}"
+            tweak = self.strings['tweak_instruction'].format(repl=tweak)
+        return {
+            "formula": {
+                "label": self.strings['formula_label'],
+                "tweak": tweak,
+                "code": record["formula"],
+            }
+        }
     
     def compose_solutions(self, solutions):
         if not solutions:
-            return ""
-        result = [self.hr]
+            return {}
+        acc = []
         for solution in solutions:
             if isinstance(solution, str):
-                result.append(self.format_text(solution))
+                acc.append({
+                    "annotation": solution
+                })
             else:
-                if solution_preamble := solution.get("solution_preamble"):
-                    result.append(self.format_text(solution_preamble))
-                result.append(solution["query"])
-        result.append(self.hr)
-        return "\n\n".join(result)
+                acc.append({
+                    "solution": {
+                        "intro": solution.get("intro", ""),
+                        "query": solution["query"],
+                    }
+                })
+        return {"solutions": acc}
     
     @staticmethod
     def actual_solutions(solutions):
@@ -56,12 +60,11 @@ class MessageGenerator:
 
     @staticmethod
     def get_first_token_from_solutions(solutions):
-        for solution in MessageGenerator.actual_solutions(solutions):
+        for solution in MessageBuilder.actual_solutions(solutions):
             return solution["token"]
 
     def run(self, records):
         self.rows = {}
-        context = ""
         solutions_by_token = defaultdict(list)
         for (entry_token, record) in records.items():
 
@@ -73,49 +76,77 @@ class MessageGenerator:
 
             if record["kind"] == "hint":
                 self.log.write(f"    Hint ({entry_token}): {repr(record['text'][:100])}\n")
-                preamble = f"🟠 {counter}. {self.strings['preamble_rejected']}"
-                hint = self.format_text("➥ " + record["text"])
-                self.rows[entry_token] = join_non_empty(preamble, hint)
+                self.rows[entry_token] = (
+                    "hint",
+                    {
+                        "label": task_label,  # defined on a previous iteration
+                        "counter": counter,  # defined on a previous iteration
+                        "preamble": self.strings["preamble_rejected"],
+                        "text": record["text"]
+                    }
+                )
                 continue
 
             counter = record["counter"]
             formula = self.compose_formula(record)
 
             if record["kind"] == "episode":
+                task_label = self.strings["episode_label"]
                 self.log.write(f"  Question {counter} ({entry_token}): {repr(record['statement'][:100])}\n")
-                if counter == 1:
-                    preamble = f"⚪️ {counter}. {self.strings['preamble_adventure']}"
-                else:
-                    preamble = f"🟢 {counter}. {self.strings['preamble_accepted'].format(token=entry_token)}"
                 current_token = self.get_first_token_from_solutions(record["solutions"])
                 if current_token: # All episodes should have at least one solution, except for the last one
                     for solution in record["solutions"]:
                         if isinstance(solution, str): # an annotation
-                            solutions_by_token[current_token].append(self.format_text(solution))
+                            solutions_by_token[current_token].append(solution)
                         else:
                             current_token = solution["token"]
                             # When the same episode has several entries, avoid duplicating its solutions
                             if solution["query"] not in solutions_by_token[current_token]:
                                 solutions_by_token[current_token].append(solution)
-                solutions = self.compose_solutions(solutions_by_token[entry_token])
-                context = self.format_text(record["context"])
-                statement = self.format_text(f"**{self.strings['statement_label']}**. {record['statement']}")
-                self.rows[entry_token] = join_non_empty(preamble, solutions, context, statement, formula)
-
+                self.rows[entry_token] = (
+                    "episode",
+                    {
+                        "label": task_label,
+                        "counter": counter,
+                        "token": entry_token,
+                        **self.compose_solutions(solutions_by_token[entry_token]),
+                        "context": record["context"],
+                        "statement_label": self.strings["statement_label"],
+                        "statement": record["statement"],
+                        **formula,
+                    }
+                )
+            
             else:
                 assert record["kind"] == "exercise", f"{FAIL}Unexpected kind: {record['kind']}.{RESET}"
+                task_label = self.strings["exercise_label"]
 
                 self.log.write(f"Exercise {counter} ({entry_token}): {repr(record['statement'][:100])}\n")
-                statement = self.format_text(f"⚪️ **{self.strings['exercise_label']} {counter}**. {record['statement']}")
-                self.rows[entry_token] = join_non_empty(statement, formula)
-                preamble = f"🟢 {counter}. {self.strings['preamble_accepted'].format(token=entry_token)}"
-                plain_text = join_non_empty(preamble, self.compose_solutions(record["solutions"]))
+                self.rows[entry_token] = (
+                    "exercise_statement",
+                    {
+                        "label": task_label,
+                        "counter": counter,
+                        "statement": record["statement"],
+                        **formula,
+                    }
+                )
+
+                exercise_correction = (
+                    "exercise_correction",
+                    {
+                        "label": task_label,
+                        "counter": counter,
+                        "token": entry_token,
+                        **self.compose_solutions(record["solutions"]),
+                    }
+                )
                 for solution in self.actual_solutions(record["solutions"]):
                     next_token = solution["token"]
                     if next_token in self.rows: # An output token already registered
                         continue
                     # A first solution or a variant with a distinct output token
-                    self.rows[next_token] = plain_text
+                    self.rows[next_token] = exercise_correction
 
         for (alias, token) in records.items():
             if isinstance(token, str):
@@ -124,8 +155,7 @@ class MessageGenerator:
         for token in solutions_by_token.keys():
             assert token in self.rows, f"{FAIL}Missing output token: {token}. Check that the adventure's last episode has no query.{RESET}"
 
-        markup = OK if self.rows else WARNING
-        print(f"{markup}{len(self.rows)} messages generated.{RESET}")
+        print(f"{OK if self.rows else WARNING}{len(self.rows)} messages generated.{RESET}")
         self.log.close()
         return self.rows
 
@@ -209,8 +239,8 @@ class MessageGenerator:
                 if isinstance(solution, str):
                     result.append(f"{solution}\n")
                 else:
-                    if solution_preamble := solution.get("solution_preamble"):
-                        result.append(f"{solution_preamble}\n")
+                    if intro := solution.get("intro"):
+                        result.append(f"{intro}\n")
                     result.append(f"```sql\n{solution['query']}\n```\n")
         if result:
             result.insert(0, f"# Cheat sheet\n")

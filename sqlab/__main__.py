@@ -39,6 +39,13 @@ def main():
 
     parser.add_argument("-p", "--password", help="MySQL password")
 
+    parser.add_argument(
+        "--web", action="store_true", help="With 'create', generate messages for SQLab online."
+    )
+    parser.add_argument(
+        "--json", action="store_true", help="With 'create', generate messages in JSON format for debugging purposes."
+    )
+
     args = parser.parse_args()
     module = importlib.import_module(f".cmd_{args.CMD}", package="sqlab")
     config = get_config(args)

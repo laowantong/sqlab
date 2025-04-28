@@ -101,7 +101,7 @@ class NotebookParser:
                     segment["section"] = "\n".join(section_buffer)
                     section_buffer.clear()
                 if kind == "episode":
-                    segment["context"] = text
+                    segment["context"] = text.strip()
                 segment["statement"] = "" if kind == "episode" else text
                 segment["salt"] = salt
                 segment["formula"] = None  # to be filled on a later iteration
@@ -176,14 +176,14 @@ class NotebookParser:
                     if label:
                         text = f"{label}. {text}"
                     solution = {
-                        "solution_preamble": text, # a "sticky" annotation, useful for a variant with a different token
+                        "intro": text, # a "sticky" annotation, useful for a variant with a different token
                         "query": query,
                         "result_head": self.extract_result_head(cell),
                         "next_salt": next_salt,
                         "token": token
                     }
                     if not text:
-                        solution.pop("solution_preamble")
+                        solution.pop("intro")
                     segments[-1]["solutions"].append(solution)
 
         # The segments are now complete, we can resolve the associations between salts and tokens.
