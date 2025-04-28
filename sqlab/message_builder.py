@@ -76,14 +76,15 @@ class MessageBuilder:
 
             if record["kind"] == "hint":
                 self.log.write(f"    Hint ({entry_token}): {repr(record['text'][:100])}\n")
-                self.rows[entry_token] = {
-                    "hint": {
+                self.rows[entry_token] = (
+                    "hint",
+                    {
                         "label": task_label,  # defined on a previous iteration
                         "counter": counter,  # defined on a previous iteration
                         "preamble": self.strings["preamble_rejected"],
                         "text": record["text"]
                     }
-                }
+                )
                 continue
 
             counter = record["counter"]
@@ -102,8 +103,9 @@ class MessageBuilder:
                             # When the same episode has several entries, avoid duplicating its solutions
                             if solution["query"] not in solutions_by_token[current_token]:
                                 solutions_by_token[current_token].append(solution)
-                self.rows[entry_token] = {
-                    "episode": {
+                self.rows[entry_token] = (
+                    "episode",
+                    {
                         "label": task_label,
                         "counter": counter,
                         "token": entry_token,
@@ -113,30 +115,32 @@ class MessageBuilder:
                         "statement": record["statement"],
                         **formula,
                     }
-                }
+                )
             
             else:
                 assert record["kind"] == "exercise", f"{FAIL}Unexpected kind: {record['kind']}.{RESET}"
                 task_label = self.strings["exercise_label"]
 
                 self.log.write(f"Exercise {counter} ({entry_token}): {repr(record['statement'][:100])}\n")
-                self.rows[entry_token] = {
-                    "exercise_statement": {
+                self.rows[entry_token] = (
+                    "exercise_statement",
+                    {
                         "label": task_label,
                         "counter": counter,
                         "statement": record["statement"],
                         **formula,
                     }
-                }
+                )
 
-                exercise_correction = {
-                    "exercise_correction": {
+                exercise_correction = (
+                    "exercise_correction",
+                    {
                         "label": task_label,
                         "counter": counter,
                         "token": entry_token,
                         **self.compose_solutions(record["solutions"]),
                     }
-                }
+                )
                 for solution in self.actual_solutions(record["solutions"]):
                     next_token = solution["token"]
                     if next_token in self.rows: # An output token already registered
