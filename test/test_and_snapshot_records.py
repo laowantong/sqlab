@@ -16,7 +16,7 @@ config = {
     "activity_map_gv_path": Path("test/snapshots/activity_map.gv"),
     "activity_map_pdf_path": Path("test/snapshots/activity_map.pdf"),
     "activity_map_svg_path": Path("test/snapshots/activity_map.svg"),
-    "markdown_to": "text",
+    "markdown_to": "txt",
     "strings": {
         "exercise_label": "Exercise",
         "statement_label": "Statement",

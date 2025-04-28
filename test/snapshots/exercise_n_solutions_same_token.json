@@ -17,7 +17,7 @@
         "token": "4547"
       },
       {
-        "solution_preamble": "Variant. ",
+        "intro": "Variant. ",
         "query": "SELECT bar",
         "result_head": "",
         "token": "4547"
