@@ -1,6 +1,7 @@
 import getpass
 import importlib
 import os
+import re
 import pydoc
 from pathlib import Path
 import configparser
@@ -176,10 +177,12 @@ def get_config(args):
         dbms = "mysql" # MariaDB is a fork of MySQL, so we use the same module.
     config["sqlab_dbms_module"] = dbms
 
-    # If the relational schema is provided as a SVG file, add its code as text
-    path = Path(config.get("relational_schema_path", ""))
-    print(path.absolute())
-    if path.is_file():
-        config["info"]["relational_schema"] = path.read_text(encoding="utf-8")
-
+    # If the relational schema is provided as SVG files, add their code as text
+    rex = re.compile(r'fill="\w+"')
+    for suffix in ("", "_dark"):
+        path = Path(str(config.get("relational_schema_path", ""))[:-4] + f"{suffix}.svg")
+        if path.is_file():
+            svg_source = path.read_text(encoding="utf-8")
+            svg_source = rex.sub(svg_source, 'fill="none"', 1)
+            config["info"][f"relational_schema{suffix}"] = svg_source
     return config
