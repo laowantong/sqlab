@@ -52,7 +52,10 @@ class AbstractDatabase:
     def execute_select(self, query_text: str) -> tuple[list[str], list[str], list[tuple]]:
         """Execute the given query and return the headers, datatypes and rows of the result."""
         cursor = self.cnx.cursor()
-        cursor.execute(query_text)
+        try:
+            cursor.execute(query_text)
+        except Exception as e:
+            raise RuntimeError(f"Error executing query: {query_text}") from e
         rows = cursor.fetchall()
         headers = [desc[0] for desc in cursor.description]
         datatypes = [desc[1] for desc in cursor.description]

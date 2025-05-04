@@ -57,11 +57,12 @@ class Database(AbstractDatabase):
         return [row[0] for row in cursor.fetchall()]
 
     def encrypt(self, clear_text, token):
-        query = f"SELECT encode(sha256({token}), 'hex') || encode(brotli({repr(clear_text)}), 'hex');"
+        escaped_text = clear_text.replace("'", "''")
+        query = f"SELECT encode(sha256({token}), 'hex') || encode(brotli('{escaped_text}'), 'hex');"
         return repr(self.execute_select(query)[2][0][0])
     
     def decrypt(self, encrypted, token):
-        query = f"SELECT replace(cast(brotli_decode(decode({repr(encrypted[65:-1])}, 'hex')) as text), '\\n', x'0A')"
+        query = f"SELECT replace(cast(brotli_decode(decode({repr(encrypted[65:-1])}, 'hex')) as text), '\\\n', x'0A')"
         return self.execute_select(query)[2][0][0]
     
     def execute_non_select(self, queries):
