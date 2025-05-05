@@ -24,13 +24,17 @@ class MessageBuilder:
             return {}
         if tweak := record.get("tweak", ""):
             tweak = self.strings['tweak_instruction'].format(repl=tweak)
-        return {
+        result =  {
             "formula": {
                 "label": self.strings['formula_label'],
                 "tweak": tweak,
                 "code": record["formula"],
             }
         }
+        for (key, value) in record.items():
+            if key.startswith("tweak_"):
+                result["formula"][key] = value
+        return result
     
     def compose_solutions(self, solutions):
         if not solutions:

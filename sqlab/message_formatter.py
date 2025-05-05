@@ -137,7 +137,7 @@ def create_message_formatter(config: dict) -> callable:
                 d = {}
                 d["code"] = data["formula"]["code"]
                 if data["formula"]["tweak"]:
-                    d["tweak"] = data["formula"]["tweak"]
+                    d["tweak"] = data["formula"].get("tweak_javascript", "TODO")
                 web["formula"] = d
             return json.dumps(web, ensure_ascii=False, indent=2)
 

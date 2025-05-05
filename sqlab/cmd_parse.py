@@ -135,7 +135,11 @@ class NotebookParser:
                 if m := re.match(r"x *= *.+ *# *(.+)", source[0]):
                     assert segments, f"{FAIL}A tweak must be preceded by an exercise or an episode.\n{source}.{RESET}"
                     assert not segments[-1]["tweak"], f"{FAIL}{segments[-1]['kind']} [{segments[-1]['salt']}] already has a tweak.\n{source}.{RESET}"
-                    segments[-1]["tweak"] = segments[-1]["tweak"] or m[1] # store the first tweak as the default one
+                    if not segments[-1]["tweak"]:
+                        segments[-1]["tweak"] = m[1] # store the first tweak as the default one
+                        for line in source[1:]: # add the non-natural language tweaks
+                            if m := re.match(r"# (\w+): (.+)", line):
+                                segments[-1][f"tweak_{m[1].lower()}"] = m[2].strip()
 
                 # Ignore all the cells that do not start with the magic command %%sql.
                 if not source[0].startswith("%%sql"):
