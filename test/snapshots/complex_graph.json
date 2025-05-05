@@ -1,12 +1,8 @@
 {
-  "info": {
-    "adventure_count": 2,
-    "episode_count": 7,
-    "exercise_count": 0
-  },
   "001": {
+    "part_number": 1,
     "kind": "episode",
-    "counter": 1,
+    "task_number": 1,
     "context": "First episode of one adventure",
     "statement": "how 001?",
     "salt": "001",
@@ -37,12 +33,12 @@
         "result_head": "",
         "token": "1002"
       }
-    ],
-    "adventure": 1
+    ]
   },
   "1002": {
+    "part_number": 1,
     "kind": "episode",
-    "counter": 2,
+    "task_number": 2,
     "context": "blah blah",
     "statement": "how 002?",
     "salt": "002",
@@ -63,12 +59,12 @@
         "result_head": "",
         "token": "1003"
       }
-    ],
-    "adventure": 1
+    ]
   },
   "2002": {
+    "part_number": 1,
     "kind": "episode",
-    "counter": 2,
+    "task_number": 2,
     "context": "blah blah",
     "statement": "how 002?",
     "salt": "002",
@@ -89,12 +85,12 @@
         "result_head": "",
         "token": "1003"
       }
-    ],
-    "adventure": 1
+    ]
   },
   "1003": {
+    "part_number": 1,
     "kind": "episode",
-    "counter": 3,
+    "task_number": 3,
     "context": "blah blah",
     "statement": "how 003?",
     "salt": "003",
@@ -105,12 +101,12 @@
         "result_head": "",
         "token": "1004"
       }
-    ],
-    "adventure": 1
+    ]
   },
   "2003": {
+    "part_number": 1,
     "kind": "episode",
-    "counter": 3,
+    "task_number": 3,
     "context": "blah blah",
     "statement": "how 003?",
     "salt": "003",
@@ -121,42 +117,42 @@
         "result_head": "",
         "token": "1004"
       }
-    ],
-    "adventure": 1
+    ]
   },
   "0102": {
     "kind": "hint",
-    "counter": 3,
+    "task_number": 3,
     "text": "Wrong",
     "query": "SELECT r0102, salt_003 as token"
   },
   "0202": {
     "kind": "hint",
-    "counter": 3,
+    "task_number": 3,
     "text": "Bad",
     "query": "SELECT r0202, salt_003 as token"
   },
   "1004": {
+    "part_number": 1,
     "kind": "episode",
-    "counter": 4,
+    "task_number": 4,
     "context": "End of one adventure",
     "statement": "no question asked!",
     "salt": "004",
-    "solutions": [],
-    "adventure": 1
+    "solutions": []
   },
   "2004": {
+    "part_number": 1,
     "kind": "episode",
-    "counter": 4,
+    "task_number": 4,
     "context": "End of one adventure",
     "statement": "no question asked!",
     "salt": "004",
-    "solutions": [],
-    "adventure": 1
+    "solutions": []
   },
   "011": {
+    "part_number": 2,
     "kind": "episode",
-    "counter": 1,
+    "task_number": 1,
     "context": "First episode of another adventure",
     "statement": "how?",
     "salt": "011",
@@ -172,25 +168,24 @@
         "result_head": "",
         "token": "1013"
       }
-    ],
-    "adventure": 2
+    ]
   },
   "1012": {
+    "part_number": 2,
     "kind": "episode",
-    "counter": 2,
+    "task_number": 2,
     "context": "End of another adventure",
     "statement": "no question asked either!",
     "salt": "012",
-    "solutions": [],
-    "adventure": 2
+    "solutions": []
   },
   "1013": {
+    "part_number": 2,
     "kind": "episode",
-    "counter": 3,
+    "task_number": 3,
     "context": "Alternative end of another adventure",
     "statement": "no question asked either!",
     "salt": "013",
-    "solutions": [],
-    "adventure": 2
+    "solutions": []
   }
 }

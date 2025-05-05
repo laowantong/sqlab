@@ -1,12 +1,8 @@
 {
-  "info": {
-    "adventure_count": 0,
-    "episode_count": 0,
-    "exercise_count": 1
-  },
   "042": {
+    "part_number": 0,
     "kind": "exercise",
-    "counter": 1,
+    "task_number": 1,
     "statement": "how?",
     "salt": "042",
     "formula": "salt_042 as token",

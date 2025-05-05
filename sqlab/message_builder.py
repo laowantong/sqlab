@@ -68,9 +68,6 @@ class MessageBuilder:
         solutions_by_token = defaultdict(list)
         for (entry_token, record) in records.items():
 
-            if entry_token == "info":
-                continue
-
             if isinstance(record, str): # an alias, i.e. an alternative token to access the same record
                 continue
 
@@ -80,14 +77,14 @@ class MessageBuilder:
                     "hint",
                     {
                         "label": task_label,  # defined on a previous iteration
-                        "counter": counter,  # defined on a previous iteration
+                        "task_number": counter,  # defined on a previous iteration
                         "preamble": self.strings["preamble_rejected"],
                         "text": record["text"]
                     }
                 )
                 continue
 
-            counter = record["counter"]
+            counter = record["task_number"]
             formula = self.compose_formula(record)
 
             if record["kind"] == "episode":
@@ -107,7 +104,7 @@ class MessageBuilder:
                     "episode",
                     {
                         "label": task_label,
-                        "counter": counter,
+                        "task_number": counter,
                         "token": entry_token,
                         **self.compose_solutions(solutions_by_token[entry_token]),
                         "context": record["context"],
@@ -126,7 +123,7 @@ class MessageBuilder:
                     "exercise_statement",
                     {
                         "label": task_label,
-                        "counter": counter,
+                        "task_number": counter,
                         "statement": record["statement"],
                         **formula,
                     }
@@ -136,7 +133,7 @@ class MessageBuilder:
                     "exercise_correction",
                     {
                         "label": task_label,
-                        "counter": counter,
+                        "task_number": counter,
                         "token": entry_token,
                         **self.compose_solutions(record["solutions"]),
                     }
@@ -159,12 +156,34 @@ class MessageBuilder:
         self.log.close()
         return self.rows
 
+    def compile_toc(self, records):
+        result = {}
+        for (token, record) in records.items():
+            if isinstance(record, str):
+                continue
+            if record["kind"] in ("exercise", "episode"):
+                part_number = record["part_number"]
+                part = result.get(part_number, {})
+                if not part:
+                    result[part_number] = {
+                        "kind": "exercises" if record["kind"] == "exercise" else "adventure",
+                        "label": self.strings[f"{record['kind']}_collection_label"],
+                        "part_number": part_number,
+                        "task_count": 0,
+                        "open_tasks": [],
+                    }
+                result[part_number]["task_count"] += 1
+                if record["task_number"] == 1 or record["kind"] == "exercise":
+                    result[part_number]["open_tasks"].append({
+                        "entry_token": token,
+                        "task_number": record["task_number"],
+                    })
+        return list(result.values())
+
     def compile_storyline(self, records):
         result = []
         previous_records_hashes = set() # Cf. compile_cheat_sheet
         for (token, record) in records.items():
-            if token == "info":
-                continue
             if isinstance(record, str) or record["kind"] != "episode":
                 continue
             record_hash = hash(json.dumps(record, sort_keys=True, ensure_ascii=False))
@@ -186,14 +205,12 @@ class MessageBuilder:
     def compile_exercises(self, records):
         result = []
         for (token, record) in records.items():
-            if token == "info":
-                continue
             if isinstance(record, str) or record["kind"] != "exercise":
                 continue
             if section := record.get("section"):
                 result.append(f"\n{section}\n")
             statement_start = record["statement"].split("\n")[0]
-            i = record["counter"]
+            i = record["task_number"]
             result.append(f"- **{self.strings['exercise_label']} {i}**. {statement_start}  ")
             first_token = self.get_first_token_from_solutions(record["solutions"])
             result.append("  " + self.strings["exercise_tokens"].format(salt=record["salt"], token=first_token))
@@ -209,8 +226,6 @@ class MessageBuilder:
                                         # duplicated and associated with these two tokens. In
                                         # cheat_sheet.md, this duplication is avoided.
         for (token, record) in records.items():
-            if token == "info":
-                continue
             if isinstance(record, str):
                 continue
             if record["kind"] == "hint":
@@ -219,7 +234,7 @@ class MessageBuilder:
             if record_hash in previous_records_hashes:
                 continue
             previous_records_hashes.add(record_hash)
-            counter = record["counter"]
+            counter = record["task_number"]
             if counter == 1:
                 if record["kind"] == "episode":
                     result.append(f"## {self.strings['adventure_label']}\n")

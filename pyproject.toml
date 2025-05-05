@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sqlab"
-version = "0.7.0" # copy-pasted from __init__.py
+version = "0.7.1" # copy-pasted from __init__.py
 description = "SQL Adventure Builder: a command line tool for creating standalone SQL activities."
 authors = ["Aristide Grange"]
 license = "MIT"

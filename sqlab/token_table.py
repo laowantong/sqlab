@@ -35,45 +35,43 @@ class TokenTable:
         epilogue_tokens = set()  # Tokens of the last episode of an adventure
 
         for (token, record) in records.items():
-            if token == "info":
-                continue
 
             kind = record["kind"]
-            task_index = record["counter"]
+            task_number = record["task_number"]
 
             if kind == "episode":
-                part = record["adventure"]
-                if task_index == 1: # The first episode of an adventure cannot be added as a solution
-                    values.add((part, 0, 1, "N/A", token))
+                part_number = record["part_number"]
+                if task_number == 1: # The first episode of an adventure cannot be added as a solution
+                    values.add((part_number, 0, 1, "N/A", token))
                 elif not record["solutions"]: # Store the token of the last episode of an adventure
                     epilogue_tokens.add(token)
                 for solution in record["solutions"]:
                     if not isinstance(solution, str):
-                        values.add((part, task_index, task_index + 1, record["salt"], solution["token"]))
+                        values.add((part_number, task_number, task_number + 1, record["salt"], solution["token"]))
 
             elif kind == "hint":
-                part = part  # Keep the previous value, since a hint is part of an exercise
+                part_number = part_number  # Keep the previous value, since a hint is contained in a task
                 if m := re.search(r"salt_(\d+)", record.get("query", "")):
                     salt = m.group(1)
                 else:  # A hash value or an example mistaken for a token
                     salt = "N/A"
-                values.add((part, task_index, task_index, salt, token))
+                values.add((part_number, task_number, task_number, salt, token))
 
             elif kind == "exercise":
-                part = 0
-                values.add((part, 0, task_index, "N/A", token))  # Each exercise is an entry point
+                part_number = 0
+                values.add((part_number, 0, task_number, "N/A", token))  # Each exercise is an entry point
                 for solution in record["solutions"]:
                     if not isinstance(solution, str):
-                        values.add((part, task_index, 0, record["salt"], solution["token"]))
+                        values.add((part_number, task_number, 0, record["salt"], solution["token"]))
             
             else:
                 raise ValueError(f"Unknown kind: {kind}")
 
         values= sorted(values, key=lambda x: (x[0], max(x[1], x[2]), x[1], -x[2], x[3], x[4]))
         self.token_table = []
-        for (part, source, target, salt, token) in values:
+        for (part_number, source, target, salt, token) in values:
             if token in epilogue_tokens: # The last episode of an adventure
-                target = 0  # The original value (task_index + 1) should be corrected
+                target = 0  # The original value (task_number + 1) should be corrected
             if source == target: # A loop
                 action = "hint"
             elif source == 0: # An entry point (for an exercise or a a first episode)
@@ -84,7 +82,7 @@ class TokenTable:
                 action = "move"
             else:
                 raise ValueError(f"Invalid source and target: {source} -> {target}")
-            self.token_table.append(Item(token, part, source, target, action, salt))
+            self.token_table.append(Item(token, part_number, source, target, action, salt))
 
     def write_as_tsv(self, path):
         with open(path, "w") as f:

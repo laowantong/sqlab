@@ -1,12 +1,8 @@
 {
-  "info": {
-    "adventure_count": 0,
-    "episode_count": 0,
-    "exercise_count": 1
-  },
   "042": {
+    "part_number": 0,
     "kind": "exercise",
-    "counter": 1,
+    "task_number": 1,
     "statement": "how?",
     "salt": "042",
     "formula": "salt_042 as token",
@@ -20,13 +16,13 @@
   },
   "3839": {
     "kind": "hint",
-    "counter": 1,
+    "task_number": 1,
     "text": "This is wrong",
     "query": "SELECT bar, salt_042 as token"
   },
   "8968": {
     "kind": "hint",
-    "counter": 1,
+    "task_number": 1,
     "text": "This is bad",
     "query": "SELECT bizz, salt_042 as token"
   }

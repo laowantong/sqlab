@@ -70,7 +70,7 @@ def create_message_formatter(config: dict) -> callable:
                 web["feedback"] = f"""
                     <div class='hint'>
                         <div class='label'>{escape(data['label'])}</div>
-                        <div class='counter'>{data['counter']}</div>
+                        <div class='task_number'>{data['task_number']}</div>
                         <div class='preamble'>{escape(data['preamble'])}</div>
                         <div class='text'>
                             {format_text(data['text'])}
@@ -81,7 +81,7 @@ def create_message_formatter(config: dict) -> callable:
                 web["task"] = f"""
                     <div class='exercise-statement'>
                         <div class='label'>{escape(data['label'])}</div>
-                        <div class='counter'>{data['counter']}</div>
+                        <div class='task_number'>{data['task_number']}</div>
                         <div class='text'>
                             {format_text(data['statement'])}
                         </div>
@@ -91,18 +91,18 @@ def create_message_formatter(config: dict) -> callable:
                 web["feedback"] = f"""
                     <div class='exercise-correction'>
                         <div class='label'>{escape(data['label'])}</div>
-                        <div class='counter'>{data['counter']}</div>
+                        <div class='task_number'>{data['task_number']}</div>
                         <div class='preamble'>{preamble_accepted}</div>
                         {data['solutions']}
                     </div>
                 """
             else:
                 assert kind == "episode", f"Unknown kind: {kind}"
-                if data["counter"] > 1:
+                if data["task_number"] > 1:
                     web["feedback"] = f"""
                         <div class='episode-correction'>
                             <div class='label'>{escape(data['label'])}</div>
-                            <div class='counter'>{data['counter'] - 1}</div>
+                            <div class='task_number'>{data['task_number'] - 1}</div>
                             <div class='preamble'>{preamble_accepted}</div>
                             {data['solutions']}
                         </div>
@@ -111,7 +111,7 @@ def create_message_formatter(config: dict) -> callable:
                     web["task"] = f"""
                         <div class='episode-statement'>
                             <div class='label'>{escape(data['label'])}</div>
-                            <div class='counter'>{data['counter']}</div>
+                            <div class='task_number'>{data['task_number']}</div>
                             <div class='text'>
                                 {format_text(data['context'])}
                             </div>
@@ -174,19 +174,19 @@ def create_message_formatter(config: dict) -> callable:
             if data.get("solutions"):
                 data["preamble"] = preamble_accepted.format(token=data.get("token"))
             if kind == "hint":
-                template = "🟠 **{label} {counter}**. {preamble}\n\n➥ {text}"
+                template = "🟠 **{label} {task_number}**. {preamble}\n\n➥ {text}"
             elif kind == "exercise_statement":
-                template = "⚪️ **{label} {counter}**. {statement}\n\n{formula}\n"
+                template = "⚪️ **{label} {task_number}**. {statement}\n\n{formula}\n"
             elif kind == "exercise_correction":
-                template = "🟢 **{label} {counter}**. {preamble}\n\n{solutions}\n"
+                template = "🟢 **{label} {task_number}**. {preamble}\n\n{solutions}\n"
             else:
                 assert kind == "episode", f"Unknown kind: {kind}"
-                if data["counter"] == 1: # first episode
-                    template = "⚪️ **{label} {counter}**.\n\n{context}\n\n**{statement_label}**. {statement}\n\n{formula}\n"
+                if data["task_number"] == 1: # first episode
+                    template = "⚪️ **{label} {task_number}**.\n\n{context}\n\n**{statement_label}**. {statement}\n\n{formula}\n"
                 elif data.get("formula"): # subsequent episode with statement
-                    template = "🟢 **{label} {counter}**. {preamble}\n\n{solutions}\n\n{context}\n\n**{statement_label}**. {statement}\n\n{formula}\n"
+                    template = "🟢 **{label} {task_number}**. {preamble}\n\n{solutions}\n\n{context}\n\n**{statement_label}**. {statement}\n\n{formula}\n"
                 else: # last episode
-                    template = "🟢 **{label} {counter}**. {preamble}\n\n{solutions}\n\n{context}\n\n"
+                    template = "🟢 **{label} {task_number}**. {preamble}\n\n{solutions}\n\n{context}\n\n"
             result = template.format_map(data)
             result = improved_text(result)
             result = wrap_text(result)

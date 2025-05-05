@@ -47,9 +47,11 @@ defaults = { # Not a JSON object because it contains comments and Python lambda 
     },
     "strings_en": {
         "exercise_label": "Exercise",
+        "exercise_collection_label": "Exercises",
         "statement_label": "Statement",
         "hint_label": "Hint",
         "episode_label": "Episode",
+        "episode_collection_label": "Adventure",
         "formula_label": "Formula",
         "solution_label": "Solution",
         "annotation_label": "Annotation",
@@ -67,9 +69,11 @@ defaults = { # Not a JSON object because it contains comments and Python lambda 
     },
     "strings_fr": {
         "exercise_label": "Exercice",
+        "exercise_collection_label": "Exercices",
         "statement_label": "Énoncé",
         "hint_label": "Indication",
         "episode_label": "Épisode",
+        "episode_collection_label": "Aventure",
         "formula_label": "Formule",
         "solution_label": "Solution",
         "annotation_label": "Annotation",

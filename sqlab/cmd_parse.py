@@ -1,4 +1,4 @@
-from collections import defaultdict, Counter
+from collections import defaultdict
 import contextlib
 import itertools
 import json
@@ -60,6 +60,7 @@ class NotebookParser:
         segments = []
         section_buffer = []
         salts = set()
+        exercise_counter = 0
         for cell in cells:
             source = cell["source"]
             if not source:
@@ -94,9 +95,19 @@ class NotebookParser:
                     segments[-1]["solutions"].append(text)
                     continue
 
+                # The cell is either an exercise or an episode.
+                if kind == "exercise":
+                    part_number = 0
+                    exercise_counter += 1
+                    task_number = exercise_counter
+                else: # kind == "episode"
+                    part_number = None # to be filled after the segments are completed
+                    task_number = None # to be filled after the segments are completed
+
                 segment = {}
+                segment["part_number"] = part_number
                 segment["kind"] = kind # "exercise" or "episode"
-                segment["counter"] = None # to be filled after the segments are complete
+                segment["task_number"] = task_number
                 if section_buffer:
                     segment["section"] = "\n".join(section_buffer)
                     section_buffer.clear()
@@ -147,7 +158,7 @@ class NotebookParser:
                     assert token, f"{FAIL}Missing token for hint:{RESET}\n{source}."
                     segments[-1]["hints"].append({
                         "kind": kind,
-                        "counter": None,  # to be filled after the segments are complete
+                        "task_number": task_number,
                         "text": text,
                         "query": raw_query,  # a wrong query is never displayed, but is stored as is for debugging purposes
                         "token": token
@@ -206,31 +217,19 @@ class NotebookParser:
             if not segment["formula"]: # episode without formula (the last one)
                 del segment["formula"]
         
-        # Number the exercises
-        exercise_count = 0
-        for segment in filter(lambda s: s["kind"] == "exercise", segments):
-            exercise_count += 1
-            segment["counter"] = exercise_count
-
         # Number the adventures and their episodes
-        adventure_count = 0
-        episode_count = 0
+        adventure_counter = 0
+        episode_counter = 0
         for segment in filter(lambda s: s["kind"] == "episode", segments):
             if segment["salt"] not in tokens_by_salt: # the first episode of an adventure
-                adventure_count += 1
-                episode_counter = itertools.count(1)
-            segment["adventure"] = adventure_count
-            episode_count += 1
-            segment["counter"] = next(episode_counter)
+                adventure_counter += 1
+                episode_counter = 0
+            episode_counter += 1
+            segment["part_number"] = adventure_counter
+            segment["task_number"] = episode_counter
 
         # Create the (almost) final token dictionary
-        records = {
-            "info": {
-                "adventure_count": adventure_count,
-                "episode_count": episode_count,
-                "exercise_count": exercise_count,
-            }
-        }
+        records = {}
         non_hint_tokens = set()
         hint_tokens = set()
         for segment in segments:
@@ -248,7 +247,7 @@ class NotebookParser:
             for hint in segment.pop("hints"):
                 token = hint.pop("token") # no need to keep the token in the value, it will be kept in the key
                 hint_tokens.add(token)
-                hint["counter"] = segment["counter"]
+                hint["task_number"] = segment["task_number"]
                 hint["salt"] = salt  # used and removed during the graph generation
                 assert token not in records, f"{FAIL}Two hint queries produce the same token {token}{RESET}"
                 records[token] = hint # each hint is accessed by exactly one token
@@ -326,8 +325,6 @@ class NotebookParser:
             if record_hash in seen_records:
                 continue
             seen_records.add(record_hash)
-            if token == "info":
-                continue
             if isinstance(record, str):
                 continue
             x = record["salt"]
@@ -335,13 +332,13 @@ class NotebookParser:
                 has_exercises = True
                 for solution in self.actual_solutions(record):
                     y = solution["token"]
-                    data["exercise_starts"].add(f"{x} [xlabel={record['counter']}]")
+                    data["exercise_starts"].add(f"{x} [xlabel={record['task_number']}]")
                     data["exercise_edges"].append(f"{x} -> {y}")
                     data["exercise_ends"].append(f'{y}')
             elif record["kind"] == "episode":
                 for solution in self.actual_solutions(record):
                     x = record["salt"]
-                    if record["counter"] == 1:
+                    if record["task_number"] == 1:
                         data["episode_starts"].add(f"{x} [xlabel=1]")
                     next_record = records.get(solution["token"])
                     if not next_record:
@@ -350,7 +347,7 @@ class NotebookParser:
                         next_record = records[next_record] # resolve the alias
                     y = next_record["salt"]
                     data["episode_edges"].append(f"{x} -> {y}")
-                    data["episode_ends"].add(f'{y} [xlabel={next_record["counter"]}]')
+                    data["episode_ends"].add(f'{y} [xlabel={next_record["task_number"]}]')
                 if not record["solutions"]:
                     data["epilogues"].append(record["salt"])
             elif record["kind"] == "hint":

@@ -105,7 +105,7 @@ def run(config: dict):
     # If the source is a notebook, parse it and populate the `records` list.
     # Otherwise, load the records from the `records.json` file.
     source_path = Path(config.get("source_path", ""))
-    records = {"info": {}}
+    records = {}
     if source_path.is_file():
         if source_path.suffix == ".ipynb":
             # Add temporarily the foreign key constraints to the core tables, before executing the
@@ -170,10 +170,11 @@ def run(config: dict):
         sql_dump.write(message_inserts)
         db.execute_non_select(message_inserts)
     
+    
     # Populate the `sqlab_info` table.
     info_inserts = compose_info_inserts(
         **config["info"],
-        **records["info"],
+        toc=json.dumps(message_builder.compile_toc(records), ensure_ascii=False),
         message_count=len(messages),
         sqlab_database_language=config["language"],
         dbms=config["dbms"],
