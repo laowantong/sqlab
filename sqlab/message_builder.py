@@ -182,7 +182,7 @@ class MessageBuilder:
                         "entry_token": token,
                         "task_number": record["task_number"],
                     })
-        return list(result.values())
+        return result
 
     def compile_storyline(self, records):
         result = []
