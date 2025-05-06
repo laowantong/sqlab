@@ -42,7 +42,7 @@ BEGIN
     SELECT
         COALESCE(
             MAX(CONVERT(UNCOMPRESS(AES_DECRYPT(msg, token)) USING utf8mb4)),
-            CONVERT("{preamble_default}" USING utf8mb4) -- fallback message
+            CONVERT('{preamble_default}' USING utf8mb4) -- fallback message
         ) INTO message
     FROM sqlab_msg;
 
