@@ -182,11 +182,11 @@ def get_config(args):
     config["sqlab_dbms_module"] = dbms
 
     # If the relational schema is provided as SVG files, add their code as text
-    rex = re.compile(r'fill="\w+"')
+    rex = re.compile(r'fill="#?\w+"')
     for suffix in ("", "_dark"):
         path = Path(str(config.get("relational_schema_path", ""))[:-4] + f"{suffix}.svg")
         if path.is_file():
             svg_source = path.read_text(encoding="utf-8")
-            svg_source = rex.sub(svg_source, 'fill="none"', 1)
+            svg_source = rex.sub('fill="none"', svg_source, 1)
             config["info"][f"relational_schema{suffix}"] = svg_source
     return config
