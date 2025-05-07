@@ -7,6 +7,7 @@ import re
 def create_message_formatter(config: dict) -> callable:
 
     strings = config["strings"]
+    sub_mark = re.compile(r"(?s)<mark>(.*?)</mark>").sub
 
     def create_json_formatter() -> callable:
         return lambda x: json.dumps(
@@ -32,6 +33,7 @@ def create_message_formatter(config: dict) -> callable:
             - Escape HTML special characters.
             - Add <br> tags for empty lines.
             """
+            text = sub_mark("", text) # Remove all token-related explanations
             text = text.replace("<br>", "")
             acc = []
             needs_p = True

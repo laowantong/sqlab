@@ -174,7 +174,8 @@ def run(config: dict):
     # Populate the `sqlab_info` table.
     info_inserts = compose_info_inserts(
         **config["info"],
-        toc=json.dumps(message_builder.compile_toc(records), ensure_ascii=False),
+        parts=json.dumps(message_builder.compile_parts(records), ensure_ascii=False),
+        web_toc=json.dumps(message_builder.compile_web_toc(records), ensure_ascii=False),
         message_count=len(messages),
         sqlab_database_language=config["language"],
         dbms=config["dbms"],

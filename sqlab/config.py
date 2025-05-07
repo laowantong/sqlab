@@ -71,11 +71,11 @@ defaults = { # Not a JSON object because it contains comments and Python lambda 
     },
     "strings_fr": {
         "exercise_label": "Exercice",
-        "exercise_collection_label": "Exercices",
+        "exercise_collection_label": "Exercices ",
         "statement_label": "Énoncé",
         "hint_label": "Indication",
         "episode_label": "Épisode",
-        "episode_collection_label": "Aventure",
+        "episode_collection_label": "Aventure ",
         "formula_label": "Formule",
         "solution_label": "Solution",
         "annotation_label": "Annotation",

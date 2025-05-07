@@ -16,6 +16,7 @@ sub_code_block = re.compile(r'(?sm)^```(\w+?)\n(.*?)```\n').sub
 sub_list = re.compile(r"(?m)((?:^- .*\n)+)").sub
 sub_item = re.compile(r"(?m)^- (.+)").sub
 sub_br = re.compile(r"<br>\n?").sub
+sub_mark = re.compile(r"(?s)<mark>(.*?)</mark>").sub
 
 def improved_html(s: str) -> str:
     s = s.strip()
@@ -68,6 +69,7 @@ def improved_text(s: str) -> str:
     s = map_bold(s)
     s = sub_item("— ", s)
     s = sub_br("\n", s)
+    s = sub_mark(r"\1", s) # Keep the token-related explanations
     return s
 
 

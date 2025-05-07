@@ -58,7 +58,7 @@ class NotebookParser:
         # (i.e. no need to store any auxiliary data at a given stage for use at a later stage).
 
         segments = []
-        section_buffer = []
+        section_path = []
         salts = set()
         exercise_counter = 0
         for cell in cells:
@@ -70,9 +70,11 @@ class NotebookParser:
             if cell["cell_type"] == "markdown":
                 source = "".join(source)
 
-                if m := re.match(r"(#+ .+?) *\(\+\)", cell["source"][0]):
-                    # Accumulate the section names ending by '(+)'
-                    section_buffer.append(m[1])
+                if m := re.match(r"(#{1,3}) (.+)", cell["source"][0]):
+                    depth = len(m[1]) - 1
+                    title = m[2].strip()
+                    subtitle = "".join(cell["source"][1:]).strip()  # the rest of the cell may consist in a subtitle
+                    section_path[depth:] = [(title, subtitle)]
                     continue
 
                 (label, salt, text) = separate_label_salt_and_text(source)
@@ -108,9 +110,8 @@ class NotebookParser:
                 segment["part_number"] = part_number
                 segment["kind"] = kind # "exercise" or "episode"
                 segment["task_number"] = task_number
-                if section_buffer:
-                    segment["section"] = "\n".join(section_buffer)
-                    section_buffer.clear()
+                segment["section_path"] = section_path[:]
+                section_path = [(title, "") for (title, _) in section_path] # A subtitle is stored only on the first time
                 if kind == "episode":
                     segment["context"] = text.strip()
                 segment["statement"] = "" if kind == "episode" else text

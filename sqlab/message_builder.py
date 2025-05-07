@@ -160,28 +160,112 @@ class MessageBuilder:
         self.log.close()
         return self.rows
 
-    def compile_toc(self, records):
-        result = {}
+    def compile_parts(self, records):
+        parts = {}
         for (token, record) in records.items():
             if isinstance(record, str):
                 continue
             if record["kind"] in ("exercise", "episode"):
                 part_number = record["part_number"]
-                part = result.get(part_number, {})
+                part = parts.get(part_number, {})
                 if not part:
-                    result[part_number] = {
+                    parts[part_number] = {
                         "kind": "exercises" if record["kind"] == "exercise" else "adventure",
                         "label": self.strings[f"{record['kind']}_collection_label"],
                         "part_number": part_number,
+                        "title": record["section_path"][0][0],
+                        "intro": record["section_path"][0][1],
+                        "tasks": [],
                         "task_count": 0,
-                        "open_tasks": [],
                     }
-                result[part_number]["task_count"] += 1
-                if record["task_number"] == 1 or record["kind"] == "exercise":
-                    result[part_number]["open_tasks"].append({
-                        "entry_token": token,
-                        "task_number": record["task_number"],
-                    })
+                if parts[part_number]["task_count"] == record["task_number"]:
+                    continue # Already added: occurs when one variant produces a different token than the first query
+                parts[part_number]["task_count"] = record["task_number"]
+                parts[part_number]["tasks"].append({
+                    "access": (record["kind"] == "exercise" or record["task_number"] == 1) and token,
+                    "task_number": record["task_number"],
+                    "task_title": record["section_path"][-1][0],
+                })
+                if intro := record["section_path"][-1][1]:
+                    parts[part_number]["tasks"][-1]["task_intro"] = intro
+        return parts
+
+    def compile_web_toc(self, records):
+        result = []
+        html = []
+        current_part = None
+        current_section = None
+        
+        for record in records.values():
+            if isinstance(record, str) or record["kind"] not in ("exercise", "episode"):
+                continue
+
+            if record["kind"] == "episode" and record["task_number"] > 1:
+                continue
+
+            part_number = record["part_number"]
+            task_number = record["task_number"]
+            (part_title, part_intro) = record["section_path"][0]
+            (section_title, section_intro) = record["section_path"][1]
+            (task_title, task_intro) = (None, None)
+            if len(record["section_path"]) > 2:
+                (task_title, task_intro) = record["section_path"][2]
+            
+            # Start a new part if needed
+            if current_part != part_number:
+                # Close previous section and part if they exist
+                if current_section is not None:
+                    html.append("</ul>\n</div>")
+                if current_part is not None:
+                    html.append("</div>")
+                    result.append("".join(html))
+                html = []
+                
+                # Start new part
+                current_part = part_number
+                html.append("<div class='part'>")
+                label = self.strings[f"{record['kind']}_collection_label"]
+                html.append(f"<h2>{label}: {part_title}</h2>")
+                if part_intro:
+                    html.append("<div class='part-intro'>")
+                    for paragraph in part_intro.split("\n"):
+                        html.append(f"<p>{paragraph}</p>")
+                    html.append("</div>")
+                current_section = None
+            
+            # Start a new section if needed
+            if current_section != section_title:
+                # Close previous section if it exists
+                if current_section is not None:
+                    html.append("</ul>\n</div>")
+                
+                # Start new section
+                current_section = section_title
+                html.append("<div class='section'>")
+                html.append(f"<h3>{section_title}</h3>")
+                if section_intro:
+                    html.append("<div class='section-intro'>")
+                    for paragraph in section_intro.split("\n"):
+                        html.append(f"<p>{paragraph}</p>")
+                    html.append("</div>")
+                html.append("<ul>")
+            
+            # Add task
+            html.append("<li>")
+            html.append(f"<div class='task-number'>{task_number}</div>")
+            if task_title:
+                html.append(f"<div class='task-title'>{task_title}</div>")
+            if task_intro:
+                html.append(f"<div class='task-intro'>{task_intro}</div>")
+            html.append("</li>")
+        
+        # Close any open section and part
+        if current_section is not None:
+            html.append("</ul>\n</div>")
+        if current_part is not None:
+            html.append("</div>")
+        
+        result.append("".join(html))
         return result
 
     def compile_storyline(self, records):
