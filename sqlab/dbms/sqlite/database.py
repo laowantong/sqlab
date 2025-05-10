@@ -1,6 +1,7 @@
 import re
 import sqlite3
 from pathlib import Path
+import json
 
 from ...database import AbstractDatabase
 from ...text_tools import FAIL, OK, RESET, WARNING
@@ -94,6 +95,13 @@ class Database(AbstractDatabase):
     @staticmethod
     def reset_table_statement(table: str) -> str:
         return f"DELETE FROM {table};\n"
+
+    @staticmethod
+    def to_json(value):
+        s = json.dumps(value, ensure_ascii=False)
+        s = s.replace("'", "''")  # In SQLite, single quotes are escaped with two single quotes
+        s = s.replace("\\", "\\\\") # Escape backslashes
+        return s
 
     def call_function(self, function_name, *args):
         if function_name == "decrypt":

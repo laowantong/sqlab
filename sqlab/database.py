@@ -1,5 +1,5 @@
 import importlib
-
+from typing import Any
 
 def database_factory(config: dict):
     """Return a Database object according to the dbms specified in the configuration."""
@@ -40,6 +40,15 @@ class AbstractDatabase:
         These include those starting with "sqlab_", and, in SQLite, the virtual tables
         decrypt and sqlean_define."""
         raise NotImplementedError
+
+    def get_row_count(self, table):
+        """Return the number of rows in the given table.
+        Don't use the context manager protocol, since it is not supported by SQLite.
+        """
+        query = f"SELECT COUNT(*) FROM {table};"
+        cursor = self.cnx.cursor()
+        cursor.execute(query)
+        return cursor.fetchone()[0]
 
     def encrypt(self, plain: str, token: int) -> str:
         """Return the encrypted version of the given plain text."""
@@ -86,6 +95,11 @@ class AbstractDatabase:
     @staticmethod
     def reset_table_statement(table: str) -> str:
         """Return a query suppressing all rows and resetting the auto increment."""
+        raise NotImplementedError
+
+    @staticmethod
+    def to_json(value: Any) -> str:
+        """Convert the given value to a JSON string properly escaped."""
         raise NotImplementedError
 
     def close(self):

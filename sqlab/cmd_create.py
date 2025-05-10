@@ -90,7 +90,8 @@ def run(config: dict):
     #    same (although the personid will be different), raising an IntegrityError.
 
     seen_hashes = {}  # use a dictionary for better warning messages
-    for table_name in db.get_table_names():
+    table_names = sorted(db.get_table_names())
+    for table_name in table_names:
         query = f"SELECT * FROM {table_name};"
         (_, _, rows) = db.execute_select(query)
         for row in rows:
@@ -172,17 +173,21 @@ def run(config: dict):
     
     
     # Populate the `sqlab_info` table.
-    info_inserts = compose_info_inserts(
+    kwargs = {
         **config["info"],
-        parts=json.dumps(message_builder.compile_parts(records), ensure_ascii=False),
-        web_toc=json.dumps(message_builder.compile_web_toc(records), ensure_ascii=False),
-        message_count=len(messages),
-        sqlab_database_language=config["language"],
-        dbms=config["dbms"],
-        dbms_version=db.get_version(),
-        sqlab_version=__version__,
-        created_at=datetime.now().isoformat()
-    )
+        "parts": message_builder.compile_parts(records),
+        "web_toc": message_builder.compile_web_toc(records),
+        "table_names": table_names,
+        "table_count": len(table_names),
+        "row_count": sum(db.get_row_count(table) for table in table_names),
+        "message_count": len(messages),
+        "sqlab_database_language": config["language"],
+        "dbms": config["dbms"],
+        "dbms_version": db.get_version(),
+        "sqlab_version": __version__,
+        "created_at": datetime.now().isoformat()
+    }
+    info_inserts = compose_info_inserts(db, **dict(sorted(kwargs.items())))
     sql_dump.write(info_inserts)
     db.execute_non_select(info_inserts)
 

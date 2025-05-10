@@ -1,5 +1,6 @@
 import re
 import psycopg2
+import json
 
 from ...database import AbstractDatabase
 from ...text_tools import FAIL, OK, RESET, WARNING
@@ -98,6 +99,13 @@ class Database(AbstractDatabase):
     
     def create_database(self):
         self.execute_non_select(self.db_creation_queries)
+
+    @staticmethod
+    def to_json(value):
+        s = json.dumps(value, ensure_ascii=False)
+        s = s.replace("'", "''")  # In PostgreSQL, single quotes are escaped with two single quotes
+        # NB: Backslashes are not escaped in PostgreSQL JSON strings
+        return s
     
     @staticmethod
     def reset_table_statement(table: str) -> str:

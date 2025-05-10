@@ -1,9 +1,9 @@
 import unicodedata
 from ast import literal_eval
 from pathlib import Path
+import json
 
 from .text_tools import WARNING, RESET, OK
-from .text_tools import repr_single
 
 def compose_message_inserts(db, rows: list[str]) -> str:
     """
@@ -121,11 +121,12 @@ class TsvRowToSqlValues:
             return "'" + cell.replace("'", "''") + "'"
 
 
-def compose_info_inserts(**kwargs) -> str:
+def compose_info_inserts(db, **kwargs) -> str:
     """Return a string of SQL commands to insert info relative to the SQLab database. """
     insertions = [f"INSERT INTO sqlab_info (name, value) VALUES"]
     for (name, value) in kwargs.items():
-        insertions.append(f"  ({repr_single(str(name))}, {repr_single(str(value))}),")
+        value = db.to_json(value)
+        insertions.append(f"  ('{name}', '{value}'),")
     insertions[-1] = insertions[-1].rstrip(",")
     insertions.append(";")
     return "\n".join(insertions)
