@@ -1,5 +1,6 @@
 import re
 import mysql.connector
+import json
 
 from ...database import AbstractDatabase
 from ...text_tools import FAIL, OK, RESET, WARNING
@@ -60,7 +61,7 @@ class Database(AbstractDatabase):
     
     def execute_non_select(self, text):
         text = re.sub(r"(?m)^DELIMITER (\$\$|;).*", "", text)  # Remove delimiter directives
-        text = re.sub(r"(?m)^\$\$.*", "", text)  # Remove // delimiter
+        text = re.sub(r"(?m)^\$\$.*", "", text)  # Remove $$ directives
         total_affected_rows = 0
         with self.cnx.cursor() as cursor:
             for _ in cursor.execute(text, multi=True):
@@ -84,6 +85,13 @@ class Database(AbstractDatabase):
     
     def create_database(self):
         self.execute_non_select(self.db_creation_queries)
+
+    @staticmethod
+    def to_json(value):
+        s = json.dumps(value, ensure_ascii=False)
+        s = s.replace("'", "''")  # In MySQL, single quotes are escaped with two single quotes
+        s = s.replace("\\", "\\\\") # Escape backslashes
+        return s
 
     @staticmethod
     def reset_table_statement(table: str) -> str:

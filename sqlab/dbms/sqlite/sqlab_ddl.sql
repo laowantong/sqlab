@@ -13,6 +13,6 @@ CREATE TABLE sqlab_msg (
 DROP TABLE IF EXISTS sqlab_info;
 CREATE TABLE sqlab_info (
   name TEXT NOT NULL,
-  value TEXT NOT NULL,
+  value JSON NOT NULL,
   PRIMARY KEY (name)
 );

@@ -11,6 +11,6 @@ CREATE TABLE sqlab_msg (msg BYTEA NOT NULL);
 DROP TABLE IF EXISTS sqlab_info;
 CREATE TABLE sqlab_info (
     name varchar(64) NOT NULL,
-    value text NOT NULL,
+    value JSON NOT NULL,
     PRIMARY KEY (name)
 );

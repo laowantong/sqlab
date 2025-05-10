@@ -1,6 +1,5 @@
 from collections import defaultdict
 import contextlib
-import itertools
 import json
 from pathlib import Path
 import re
