@@ -90,8 +90,8 @@ def run(config: dict):
     #    same (although the personid will be different), raising an IntegrityError.
 
     seen_hashes = {}  # use a dictionary for better warning messages
-    table_names = sorted(db.get_table_names())
-    for table_name in table_names:
+    table_structures = db.get_table_structures()
+    for table_name in table_structures:
         query = f"SELECT * FROM {table_name};"
         (_, _, rows) = db.execute_select(query)
         for row in rows:
@@ -177,9 +177,9 @@ def run(config: dict):
         **config["info"],
         "parts": message_builder.compile_parts(records),
         "web_toc": message_builder.compile_web_toc(records),
-        "table_names": table_names,
-        "table_count": len(table_names),
-        "row_count": sum(db.get_row_count(table) for table in table_names),
+        "table_count": len(table_structures),
+        "row_count": sum(db.get_row_count(table) for table in table_structures),
+        "table_structures": table_structures,
         "message_count": len(messages),
         "sqlab_database_language": config["language"],
         "dbms": config["dbms"],

@@ -40,6 +40,14 @@ class AbstractDatabase:
         These include those starting with "sqlab_", and, in SQLite, the virtual tables
         decrypt and sqlean_define."""
         raise NotImplementedError
+    
+    def get_table_structures(self) -> dict[str, list[str]]:
+        """Return the names of all the tables (except the utility tables) in the DB
+        and the names of their columns (except `hash`)."""
+        table_structures = {}
+        for table in sorted(self.get_table_names()):
+            table_structures[table] = self.get_headers(table, keep_auto_increment_columns=True)
+        return table_structures
 
     def get_row_count(self, table):
         """Return the number of rows in the given table.
