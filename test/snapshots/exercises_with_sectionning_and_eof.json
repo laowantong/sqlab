@@ -3,7 +3,16 @@
     "part_number": 0,
     "kind": "exercise",
     "task_number": 1,
-    "section": "# 1. Keep this\n# 1.1. Keep this",
+    "section_path": [
+      [
+        "Keep this section",
+        "A section intro."
+      ],
+      [
+        "Keep this subsection",
+        "A subsection intro"
+      ]
+    ],
     "statement": "how?",
     "salt": "042",
     "formula": "salt_042 as token",
@@ -19,7 +28,16 @@
     "part_number": 0,
     "kind": "exercise",
     "task_number": 2,
-    "section": "# 1.2. Keep this",
+    "section_path": [
+      [
+        "Keep this section",
+        ""
+      ],
+      [
+        "Keep this other subsection",
+        ""
+      ]
+    ],
     "statement": "how?",
     "salt": "043",
     "formula": "salt_043 as token",
@@ -35,6 +53,16 @@
     "part_number": 0,
     "kind": "exercise",
     "task_number": 3,
+    "section_path": [
+      [
+        "Keep this section",
+        ""
+      ],
+      [
+        "Keep this other subsection",
+        ""
+      ]
+    ],
     "statement": "how?",
     "salt": "044",
     "formula": "salt_044 as token",

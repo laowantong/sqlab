@@ -283,14 +283,13 @@ def create_records_and_token_tables():
 
     path = Path(base_dir, "exercises_with_sectionning_and_eof.json")
     cells = [
-        markdown("# 1. Keep this (+)\n"),
-        markdown("# 1.1. Keep this (+)\n"),
+        markdown("# Keep this section\nA section intro."),
+        markdown("## Keep this subsection\nA subsection intro"),
         markdown("**Exercise [042].** how?"),
         sql("SELECT foo, salt_042 as token", "5664"),
-        markdown("# 1.2. Keep this (+)\n"),
+        markdown("## Keep this other subsection\n"),
         markdown("**Exercise [043].** how?"),
         sql("SELECT foo, salt_043 as token", "6877"),
-        markdown("# 1.3. Don't keep this\n"),
         markdown("**Exercise [044].** how?"),
         sql("SELECT foo, salt_044 as token", "9112"),
         code("raise EOFError"), # Ignore everything after this
