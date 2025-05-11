@@ -7,7 +7,7 @@ from importlib import resources
 
 from . import __version__
 from .cmd_parse import run as parse_notebook
-from .compose_inserts import compose_data_inserts, compose_message_inserts, compose_info_inserts
+from .compose_inserts import compose_data_inserts, compose_message_inserts, compose_metadata_inserts
 from .database import database_factory
 from .message_builder import MessageBuilder
 from .message_formatter import create_message_formatter
@@ -172,9 +172,9 @@ def run(config: dict):
         db.execute_non_select(message_inserts)
     
     
-    # Populate the `sqlab_info` table.
+    # Populate the `sqlab_metadata` table.
     kwargs = {
-        **config["info"],
+        **config["metadata"],
         "parts": message_builder.compile_parts(records),
         "web_toc": message_builder.compile_web_toc(records),
         "table_count": len(table_structures),
@@ -187,9 +187,9 @@ def run(config: dict):
         "sqlab_version": __version__,
         "created_at": datetime.now().isoformat()
     }
-    info_inserts = compose_info_inserts(db, **dict(sorted(kwargs.items())))
-    sql_dump.write(info_inserts)
-    db.execute_non_select(info_inserts)
+    metadata_inserts = compose_metadata_inserts(db, **dict(sorted(kwargs.items())))
+    sql_dump.write(metadata_inserts)
+    db.execute_non_select(metadata_inserts)
 
     sql_dump.close()
 

@@ -121,9 +121,9 @@ class TsvRowToSqlValues:
             return "'" + cell.replace("'", "''") + "'"
 
 
-def compose_info_inserts(db, **kwargs) -> str:
-    """Return a string of SQL commands to insert info relative to the SQLab database. """
-    insertions = [f"INSERT INTO sqlab_info (name, value) VALUES"]
+def compose_metadata_inserts(db, **kwargs) -> str:
+    """Return a string of SQL commands to insert metadata relative to the SQLab database. """
+    insertions = [f"INSERT INTO sqlab_metadata (name, value) VALUES"]
     for (name, value) in kwargs.items():
         value = db.to_json(value)
         insertions.append(f"  ('{name}', '{value}'),")

@@ -92,7 +92,7 @@ defaults = { # Not a JSON object because it contains comments and Python lambda 
         "adventure_label": "Aventure",
         "exercises_label": "Exercices",
     },
-    "info": {}
+    "metadata": {}
 }
 # fmt: on
 
@@ -194,5 +194,5 @@ def get_config(args):
         if path.is_file():
             svg_source = path.read_text(encoding="utf-8")
             svg_source = rex.sub('fill="none"', svg_source, 1)
-            config["info"][f"relational_schema_{suffix}"] = svg_source
+            config["metadata"][f"relational_schema_{suffix}"] = svg_source
     return config
