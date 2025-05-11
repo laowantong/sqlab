@@ -72,28 +72,26 @@ def create_message_formatter(config: dict) -> callable:
                 web["feedback"] = f"""
                     <div class='hint'>
                         <div class='label'>{escape(data['label'])}</div>
-                        <div class='task_number'>{data['task_number']}</div>
+                        <div class='number'>{data['task_number']}</div>
                         <div class='preamble'>{escape(data['preamble'])}</div>
                         <div class='text'>
                             {format_text(data['text'])}
                         </div>
                     </div>
                 """
-            elif kind == "exercise_statement":
+            elif kind == "exercise_task":
                 web["task"] = f"""
-                    <div class='exercise-statement'>
+                    <div class='exercise task'>
                         <div class='label'>{escape(data['label'])}</div>
-                        <div class='task_number'>{data['task_number']}</div>
-                        <div class='text'>
-                            {format_text(data['statement'])}
-                        </div>
+                        <div class='number'>{data['task_number']}</div>
+                        <div class='text'>{format_text(data['statement'])}</div>
                     </div>
                 """
             elif kind == "exercise_correction":
                 web["feedback"] = f"""
-                    <div class='exercise-correction'>
+                    <div class='correction'>
                         <div class='label'>{escape(data['label'])}</div>
-                        <div class='task_number'>{data['task_number']}</div>
+                        <div class='number'>{data['task_number']}</div>
                         <div class='preamble'>{preamble_accepted}</div>
                         {data['solutions']}
                     </div>
@@ -102,33 +100,29 @@ def create_message_formatter(config: dict) -> callable:
                 assert kind == "episode", f"Unknown kind: {kind}"
                 if data["task_number"] > 1:
                     web["feedback"] = f"""
-                        <div class='episode-correction'>
+                        <div class='correction'>
                             <div class='label'>{escape(data['label'])}</div>
-                            <div class='task_number'>{data['task_number'] - 1}</div>
+                            <div class='number'>{data['task_number'] - 1}</div>
                             <div class='preamble'>{preamble_accepted}</div>
                             {data['solutions']}
                         </div>
                     """
                 if data["statement"]:
                     web["task"] = f"""
-                        <div class='episode-statement'>
+                        <div class='episode task'>
                             <div class='label'>{escape(data['label'])}</div>
-                            <div class='task_number'>{data['task_number']}</div>
-                            <div class='text'>
-                                {format_text(data['context'])}
-                            </div>
+                            <div class='number'>{data['task_number']}</div>
+                            <div class='context'>{format_text(data['context'])}</div>
                             <div class='statement'>
                                 <div class='label'>{escape(data['statement_label'])}</div>
-                                <div class='text'>
-                                    {format_text(data['statement'])}
-                                </div>
+                                <div class='text'>{format_text(data['statement'])}</div>
                             </div>
                         </div>
                     """
-                else:
+                else: # Episode without statement = last episode
                     web["task"] = f"""
-                        <div class='epilogue'>
-                            <div class='text'>
+                        <div class='episode task'>
+                            <div class='context'>
                                 {format_text(data['context'])}
                             </div>
                         </div>
@@ -177,7 +171,7 @@ def create_message_formatter(config: dict) -> callable:
                 data["preamble"] = preamble_accepted.format(token=data.get("token"))
             if kind == "hint":
                 template = "🟠 **{label} {task_number}**. {preamble}\n\n➥ {text}"
-            elif kind == "exercise_statement":
+            elif kind == "exercise_task":
                 template = "⚪️ **{label} {task_number}**. {statement}\n\n{formula}\n"
             elif kind == "exercise_correction":
                 template = "🟢 **{label} {task_number}**. {preamble}\n\n{solutions}\n"

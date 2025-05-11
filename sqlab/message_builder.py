@@ -124,7 +124,7 @@ class MessageBuilder:
 
                 self.log.write(f"Exercise {counter} ({entry_token}): {repr(record['statement'][:100])}\n")
                 self.rows[entry_token] = (
-                    "exercise_statement",
+                    "exercise_task",
                     {
                         "label": task_label,
                         "task_number": counter,
@@ -252,7 +252,7 @@ class MessageBuilder:
             
             # Add task
             html.append("<li>")
-            html.append(f"<div class='task-number'>{task_number}</div>")
+            html.append(f"<div class='number'>{task_number}</div>")
             if task_title:
                 html.append(f"<div class='task-title'>{task_title}</div>")
             if task_intro:
