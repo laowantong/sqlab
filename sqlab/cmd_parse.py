@@ -98,15 +98,15 @@ class NotebookParser:
 
                 # The cell is either an exercise or an episode.
                 if kind == "exercise":
-                    part_number = 0
+                    activity_number = 0
                     exercise_counter += 1
                     task_number = exercise_counter
                 else: # kind == "episode"
-                    part_number = None # to be filled after the segments are completed
+                    activity_number = None # to be filled after the segments are completed
                     task_number = None # to be filled after the segments are completed
 
                 segment = {}
-                segment["part_number"] = part_number
+                segment["activity_number"] = activity_number
                 segment["kind"] = kind # "exercise" or "episode"
                 segment["task_number"] = task_number
                 segment["section_path"] = section_path[:]
@@ -229,7 +229,7 @@ class NotebookParser:
                 adventure_counter += 1
                 episode_counter = 0
             episode_counter += 1
-            segment["part_number"] = adventure_counter
+            segment["activity_number"] = adventure_counter
             segment["task_number"] = episode_counter
 
         # Create the (almost) final token dictionary

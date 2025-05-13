@@ -175,7 +175,7 @@ def run(config: dict):
     # Populate the `sqlab_metadata` table.
     kwargs = {
         **config["metadata"],
-        "parts": message_builder.compile_parts(records),
+        "activities": message_builder.compile_activities(records),
         "web_toc": message_builder.compile_web_toc(records),
         "table_count": len(table_structures),
         "row_count": sum(db.get_row_count(table) for table in table_structures),

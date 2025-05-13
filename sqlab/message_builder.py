@@ -160,40 +160,40 @@ class MessageBuilder:
         self.log.close()
         return self.rows
 
-    def compile_parts(self, records):
-        parts = {}
+    def compile_activities(self, records):
+        activities = {}
         for (token, record) in records.items():
             if isinstance(record, str):
                 continue
             if record["kind"] in ("exercise", "episode"):
-                part_number = record["part_number"]
-                part = parts.get(part_number, {})
-                if not part:
-                    parts[part_number] = {
+                activity_number = record["activity_number"]
+                activity = activities.get(activity_number, {})
+                if not activity:
+                    activities[activity_number] = {
                         "kind": "exercises" if record["kind"] == "exercise" else "adventure",
                         "label": self.strings[f"{record['kind']}_collection_label"],
-                        "part_number": part_number,
+                        "activity_number": activity_number,
                         "title": record["section_path"][0][0],
                         "intro": record["section_path"][0][1],
                         "tasks": [],
                         "task_count": 0,
                     }
-                if parts[part_number]["task_count"] == record["task_number"]:
+                if activities[activity_number]["task_count"] == record["task_number"]:
                     continue # Already added: occurs when one variant produces a different token than the first query
-                parts[part_number]["task_count"] = record["task_number"]
-                parts[part_number]["tasks"].append({
+                activities[activity_number]["task_count"] = record["task_number"]
+                activities[activity_number]["tasks"].append({
                     "access": (record["kind"] == "exercise" or record["task_number"] == 1) and token,
                     "task_number": record["task_number"],
                     "task_title": record["section_path"][-1][0],
                 })
                 if intro := record["section_path"][-1][1]:
-                    parts[part_number]["tasks"][-1]["task_intro"] = intro
-        return parts
+                    activities[activity_number]["tasks"][-1]["task_intro"] = intro
+        return activities
 
     def compile_web_toc(self, records):
         result = []
         html = []
-        current_part = None
+        current_activity = None
         current_section = None
         
         for record in records.values():
@@ -203,7 +203,7 @@ class MessageBuilder:
             if record["kind"] == "episode" and record["task_number"] > 1:
                 continue
 
-            part_number = record["part_number"]
+            activity_number = record["activity_number"]
             task_number = record["task_number"]
             (part_title, part_intro) = record["section_path"][0]
             (section_title, section_intro) = record["section_path"][1]
@@ -211,23 +211,23 @@ class MessageBuilder:
             if len(record["section_path"]) > 2:
                 (task_title, task_intro) = record["section_path"][2]
             
-            # Start a new part if needed
-            if current_part != part_number:
-                # Close previous section and part if they exist
+            # Start a new activity if needed
+            if current_activity != activity_number:
+                # Close previous section and activity if they exist
                 if current_section is not None:
                     html.append("</ul>\n</div>")
-                if current_part is not None:
+                if current_activity is not None:
                     html.append("</div>")
                     result.append("".join(html))
                 html = []
                 
-                # Start new part
-                current_part = part_number
-                html.append("<div class='part'>")
+                # Start new activity
+                current_activity = activity_number
+                html.append("<div class='activity'>")
                 label = self.strings[f"{record['kind']}_collection_label"]
                 html.append(f"<h2>{label}: {part_title}</h2>")
                 if part_intro:
-                    html.append("<div class='part-intro'>")
+                    html.append("<div class='activity-intro'>")
                     for paragraph in part_intro.split("\n"):
                         html.append(f"<p>{paragraph}</p>")
                     html.append("</div>")
@@ -259,10 +259,10 @@ class MessageBuilder:
                 html.append(f"<div class='task-intro'>{task_intro}</div>")
             html.append("</li>")
         
-        # Close any open section and part
+        # Close any open section and activity
         if current_section is not None:
             html.append("</ul>\n</div>")
-        if current_part is not None:
+        if current_activity is not None:
             html.append("</div>")
         
         result.append("".join(html))

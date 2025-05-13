@@ -1,6 +1,6 @@
 {
   "001": {
-    "part_number": 1,
+    "activity_number": 1,
     "kind": "episode",
     "task_number": 1,
     "section_path": [],
@@ -37,7 +37,7 @@
     ]
   },
   "1002": {
-    "part_number": 1,
+    "activity_number": 1,
     "kind": "episode",
     "task_number": 2,
     "section_path": [],
@@ -64,7 +64,7 @@
     ]
   },
   "2002": {
-    "part_number": 1,
+    "activity_number": 1,
     "kind": "episode",
     "task_number": 2,
     "section_path": [],
@@ -91,7 +91,7 @@
     ]
   },
   "1003": {
-    "part_number": 1,
+    "activity_number": 1,
     "kind": "episode",
     "task_number": 3,
     "section_path": [],
@@ -108,7 +108,7 @@
     ]
   },
   "2003": {
-    "part_number": 1,
+    "activity_number": 1,
     "kind": "episode",
     "task_number": 3,
     "section_path": [],
@@ -137,7 +137,7 @@
     "query": "SELECT r0202, salt_003 as token"
   },
   "1004": {
-    "part_number": 1,
+    "activity_number": 1,
     "kind": "episode",
     "task_number": 4,
     "section_path": [],
@@ -147,7 +147,7 @@
     "solutions": []
   },
   "2004": {
-    "part_number": 1,
+    "activity_number": 1,
     "kind": "episode",
     "task_number": 4,
     "section_path": [],
@@ -157,7 +157,7 @@
     "solutions": []
   },
   "011": {
-    "part_number": 2,
+    "activity_number": 2,
     "kind": "episode",
     "task_number": 1,
     "section_path": [],
@@ -179,7 +179,7 @@
     ]
   },
   "1012": {
-    "part_number": 2,
+    "activity_number": 2,
     "kind": "episode",
     "task_number": 2,
     "section_path": [],
@@ -189,7 +189,7 @@
     "solutions": []
   },
   "1013": {
-    "part_number": 2,
+    "activity_number": 2,
     "kind": "episode",
     "task_number": 3,
     "section_path": [],

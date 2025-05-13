@@ -1,4 +1,4 @@
-token	part	source	target	action	salt
+token	activity	source	target	action	salt
 001	1	0	1	enter	N/A
 1002	1	1	2	move	001
 2002	1	1	2	move	001

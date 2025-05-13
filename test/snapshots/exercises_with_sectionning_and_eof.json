@@ -1,6 +1,6 @@
 {
   "042": {
-    "part_number": 0,
+    "activity_number": 0,
     "kind": "exercise",
     "task_number": 1,
     "section_path": [
@@ -25,7 +25,7 @@
     ]
   },
   "043": {
-    "part_number": 0,
+    "activity_number": 0,
     "kind": "exercise",
     "task_number": 2,
     "section_path": [
@@ -50,7 +50,7 @@
     ]
   },
   "044": {
-    "part_number": 0,
+    "activity_number": 0,
     "kind": "exercise",
     "task_number": 3,
     "section_path": [
