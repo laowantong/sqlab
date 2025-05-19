@@ -9,6 +9,8 @@ import importlib
 from .text_tools import FAIL, OK, RESET, WARNING
 from .text_tools import separate_label_salt_and_text, split_sql_source, separate_query_formula_and_salt
 
+REWARD_UNIT = 1000
+
 def run(config: dict):
     parser = NotebookParser(config)
     print(f"Updating the records...")
@@ -116,6 +118,7 @@ class NotebookParser:
                 segment["statement"] = "" if kind == "episode" else text
                 segment["salt"] = salt
                 segment["formula"] = None  # to be filled on a later iteration
+                segment["reward"] = REWARD_UNIT if kind == "exercise" else None # idem
                 segment["tweak"] = None  # idem
                 segment["default_next_salt"] = None  # idem
                 segment["default_token"] = None  # idem
@@ -223,14 +226,15 @@ class NotebookParser:
         
         # Number the adventures and their episodes
         adventure_counter = 0
-        episode_counter = 0
+        n = 0
         for segment in filter(lambda s: s["kind"] == "episode", segments):
             if segment["salt"] not in tokens_by_salt: # the first episode of an adventure
                 adventure_counter += 1
-                episode_counter = 0
-            episode_counter += 1
+                n = 0
+            n += 1
             segment["activity_number"] = adventure_counter
-            segment["task_number"] = episode_counter
+            segment["task_number"] = n
+            segment["reward"] = REWARD_UNIT * (n * (n + 1)) // 2
 
         # Create the (almost) final token dictionary
         records = {}

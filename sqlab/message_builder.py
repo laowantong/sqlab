@@ -114,6 +114,7 @@ class MessageBuilder:
                         "context": record["context"],
                         "statement_label": self.strings["statement_label"],
                         "statement": record["statement"],
+                        "reward": record["reward"],
                         **formula,
                     }
                 )
@@ -129,6 +130,7 @@ class MessageBuilder:
                         "label": task_label,
                         "task_number": counter,
                         "statement": record["statement"],
+                        "reward": record["reward"],
                         **formula,
                     }
                 )
@@ -183,11 +185,16 @@ class MessageBuilder:
                 activities[activity_number]["task_count"] = record["task_number"]
                 activities[activity_number]["tasks"].append({
                     "access": (record["kind"] == "exercise" or record["task_number"] == 1) and token,
+                    "reward": record["reward"],
                     "task_number": record["task_number"],
                     "task_title": record["section_path"][-1][0],
                 })
                 if intro := record["section_path"][-1][1]:
                     activities[activity_number]["tasks"][-1]["task_intro"] = intro
+                if formula := record.get("formula"):  # This is not the last episode of an adventure
+                    activities[activity_number]["tasks"][-1]["formula"] = formula
+                if tweak_javascript := record.get("tweak_javascript"):
+                    activities[activity_number]["tasks"][-1]["tweak_javascript"] = tweak_javascript
         return activities
 
     def compile_web_toc(self, records):
