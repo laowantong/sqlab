@@ -162,6 +162,13 @@ class MessageBuilder:
         self.log.close()
         return self.rows
 
+    @staticmethod
+    def extract_column_names_from_first_solution(solutions):
+        for solution in solutions:
+            if isinstance(solution, dict):
+                return solution.get("columns", [])
+        return []
+
     def compile_activities(self, records):
         activities = {}
         for (token, record) in records.items():
@@ -188,6 +195,7 @@ class MessageBuilder:
                     "reward": record["reward"],
                     "task_number": record["task_number"],
                     "task_title": record["section_path"][-1][0],
+                    "columns": self.extract_column_names_from_first_solution(record["solutions"])
                 })
                 if intro := record["section_path"][-1][1]:
                     activities[activity_number]["tasks"][-1]["task_intro"] = intro
@@ -195,47 +203,58 @@ class MessageBuilder:
                     activities[activity_number]["tasks"][-1]["formula"] = formula
                 if tweak_javascript := record.get("tweak_javascript"):
                     activities[activity_number]["tasks"][-1]["tweak_javascript"] = tweak_javascript
+        tocs = self.compile_toc(records)
+        for (activity_number, toc) in zip(activities, tocs):
+            activities[activity_number]["toc"] = toc
         return activities
 
-    def compile_web_toc(self, records):
+    def compile_toc(self, records):
         result = []
         html = []
         current_activity = None
         current_section = None
+        current_task_title = None
         
         for record in records.values():
             if isinstance(record, str) or record["kind"] not in ("exercise", "episode"):
                 continue
 
+            # Uncomment the following line to skip all but the first task of each episode
             if record["kind"] == "episode" and record["task_number"] > 1:
                 continue
 
             activity_number = record["activity_number"]
             task_number = record["task_number"]
-            (part_title, part_intro) = record["section_path"][0]
+            (activity_title, activity_intro) = record["section_path"][0]
             (section_title, section_intro) = record["section_path"][1]
-            (task_title, task_intro) = (None, None)
+            (task_title, task_intro) = ("", None)
             if len(record["section_path"]) > 2:
                 (task_title, task_intro) = record["section_path"][2]
+                task_title = task_title.split(" (")[0]
             
             # Start a new activity if needed
             if current_activity != activity_number:
-                # Close previous section and activity if they exist
-                if current_section is not None:
-                    html.append("</ul>\n</div>")
+                # Close any open section and activity
                 if current_activity is not None:
+                    html.append("</span>")
                     html.append("</div>")
-                    result.append("".join(html))
-                html = []
+                    html.append("</div>")
+                    html.append("</div>")
+                    html.append("</div>")
+                    
+                    code = "".join(html)
+                    code = code.replace(", </span>", ".</span>")
+
+                    result.append(code)
+                    html = []
                 
                 # Start new activity
                 current_activity = activity_number
-                html.append("<div class='activity'>")
+                html.append("<div class='toc'>")
                 label = self.strings[f"{record['kind']}_collection_label"]
-                html.append(f"<h2>{label}: {part_title}</h2>")
-                if part_intro:
+                if activity_intro:
                     html.append("<div class='activity-intro'>")
-                    for paragraph in part_intro.split("\n"):
+                    for paragraph in activity_intro.split("\n"):
                         html.append(f"<p>{paragraph}</p>")
                     html.append("</div>")
                 current_section = None
@@ -244,35 +263,43 @@ class MessageBuilder:
             if current_section != section_title:
                 # Close previous section if it exists
                 if current_section is not None:
-                    html.append("</ul>\n</div>")
+                    html.append("</span></div></div>")
+                current_task_title = None
                 
                 # Start new section
                 current_section = section_title
                 html.append("<div class='section'>")
-                html.append(f"<h3>{section_title}</h3>")
+                html.append(f"<h3>{section_title}.</h3>")
                 if section_intro:
                     html.append("<div class='section-intro'>")
                     for paragraph in section_intro.split("\n"):
                         html.append(f"<p>{paragraph}</p>")
                     html.append("</div>")
-                html.append("<ul>")
             
-            # Add task
-            html.append("<li>")
-            html.append(f"<div class='number'>{task_number}</div>")
-            if task_title:
-                html.append(f"<div class='task-title'>{task_title}</div>")
-            if task_intro:
-                html.append(f"<div class='task-intro'>{task_intro}</div>")
-            html.append("</li>")
+            # Start a new task list if needed
+            if current_task_title != task_title:
+                # Close previous task list if it exists
+                if current_task_title is not None:
+                    html.append("</span></div>")
+                html.append(f"<div class='task-group'>")
+                display_title = task_title or self.strings["tasks_label"]
+                html.append(f"<span class='task-title'>{display_title}. </span>")
+                html.append("<span class='task-numbers'>")
+                current_task_title = task_title
+            # Add task item
+            html.append(f"{task_number}, ")
         
         # Close any open section and activity
-        if current_section is not None:
-            html.append("</ul>\n</div>")
-        if current_activity is not None:
-            html.append("</div>")
+        html.append("</span>")
+        html.append("</div>")
+        html.append("</div>")
+        html.append("</div>")
+        html.append("</div>")
         
-        result.append("".join(html))
+        code = "".join(html)
+        code = code.replace(", </span>", ".</span>")
+
+        result.append(code)
         return result
 
     def compile_storyline(self, records):

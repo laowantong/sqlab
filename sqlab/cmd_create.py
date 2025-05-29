@@ -175,8 +175,6 @@ def run(config: dict):
     # Populate the `sqlab_metadata` table.
     kwargs = {
         **config["metadata"],
-        "activities": message_builder.compile_activities(records),
-        "web_toc": message_builder.compile_web_toc(records),
         "table_count": len(table_structures),
         "row_count": sum(db.get_row_count(table) for table in table_structures),
         "table_structures": table_structures,
@@ -187,6 +185,8 @@ def run(config: dict):
         "sqlab_version": __version__,
         "created_at": datetime.now().isoformat()
     }
+    if config["markdown_to"] == "web":
+        kwargs["activities"] = message_builder.compile_activities(records)
     metadata_inserts = compose_metadata_inserts(db, **dict(sorted(kwargs.items())))
     sql_dump.write(metadata_inserts)
     db.execute_non_select(metadata_inserts)

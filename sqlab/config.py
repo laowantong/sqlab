@@ -68,6 +68,7 @@ defaults = { # Not a JSON object because it contains comments and Python lambda 
         "exercise_tokens": "Full statement: {salt}. Solution: {token}.",
         "adventure_label": "Adventure",
         "exercises_label": "Exercises",
+        "tasks_label": "Tasks",
     },
     "strings_fr": {
         "exercise_label": "Exercice",
@@ -91,6 +92,7 @@ defaults = { # Not a JSON object because it contains comments and Python lambda 
         "exercise_tokens": "Énoncé complet : {salt}. Solution : {token}.",
         "adventure_label": "Aventure",
         "exercises_label": "Exercices",
+        "tasks_label": "Tâches",
     },
     "metadata": {}
 }

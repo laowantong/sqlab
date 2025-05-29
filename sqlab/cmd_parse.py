@@ -193,10 +193,12 @@ class NotebookParser:
                     token = token or segments[-1]["default_token"]
                     if label:
                         text = f"{label}. {text}"
+                    html_table = self.find_html_table(cell)
                     solution = {
                         "intro": text, # a "sticky" annotation, useful for a variant with a different token
                         "query": query,
-                        "result_head": self.extract_result_head(cell),
+                        "columns": self.extract_column_names(html_table),
+                        "result_head": self.extract_result_head(html_table),
                         "next_salt": next_salt,
                         "token": token
                     }
@@ -279,24 +281,41 @@ class NotebookParser:
                     return(m[1])
 
     @staticmethod
-    def extract_result_head(code_cell: dict) -> str:
-        # Find the first output which contains a html table.
+    def find_html_table(code_cell: dict) -> str:
+        """Find the first output which contains an HTML table and return it."""
         for output in code_cell["outputs"]:
             if "data" in output:
                 table = "".join(output["data"]["text/html"])
                 if table.startswith("<table>"):
-                    n = table.count("<tr>") - 1  # Don't rely on the number of affected rows
-                                                 # displayed by MySQL or PostgreSQL, since SQLite
-                                                 # displays it only for the DML statements.
-                    break
-        else:
-            print(f"{WARNING}No table in the output.{RESET}")
-            print(code_cell["outputs"])
-            print()
+                    return table
+        print(f"{WARNING}No table in the output.{RESET}")
+        print(code_cell["outputs"])
+        print()
+        return ""
+
+    @staticmethod
+    def extract_result_head(table: str) -> str:
+        """Keep only the first two rows of the table."""
+        if not table:
             return ""
-        # Keep only the first two rows
+        n = table.count("<tr>") - 1  # Don't rely on the number of affected rows
+                                     # displayed by MySQL or PostgreSQL, since SQLite
+                                     # displays it only for the DML statements.
         count_str = f"\nTotal: {n} row{'s'[:n^1]} affected."
         return re.sub(r"(?s)(<table>\n(?:.*?<tr>.+?</tr>\n){,3}).*(</table>)", fr"\1\2{count_str}", table)
+
+    @staticmethod
+    def extract_column_names(table: str) -> list:
+        """Extract column names from the HTML table, except token."""
+        if not table:
+            return []
+        # Find the header row (first <tr> tag)
+        header_row = re.search(r"(?s)<tr>(.+?)</tr>", table).group(1)
+        # Extract text from each <th> tag
+        columns = re.findall(r"<th>(?!token)(.+?)</th>", header_row)
+        if "hash" in columns:
+            columns = ["*"]
+        return columns
     
     @staticmethod
     def actual_solutions(segment_or_record):
