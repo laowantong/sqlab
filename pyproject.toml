@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "sqlab"
-version = "0.7.14" # copy-pasted from __init__.py
+version = "0.7.15" # copy-pasted from __init__.py
 description = "SQL Adventure Builder: a command line tool for creating standalone SQL activities."
 authors = ["Aristide Grange"]
 license = "MIT"
@@ -42,6 +42,7 @@ mysql-connector-python= "^8.2.0"
 sqlalchemy="^2.0.27"
 psycopg2 = "^2.9.9"
 cmd2 = "^2.4.3"
+markdown2 = {extras = ["all"], version = "^2.5.3"}
 
 [tool.poetry.group.dev.dependencies]
 graphviz = "^0.20"
