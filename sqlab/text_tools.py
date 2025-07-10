@@ -1,7 +1,9 @@
 import re
 import textwrap
-
+from markdown2 import Markdown
 import sqlparse
+
+md = Markdown(extras=["fenced-code-blocks", "latex"])
 
 # ANSI color codes
 OK = "\033[92m"
@@ -18,15 +20,10 @@ sub_item = re.compile(r"(?m)^- (.+)").sub
 sub_br = re.compile(r"<br>\n?").sub
 sub_mark = re.compile(r"(?s)<mark>(.*?)</mark>").sub
 
-def improved_html(s: str) -> str:
+def markdown_to_html(s: str) -> str:
     s = s.strip()
     s = s.replace("\u00A0", "&nbsp;")
-    s = sub_mono(r"<code>\1</code>", s)
-    s = sub_italic(r"<em>\1</em>", s)
-    s = sub_bold(r"<strong>\1</strong>", s)
-    s = sub_code_block(r"<pre><code class='\1'>\2</code></pre>\n", s)
-    s = sub_list(r"<ul>\1</ul>", s)
-    s = sub_item(r"  <li>\1</li>", s)
+    s = md.convert(s)
     return s
 
 def map_chars(sub: callable, chars: str) -> callable:

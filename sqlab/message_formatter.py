@@ -1,8 +1,9 @@
 from copy import deepcopy
 import json
-from .text_tools import TextWrapper, improved_html, improved_text
+from .text_tools import TextWrapper, markdown_to_html, improved_text
 from html import escape
 import re
+from textwrap import dedent
 
 def create_message_formatter(config: dict) -> callable:
 
@@ -33,18 +34,8 @@ def create_message_formatter(config: dict) -> callable:
             - Escape HTML special characters.
             """
             text = sub_mark("", text) # Remove all token-related explanations
-            text = text.replace("<br>", "")
-            acc = []
-            needs_p = True
-            for line in text.splitlines():
-                if line.startswith("```"):
-                    needs_p = not needs_p
-                if needs_p and not line.startswith("```"):
-                    if line.strip():
-                        acc.append(f"<p>{escape(line.strip())}</p>")
-                else:
-                    acc.append(escape(line))
-            return "\n".join(acc)
+            text = dedent(text)
+            return markdown_to_html(text)
 
         def format_solutions(data):
             if data.get("solutions"):
@@ -54,7 +45,7 @@ def create_message_formatter(config: dict) -> callable:
                         acc.append("<div class='solution'>")
                         if intro := x["solution"].get("intro"):
                             acc.append(f"<div class='intro'>{format_text(intro)}</div>")
-                        acc.append(f"<pre><code class='sql'>{escape(x['solution']['query'])}</code></pre>")
+                        acc.append(format_text(f"```sql\n{x['solution']['query']}\n```"))
                         acc.append("</div>")
                     elif "annotation" in x:
                         acc.append(f"<div class='annotation'>{format_text(x['annotation'])}</div>")
@@ -119,7 +110,7 @@ def create_message_formatter(config: dict) -> callable:
                         </div>
                     """
             for (k, v) in task_data.items():
-                task_data[k] = sub_indent("", improved_html(v))
+                task_data[k] = sub_indent("", v)
             return json.dumps(task_data, ensure_ascii=False, indent=2)
 
         return lambda couple: to_web(*couple)
