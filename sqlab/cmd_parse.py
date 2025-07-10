@@ -80,7 +80,7 @@ class NotebookParser:
                     if not db_metadata:
                         db_metadata["kind"] = "db_metadata"
                         db_metadata["title"]= title
-                        db_metadata["description"] = subtitle
+                        db_metadata["pitch"] = subtitle
                     continue
 
                 (label, salt, text) = separate_label_salt_and_text(source)

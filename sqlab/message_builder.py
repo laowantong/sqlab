@@ -186,7 +186,7 @@ class MessageBuilder:
                         "label": self.strings[f"{record['kind']}_collection_label"],
                         "activity_number": activity_number,
                         "title": record["section_path"][0][0],
-                        "intro": record["section_path"][0][1],
+                        "activity_pitch": record["section_path"][0][1],
                         "tasks": [],
                         "task_count": 0,
                         "hint_count": 0,
@@ -259,7 +259,7 @@ class MessageBuilder:
                 html.append("<div class='toc'>")
                 label = self.strings[f"{record['kind']}_collection_label"]
                 if activity_intro:
-                    html.append("<div class='activity-intro'>")
+                    html.append("<div class='activity-pitch'>")
                     for paragraph in activity_intro.split("\n"):
                         html.append(f"<p>{paragraph}</p>")
                     html.append("</div>")

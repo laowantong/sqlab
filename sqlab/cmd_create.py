@@ -176,7 +176,7 @@ def run(config: dict):
     kwargs = {
         **config["metadata"],
         "title": records["db_metadata"]["title"],
-        "description": records["db_metadata"]["description"],
+        "pitch": records["db_metadata"]["pitch"],
         "table_count": len(table_structures),
         "row_count": sum(db.get_row_count(table) for table in table_structures),
         "table_structures": table_structures,
