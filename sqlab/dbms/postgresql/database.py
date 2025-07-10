@@ -71,6 +71,8 @@ class Database(AbstractDatabase):
         return self.execute_select(query)[2][0][0]
 
     def execute_non_select(self, text):
+        if not text.strip():
+            return None
         statements = [
             s
             for statement in re.split(r";\s*\n+", text)  # Split on trailing semicolons

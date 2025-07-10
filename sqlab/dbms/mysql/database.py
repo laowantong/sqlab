@@ -60,6 +60,8 @@ class Database(AbstractDatabase):
         return self.execute_select(query)[2][0][0]
     
     def execute_non_select(self, text):
+        if not text.strip():
+            return None
         text = re.sub(r"(?m)^DELIMITER (\$\$|;).*", "", text)  # Remove delimiter directives
         text = re.sub(r"(?m)^\$\$.*", "", text)  # Remove $$ directives
         total_affected_rows = 0

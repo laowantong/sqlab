@@ -37,6 +37,8 @@ class TokenTable:
         for (token, record) in records.items():
 
             kind = record["kind"]
+            if kind == "db_metadata":
+                continue
             task_number = record["task_number"]
 
             if kind == "episode":
@@ -63,7 +65,7 @@ class TokenTable:
                 for solution in record["solutions"]:
                     if not isinstance(solution, str):
                         values.add((activity_number, task_number, 0, record["salt"], solution["token"]))
-            
+                                
             else:
                 raise ValueError(f"Unknown kind: {kind}")
 

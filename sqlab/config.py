@@ -59,10 +59,10 @@ defaults = { # Not a JSON object because it contains comments and Python lambda 
         "action_label": "Action",
         "preamble_adventure": "Welcome!",
         "preamble_accepted": "Your query yields the correct token ({token}), congratulations! Please note the official correction:",
-        "preamble_accepted_without_token": "Your query is accepted, congratulations! Please note the official correction:",
+        "preamble_accepted_for_the_web": "Your query is accepted, congratulations! Please note the official correction:",
         "preamble_rejected": "You are not far from the expected result.",
         "preamble_default": "🔴 No specific message is planned for this token. Possible reasons:\n1. Copy-paste accident (double-click on the token to facilitate selection).\n2. Formula for calculating the token not updated.\n3. (0) still present, or replaced by the wrong value.\n4. New logical error. Congratulations on your creativity! Now read the statement carefully and, if the symptoms persist, ask your teacher.",
-        "preamble_default_without_token": {"feedback": "<div class='default hint'><div class='preamble'>Unknown error.</div><div class='text'>Congratulations on your creativity! Now read the statement carefully and, if the symptoms persist, ask your teacher.</div></div>"},
+        "preamble_default_for_the_web": {"category": "default-hint", "feedback": "<div class='preamble'>Unknown error.</div><div class='text'>Congratulations on your creativity! Now read the statement carefully and, if the symptoms persist, ask your teacher.</div>"},
         "close_dialog": "If you see this window, press Esc without touching anything else.",
         "tweak_instruction": "replace (0) with {repl}",
         "exercise_tokens": "Full statement: {salt}. Solution: {token}.",
@@ -72,21 +72,21 @@ defaults = { # Not a JSON object because it contains comments and Python lambda 
     },
     "strings_fr": {
         "exercise_label": "Exercice",
-        "exercise_collection_label": "Exercices ",
+        "exercise_collection_label": "Exercices",
         "statement_label": "Énoncé",
         "hint_label": "Indication",
         "episode_label": "Épisode",
-        "episode_collection_label": "Aventure ",
+        "episode_collection_label": "Aventure",
         "formula_label": "Formule",
         "solution_label": "Solution",
         "annotation_label": "Annotation",
         "action_label": "Action",
         "preamble_adventure": "Bienvenue !",
         "preamble_accepted": "Votre requête produit le bon token ({token}), bravo ! Notez la correction officielle :",
-        "preamble_accepted_without_token": "Votre requête est acceptée, bravo ! Notez la correction officielle :",
+        "preamble_accepted_for_the_web": "Votre requête est acceptée, bravo ! Notez la correction officielle :",
         "preamble_rejected": "Vous n'êtes pas loin du résultat attendu.",
         "preamble_default": "🔴 Aucun message spécifique n’est prévu pour ce token.\nRaisons possibles :\n1. Accident de copier-coller (double-cliquez sur le token pour en faciliter la sélection).\n2. Formule de calcul du token non mise à jour.\n3. (0) toujours présent, ou remplacé par la mauvaise valeur.\n4. Erreur logique inédite. Bravo pour votre créativité ! Maintenant relisez attentivement l’énoncé et, si les symptômes persistent, consultez votre enseignant.",
-        "preamble_default_without_token": {"feedback": "<div class='default hint'><div class='preamble'>Erreur inédite.</div><div class='text'>Bravo pour votre créativité ! Maintenant relisez attentivement l’énoncé et, si les symptômes persistent, consultez votre enseignant.</div></div>"},
+        "preamble_default_for_the_web": {"category": "default-hint", "feedback": "<div class='preamble'>Erreur inédite.</div><div class='text'>Bravo pour votre créativité ! Maintenant relisez attentivement l’énoncé et, si les symptômes persistent, consultez votre enseignant.</div>"},
         "close_dialog": "Si vous voyez cette fenêtre, appuyez sur Esc sans rien toucher d'autre.",
         "tweak_instruction": "remplacez (0) par {repl}",
         "exercise_tokens": "Énoncé complet : {salt}. Solution : {token}.",
@@ -138,7 +138,8 @@ def get_config(args):
     if args.web:
         config["markdown_to"] = "web"
         config["sql_dump_path"] = config["sql_dump_path"].replace(".sql", "_web.sql")
-        config["strings"]["preamble_default"] = json.dumps(config["strings"]["preamble_default_without_token"], ensure_ascii=False).replace("'", "''")
+        config["strings"]["preamble_default"] = json.dumps(config["strings"]["preamble_default_for_the_web"], ensure_ascii=False).replace("'", "''")
+        config["strings"]["preamble_accepted"] = config["strings"]["preamble_accepted_for_the_web"]
     elif args.json:
         config["markdown_to"] = "json"
         config["sql_dump_path"] = config["sql_dump_path"].replace(".sql", "_json.sql")

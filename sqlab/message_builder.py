@@ -75,6 +75,9 @@ class MessageBuilder:
             if isinstance(record, str): # an alias, i.e. an alternative token to access the same record
                 continue
 
+            if record["kind"] == "db_metadata":
+                continue
+
             if record["kind"] == "hint":
                 self.log.write(f"    Hint ({entry_token}): {repr(record['text'][:100])}\n")
                 self.rows[entry_token] = (
@@ -186,6 +189,7 @@ class MessageBuilder:
                         "intro": record["section_path"][0][1],
                         "tasks": [],
                         "task_count": 0,
+                        "hint_count": 0,
                     }
                 if activities[activity_number]["task_count"] == record["task_number"]:
                     continue # Already added: occurs when one variant produces a different token than the first query
@@ -193,7 +197,7 @@ class MessageBuilder:
                 activities[activity_number]["tasks"].append({
                     "access": (record["kind"] == "exercise" or record["task_number"] == 1) and token,
                     "reward": record["reward"],
-                    "task_number": record["task_number"],
+                    "number": record["task_number"],
                     "task_title": record["section_path"][-1][0],
                     "columns": self.extract_column_names_from_first_solution(record["solutions"])
                 })
@@ -203,6 +207,8 @@ class MessageBuilder:
                     activities[activity_number]["tasks"][-1]["formula"] = formula
                 if tweak_javascript := record.get("tweak_javascript"):
                     activities[activity_number]["tasks"][-1]["tweak_javascript"] = tweak_javascript
+            elif record["kind"] == "hint":
+                activities[activity_number]["hint_count"] += 1
         tocs = self.compile_toc(records)
         for (activity_number, toc) in zip(activities, tocs):
             activities[activity_number]["toc"] = toc
@@ -350,7 +356,7 @@ class MessageBuilder:
         for (token, record) in records.items():
             if isinstance(record, str):
                 continue
-            if record["kind"] == "hint":
+            if record["kind"] in ("hint", "db_metadata"):
                 continue
             record_hash = hash(json.dumps(record, sort_keys=True, ensure_ascii=False))
             if record_hash in previous_records_hashes:

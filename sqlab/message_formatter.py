@@ -23,7 +23,7 @@ def create_message_formatter(config: dict) -> callable:
     def create_web_formatter() -> callable:
 
         sub_indent = re.compile(r"(?m)^\s+(?=<)").sub
-        preamble_accepted = escape(strings["preamble_accepted_without_token"])
+        preamble_accepted = escape(strings["preamble_accepted"])
 
         def format_text(text: str) -> str:
             """
@@ -31,7 +31,6 @@ def create_message_formatter(config: dict) -> callable:
             - Suppress existing <br> tags.
             - Add <p> tags to each line, except for code blocks.
             - Escape HTML special characters.
-            - Add <br> tags for empty lines.
             """
             text = sub_mark("", text) # Remove all token-related explanations
             text = text.replace("<br>", "")
@@ -43,8 +42,6 @@ def create_message_formatter(config: dict) -> callable:
                 if needs_p and not line.startswith("```"):
                     if line.strip():
                         acc.append(f"<p>{escape(line.strip())}</p>")
-                    else:
-                        acc.append("<br>")
                 else:
                     acc.append(escape(line))
             return "\n".join(acc)
@@ -67,52 +64,46 @@ def create_message_formatter(config: dict) -> callable:
         def to_web(kind, data):
             data = deepcopy(data)
             format_solutions(data)
-            web = {}
+            task_data = {}
             if kind == "hint":
-                web["feedback"] = f"""
-                    <div class='hint'>
-                        <div class='label'>{escape(data['label'])}</div>
-                        <div class='number'>{data['task_number']}</div>
-                        <div class='preamble'>{escape(data['preamble'])}</div>
-                        <div class='text'>
-                            {format_text(data['text'])}
-                        </div>
+                task_data["category"] = "specific-hint"
+                task_data["feedback"] = f"""
+                    <div class='preamble'>{escape(data['preamble'])}</div>
+                    <div class='text'>
+                        {format_text(data['text'])}
                     </div>
                 """
             elif kind == "exercise_task":
-                web["task"] = f"""
-                    <div class='exercise task'>
+                task_data["description"] = f"""
+                    <div class='exercise description'>
                         <div class='label'>{escape(data['label'])}</div>
                         <div class='number'>{data['task_number']}</div>
                         <div class='text'>{format_text(data['statement'])}</div>
                     </div>
                 """
             elif kind == "exercise_correction":
-                web["feedback"] = f"""
-                    <div class='correction'>
-                        <div class='label'>{escape(data['label'])}</div>
-                        <div class='number'>{data['task_number']}</div>
-                        <div class='preamble'>{preamble_accepted}</div>
-                        {data['solutions']}
-                    </div>
+                task_data["category"] = "correction"
+                task_data["feedback"] = f"""
+                    <div class='preamble'>{preamble_accepted}</div>
+                    {data['solutions']}
                 """
             else:
                 assert kind == "episode", f"Unknown kind: {kind}"
                 if data["task_number"] > 1:
-                    web["feedback"] = f"""
-                        <div class='correction'>
-                            <div class='label'>{escape(data['label'])}</div>
-                            <div class='number'>{data['task_number'] - 1}</div>
-                            <div class='preamble'>{preamble_accepted}</div>
-                            {data['solutions']}
-                        </div>
+                    task_data["category"] = "correction"
+                    task_data["feedback"] = f"""
+                        <div class='preamble'>{preamble_accepted}</div>
+                        {data['solutions']}
                     """
                 if data["statement"]:
-                    web["task"] = f"""
-                        <div class='episode task'>
+                    context = format_text(data['context'])
+                    # Add a lettrine iff the first character is a letter
+                    context = re.sub(r"^(<p>)(\w)", r"\1<span class='lettrine'>\2</span>", context)
+                    task_data["description"] = f"""
+                        <div class='episode description'>
                             <div class='label'>{escape(data['label'])}</div>
                             <div class='number'>{data['task_number']}</div>
-                            <div class='context'>{format_text(data['context'])}</div>
+                            <div class='context'>{context}</div>
                             <div class='statement'>
                                 <div class='label'>{escape(data['statement_label'])}</div>
                                 <div class='text'>{format_text(data['statement'])}</div>
@@ -120,16 +111,16 @@ def create_message_formatter(config: dict) -> callable:
                         </div>
                     """
                 else: # Episode without statement = last episode
-                    web["task"] = f"""
-                        <div class='episode task'>
+                    task_data["description"] = f"""
+                        <div class='episode description'>
                             <div class='context'>
                                 {format_text(data['context'])}
                             </div>
                         </div>
                     """
-            for (k, v) in web.items():
-                web[k] = sub_indent("", improved_html(v))
-            return json.dumps(web, ensure_ascii=False, indent=2)
+            for (k, v) in task_data.items():
+                task_data[k] = sub_indent("", improved_html(v))
+            return json.dumps(task_data, ensure_ascii=False, indent=2)
 
         return lambda couple: to_web(*couple)
 

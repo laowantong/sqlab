@@ -9,7 +9,7 @@ import importlib
 from .text_tools import FAIL, OK, RESET, WARNING
 from .text_tools import separate_label_salt_and_text, split_sql_source, separate_query_formula_and_salt
 
-REWARD_UNIT = 1000
+REWARD_UNIT = 10
 
 def run(config: dict):
     parser = NotebookParser(config)
@@ -58,6 +58,7 @@ class NotebookParser:
         # The associations between salts and tokens will be resolved later, in a stateless way
         # (i.e. no need to store any auxiliary data at a given stage for use at a later stage).
 
+        db_metadata = {}
         segments = []
         section_path = []
         salts = set()
@@ -76,6 +77,10 @@ class NotebookParser:
                     title = m[2].strip()
                     subtitle = "".join(cell["source"][1:]).strip()  # the rest of the cell may consist in a subtitle
                     section_path[depth:] = [(title, subtitle)]
+                    if not db_metadata:
+                        db_metadata["kind"] = "db_metadata"
+                        db_metadata["title"]= title
+                        db_metadata["description"] = subtitle
                     continue
 
                 (label, salt, text) = separate_label_salt_and_text(source)
@@ -267,6 +272,7 @@ class NotebookParser:
         # Generate the graph and (side effect) pop the hint salts from records
         self.dump_graph(records)
 
+        records["db_metadata"] = db_metadata
         return records
     
     @staticmethod
@@ -426,9 +432,10 @@ class NotebookParser:
         template = re.sub(r"(?m)^ {8}", "", template)
         data["engine"] = "twopi" if has_exercises else "dot\n    rankdir=LR"
         text = template.format(**data)
-        previous_text = self.activity_map_gv_path.read_text(encoding="utf8")
-        if previous_text == text:
-            return # the graph has not changed, no need to update the files
+        if self.activity_map_gv_path.is_file():
+            previous_text = self.activity_map_gv_path.read_text(encoding="utf8")
+            if previous_text == text:
+                return # the graph has not changed, no need to update the files
         self.activity_map_gv_path.write_text(text)
         print(f"Graph written to '{self.activity_map_gv_path}'.")
         with contextlib.suppress(ImportError):

@@ -66,10 +66,12 @@ class Database(AbstractDatabase):
         query = f"SELECT replace(cast(brotli_decode(decode({repr(encrypted[65:-1])}, 'hex')) as text), '\\\n', x'0A')"
         return self.execute_select(query)[2][0][0]
     
-    def execute_non_select(self, queries):
+    def execute_non_select(self, text):
+        if not text.strip():
+            return None
         statements = [
             s
-            for statement in re.split(r";\s*\n+", queries)  # Split on trailing semicolons
+            for statement in re.split(r";\s*\n+", text)  # Split on trailing semicolons
             if (s := statement.strip()) # and remove empty strings
         ]
         total_affected_rows = 0
