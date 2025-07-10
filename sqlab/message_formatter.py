@@ -35,7 +35,9 @@ def create_message_formatter(config: dict) -> callable:
             """
             text = sub_mark("", text) # Remove all token-related explanations
             text = dedent(text)
-            return markdown_to_html(text)
+            text = markdown_to_html(text)
+            text = text.replace("<a href=", '<a target="_blank" href=')  # Open links in a new tab
+            return text
 
         def format_solutions(data):
             if data.get("solutions"):
