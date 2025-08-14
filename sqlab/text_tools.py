@@ -3,7 +3,7 @@ import textwrap
 from markdown2 import Markdown
 import sqlparse
 
-md = Markdown(extras=["fenced-code-blocks", "latex"])
+md = Markdown(extras=["fenced-code-blocks", "latex", "tables", "cuddled-lists"])
 
 # ANSI color codes
 OK = "\033[92m"

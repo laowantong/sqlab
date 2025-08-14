@@ -24,6 +24,7 @@ def create_message_formatter(config: dict) -> callable:
     def create_web_formatter() -> callable:
 
         sub_indent = re.compile(r"(?m)^\s+(?=<)").sub
+        sub_paragraph_heading = re.compile(r"<p><em>(.*?)</em>").sub
         preamble_accepted = escape(strings["preamble_accepted"])
 
         def format_text(text: str) -> str:
@@ -37,6 +38,7 @@ def create_message_formatter(config: dict) -> callable:
             text = dedent(text)
             text = markdown_to_html(text)
             text = text.replace("<a href=", '<a target="_blank" href=')  # Open links in a new tab
+            text = sub_paragraph_heading(r"<p class='paragraph'><span class='subtitle'>\1</span>", text)
             return text
 
         def format_solutions(data):
@@ -67,11 +69,10 @@ def create_message_formatter(config: dict) -> callable:
                     </div>
                 """
             elif kind == "exercise_task":
-                task_data["description"] = f"""
-                    <div class='exercise description'>
-                        <div class='label'>{escape(data['label'])}</div>
-                        <div class='number'>{data['task_number']}</div>
-                        <div class='text'>{format_text(data['statement'])}</div>
+                task_data["question"] = f"""
+                    <div class='exercise question'>
+                        <div class='title'>{strings['exercise_label']} {data['task_number']}</div>
+                        {format_text(data['statement'])}
                     </div>
                 """
             elif kind == "exercise_correction":
@@ -88,27 +89,22 @@ def create_message_formatter(config: dict) -> callable:
                         <div class='preamble'>{preamble_accepted}</div>
                         {data['solutions']}
                     """
+                context = format_text(data['context'])
+                # Add a lettrine iff the first character is a letter
+                context = re.sub(r"^(<p>)(\w)", r"\1<span class='lettrine'>\2</span>", context)
                 if data["statement"]:
-                    context = format_text(data['context'])
-                    # Add a lettrine iff the first character is a letter
-                    context = re.sub(r"^(<p>)(\w)", r"\1<span class='lettrine'>\2</span>", context)
-                    task_data["description"] = f"""
-                        <div class='episode description'>
-                            <div class='label'>{escape(data['label'])}</div>
-                            <div class='number'>{data['task_number']}</div>
-                            <div class='context'>{context}</div>
-                            <div class='statement'>
-                                <div class='label'>{escape(data['statement_label'])}</div>
-                                <div class='text'>{format_text(data['statement'])}</div>
-                            </div>
+                    task_data["question"] = f"""
+                        <div class='episode question'>
+                            <div class='title'>{strings['episode_label']} {data['task_number']}</div>
+                            <div class='context' lang={config['language']}>{context}</div>
+                            {format_text(data['statement'])}
                         </div>
                     """
                 else: # Episode without statement = last episode
-                    task_data["description"] = f"""
-                        <div class='episode description'>
-                            <div class='context'>
-                                {format_text(data['context'])}
-                            </div>
+                    task_data["question"] = f"""
+                        <div class='epilogue question'>
+                            <div class='title'>{strings['epilogue_label']}</div>
+                            <div class='context' lang={config['language']}>{context}</div>
                         </div>
                     """
             for (k, v) in task_data.items():
