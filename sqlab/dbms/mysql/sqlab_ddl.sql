@@ -6,7 +6,7 @@
 DROP TABLE IF EXISTS sqlab_msg;
 CREATE TABLE sqlab_msg (
   msg blob NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- Some metadata about the SQLab database.
 
@@ -15,4 +15,4 @@ CREATE TABLE sqlab_metadata (
   name varchar(64) NOT NULL,
   value JSON NOT NULL,
   PRIMARY KEY (name)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

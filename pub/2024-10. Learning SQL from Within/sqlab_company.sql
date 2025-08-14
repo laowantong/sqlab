@@ -7,7 +7,7 @@
 /*!40101 SET NAMES utf8mb4 */;
 
 DROP DATABASE IF EXISTS sqlab_company;
-CREATE DATABASE sqlab_company DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+CREATE DATABASE sqlab_company DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 USE sqlab_company;
 
