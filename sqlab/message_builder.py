@@ -1,5 +1,6 @@
 import json
 from collections import defaultdict
+import re
 
 from .text_tools import WARNING, RESET, OK, FAIL
 
@@ -198,6 +199,7 @@ class MessageBuilder:
                     "access": (record["kind"] == "exercise" or record["task_number"] == 1) and token,
                     "reward": record["reward"],
                     "number": record["task_number"],
+                    "salt": record["salt"],
                     "task_title": record["section_path"][-1][0],
                     "columns": self.extract_column_names_from_first_solution(record["solutions"])
                 })
@@ -209,17 +211,18 @@ class MessageBuilder:
                     activities[activity_number]["tasks"][-1]["tweak_javascript"] = tweak_javascript
             elif record["kind"] == "hint":
                 activities[activity_number]["hint_count"] += 1
-        tocs = self.compile_toc(records)
-        for (activity_number, toc) in zip(activities, tocs):
-            activities[activity_number]["toc"] = toc
+        tocs = self.compile_tocs(records)
+        for (activity_number, toc) in zip(activities, tocs.values()):
+            activities[activity_number]["toc"] = json.dumps(toc, ensure_ascii=False)
         return activities
 
-    def compile_toc(self, records):
-        result = []
-        html = []
+    def compile_tocs(self, records):
+        result = {}
         current_activity = None
         current_section = None
         current_task_title = None
+        current_section_data = None
+        current_task_group = None
         
         for record in records.values():
             if isinstance(record, str) or record["kind"] not in ("exercise", "episode"):
@@ -231,7 +234,6 @@ class MessageBuilder:
 
             activity_number = record["activity_number"]
             task_number = record["task_number"]
-            (activity_title, activity_intro) = record["section_path"][0]
             (section_title, section_intro) = record["section_path"][1]
             (task_title, task_intro) = ("", None)
             if len(record["section_path"]) > 2:
@@ -240,73 +242,108 @@ class MessageBuilder:
             
             # Start a new activity if needed
             if current_activity != activity_number:
-                # Close any open section and activity
-                if current_activity is not None:
-                    html.append("</span>")
-                    html.append("</div>")
-                    html.append("</div>")
-                    html.append("</div>")
-                    html.append("</div>")
-                    
-                    code = "".join(html)
-                    code = code.replace(", </span>", ".</span>")
-
-                    result.append(code)
-                    html = []
+                # Finalize previous section for previous activity
+                if current_activity is not None and current_section_data is not None:
+                    result[current_activity].append(current_section_data)
                 
-                # Start new activity
                 current_activity = activity_number
-                html.append("<div class='toc'>")
-                label = self.strings[f"{record['kind']}_collection_label"]
-                if activity_intro:
-                    html.append("<div class='activity-pitch'>")
-                    for paragraph in activity_intro.split("\n"):
-                        html.append(f"<p>{paragraph}</p>")
-                    html.append("</div>")
+                if activity_number not in result:
+                    result[activity_number] = []
                 current_section = None
+                current_section_data = None
             
             # Start a new section if needed
             if current_section != section_title:
-                # Close previous section if it exists
-                if current_section is not None:
-                    html.append("</span></div></div>")
-                current_task_title = None
+                # Finalize previous section
+                if current_section_data is not None:
+                    result[current_activity].append(current_section_data)
                 
                 # Start new section
                 current_section = section_title
-                html.append("<div class='section'>")
-                html.append(f"<h3>{section_title}.</h3>")
-                if section_intro:
-                    html.append("<div class='section-intro'>")
-                    for paragraph in section_intro.split("\n"):
-                        html.append(f"<p>{paragraph}</p>")
-                    html.append("</div>")
+                current_section_data = {
+                    "title": section_title,
+                    "intro": section_intro or "",
+                    "taskGroups": []
+                }
+                current_task_title = None
+                current_task_group = None
             
-            # Start a new task list if needed
+            # Start a new task group if needed
             if current_task_title != task_title:
-                # Close previous task list if it exists
-                if current_task_title is not None:
-                    html.append("</span></div>")
-                html.append(f"<div class='task-group'>")
-                display_title = task_title or self.strings["tasks_label"]
-                html.append(f"<span class='task-title'>{display_title}. </span>")
-                html.append("<span class='task-numbers'>")
                 current_task_title = task_title
-            # Add task item
-            html.append(f"{task_number}, ")
+                group_title = task_title or self.strings["tasks_label"]
+                current_task_group = {
+                    "groupTitle": group_title,
+                    "tasks": []
+                }
+                current_section_data["taskGroups"].append(current_task_group)
+            
+            # Add task number to current group
+            current_task_group["tasks"].append(task_number)
         
-        # Close any open section and activity
-        html.append("</span>")
-        html.append("</div>")
-        html.append("</div>")
-        html.append("</div>")
-        html.append("</div>")
+        # Finalize the last section
+        if current_activity is not None and current_section_data is not None:
+            result[current_activity].append(current_section_data)
         
-        code = "".join(html)
-        code = code.replace(", </span>", ".</span>")
-
-        result.append(code)
         return result
+
+    def compile_check_list(self, records):
+        """
+        For every query (including variants), returns a dictionary with the following keys:
+        - `id`: a concatenation of the activity number, task number, and a counter starting at 0;
+        - `query`: the raw SQL query to execute, deprived from any reference to a hash value;
+        - `formula`: the formula to inject in the query;
+        - `columns`: the expected column names;
+        - `tweak`: the JavaScript tweak to apply to the query, if any;
+        - `ok`: a boolean indicating whether the query is a solution or a hint;
+        - `token`: the expected token.
+        """
+        result = []
+        sub_spaces = re.compile(r"\s+").sub
+        sub_hashes = re.compile(r"(?mi)^ +, .*\b(hash|as token)\b.*\n?").sub
+        id_prefix = "UNDEFINED-UNDEFINED-"
+        counter = "UNDEFINED"
+        for (token, record) in records.items():
+            if isinstance(record, str):
+                continue
+            if record["kind"] in ("episode", "exercise"):
+                if not (formula := record.get("formula")):
+                    break  # The epilogue of an adventure has no formula
+                id_prefix = f"{record['activity_number']}-{record['task_number']}-"
+                counter = 0
+                formula = formula.replace("{{x}}", "(0)")
+                tweak = record.get("tweak_javascript")
+                for solution in record["solutions"]:
+                    if isinstance(solution, str):
+                        continue
+                    query = sub_hashes("", solution["query"])
+                    query = sub_spaces(" ", query).replace(" ,", ",")
+                    columns = solution["columns"]
+                    result.append({
+                        "id": f"{id_prefix}{counter}",
+                        "query": query,
+                        "formula": formula,
+                        "columns": columns,
+                        "tweak": tweak,
+                        "kind": "solution",
+                        "token": solution["token"]
+                    })
+                    counter += 1
+            elif record["kind"] == "hint":
+                query = sub_hashes("", record["query"])
+                query = sub_spaces(" ", query).replace(" ,", ",")
+                result.append({
+                    "id": f"{id_prefix}{counter}",
+                    "query": query,
+                    "formula": formula,
+                    "columns": columns,
+                    "tweak": tweak,
+                    "kind": "hint",
+                    "token": token
+                })
+                counter += 1
+        text = json.dumps(result, ensure_ascii=False, indent=2)
+        return text.replace("\n      ", " ").replace("\n    ]", " ]")
 
     def compile_storyline(self, records):
         result = []

@@ -153,6 +153,12 @@ def run(config: dict):
     if cheat_sheet:
         config["cheat_sheet_path"].write_text(cheat_sheet, encoding="utf-8")
         print(f"Cheat sheet compiled to '{config['cheat_sheet_path']}'.")
+    
+    # Dump the check list to a dedicated file
+    check_list = message_builder.compile_check_list(records)
+    if check_list:
+        config["check_list_path"].write_text(check_list, encoding="utf-8")
+        print(f"Check list compiled to '{config['check_list_path']}'.")
 
     # Populate the `sqlab_msg` table.
     messages = message_builder.run(records)

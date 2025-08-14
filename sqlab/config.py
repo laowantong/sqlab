@@ -15,6 +15,7 @@ defaults = { # Not a JSON object because it contains comments and Python lambda 
     "ddl_path": NotImplementedError("DDL configuration is mandatory. It must be the path of a .sql file."),
     "dataset_dir": NotImplementedError("Dataset configuration is mandatory. It must be the path of a folder containing TSV files."),
     "cheat_sheet_path": "./output/cheat_sheet.md",
+    "check_list_path": "./output/check_list.json",
     "token_table_path": "./output/token_table.sql",
     "sql_dump_path": "./output/dump.sql",
     "exercises_path": "./output/exercises.md",
