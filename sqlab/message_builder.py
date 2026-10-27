@@ -213,7 +213,7 @@ class MessageBuilder:
                 activities[activity_number]["hint_count"] += 1
         tocs = self.compile_tocs(records)
         for (activity_number, toc) in zip(activities, tocs.values()):
-            activities[activity_number]["toc"] = json.dumps(toc, ensure_ascii=False)
+            activities[activity_number]["toc"] = toc
         return activities
 
     def compile_tocs(self, records):

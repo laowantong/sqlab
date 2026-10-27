@@ -7,4 +7,4 @@ cnx.ini
 *.amdn
 update_outputs.sh
 .ipynb_checkpoints/
-
+.idea/

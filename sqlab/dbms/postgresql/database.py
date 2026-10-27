@@ -63,28 +63,25 @@ class Database(AbstractDatabase):
         with self.cnx.cursor() as cursor:
             cursor.execute(query)
             encrypted_hex = cursor.fetchone()[0]
-            return fr"'\x{encrypted_hex}'"
-    
+            result = f"decode('{encrypted_hex}', 'hex')"
+            return result
+
     def decrypt(self, encrypted, token):
         token = token.lstrip("0")
-        query = fr"SELECT pgp_sym_decrypt({encrypted}, {repr(token)}, 'cipher-algo=aes')"
-        return self.execute_select(query)[2][0][0]
+        hex_str = re.search(r"decode\('([0-9a-f]+)', 'hex'\)", encrypted).group(1)
+        raw_bytes = bytes.fromhex(hex_str)
+        query = "SELECT pgp_sym_decrypt(%s, %s, 'cipher-algo=aes')"
+        with self.cnx.cursor() as cursor:
+            cursor.execute(query, (raw_bytes, token))
+            return cursor.fetchone()[0]
 
     def execute_non_select(self, text):
-        if not text.strip():
-            return None
-        statements = [
-            s
-            for statement in re.split(r";\s*\n+", text)  # Split on trailing semicolons
-            if (s := statement.strip()) # and remove empty strings
-        ]
-        total_affected_rows = 0
+        """Execute PostgreSQL dump lines without modification."""
         with self.cnx.cursor() as cursor:
-            for statement in statements:
-                cursor.execute(statement)
-                total_affected_rows += cursor.rowcount
-        return total_affected_rows
-    
+            cursor.execute(text.strip())
+        self.cnx.commit()
+        return cursor.rowcount or 0
+
     def parse_ddl(self, queries):
         triple = re.split(r"(?mi)^(?:\\c .+|-- FK\b.*)", queries, 2)
         self.db_creation_queries = triple[0]
@@ -100,6 +97,7 @@ class Database(AbstractDatabase):
         )
     
     def create_database(self):
+        self.cnx.autocommit = True  # ensure no implicit transaction
         self.execute_non_select(self.db_creation_queries)
 
     @staticmethod

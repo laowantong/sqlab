@@ -1,0 +1,83 @@
+[
+  {
+    "id": "0-1-0",
+    "query": "SELECT b.name, b.part, salt_042(sum(nn(b.hash)) OVER ()) AS token FROM broker b;",
+    "formula": "salt_042(sum(nn(b.hash)) OVER ()) AS token",
+    "columns": [ "name", "part", "token" ],
+    "tweak": null,
+    "kind": "solution",
+    "token": "900723996"
+  },
+  {
+    "id": "0-1.5-0",
+    "query": "SELECT from_broker, to_broker, salt_012(sum(nn(t_hash)) OVER ()) AS token FROM GRAPH_TABLE ( trade_graph MATCH (a:Broker)-[t:TRADES_WITH]->(b:Broker) COLUMNS ( a.name AS from_broker, b.name AS to_broker, t.hash AS t_hash ) );",
+    "formula": "salt_012(sum(nn(t.hash)) OVER ()) AS token",
+    "columns": [ "from_broker", "to_broker", "token" ],
+    "tweak": null,
+    "kind": "solution",
+    "token": "862855806"
+  },
+  {
+    "id": "0-2-0",
+    "query": "SELECT from_broker, to_broker, cost, salt_078(sum(nn(hash) + cost) OVER ()) AS token FROM GRAPH_TABLE ( trade_graph MATCH (a:Broker)-[t:TRADES_WITH]->(b:Broker) COLUMNS ( a.name AS from_broker, b.name AS to_broker, t.cost AS cost, a.hash ) );",
+    "formula": "salt_078(sum(nn(a.hash)) OVER ()) AS token",
+    "columns": [ "from_broker", "to_broker", "cost", "token" ],
+    "tweak": null,
+    "kind": "solution",
+    "token": "72003022"
+  },
+  {
+    "id": "0-3-0",
+    "query": "SELECT seller, supplier, cost, seller_hash, supplier_hash, salt_010((nn(seller_hash) + nn(supplier_hash))/2) AS token FROM GRAPH_TABLE ( trade_graph MATCH (a:Broker)-[t:TRADES_WITH]->(b:Broker) WHERE b.part = 'Ion Thruster' COLUMNS ( a.name AS seller, b.name AS supplier, t.cost AS cost, a.hash AS seller_hash, b.hash AS supplier_hash ) ) ORDER BY cost LIMIT 1;",
+    "formula": "salt_010(sum(nn(a.hash)) OVER ()) AS token",
+    "columns": [ "seller", "supplier", "cost", "token" ],
+    "tweak": null,
+    "kind": "solution",
+    "token": "256156672"
+  },
+  {
+    "id": "0-4-0",
+    "query": "SELECT start, middleman, supplier, total_cost, salt_080(sum(nn(a_hash) + nn(b_hash) + nn(c_hash)) OVER ()) AS token FROM GRAPH_TABLE ( trade_graph MATCH (a:Broker)-[t1:TRADES_WITH]->(b:Broker)-[t2:TRADES_WITH]->(c:Broker) WHERE c.part = 'Plasma Regulator' COLUMNS ( a.name AS start, b.name AS middleman, c.name AS supplier, t1.cost + t2.cost AS total_cost, a.hash AS a_hash, b.hash AS b_hash, c.hash AS c_hash ) ) ORDER BY total_cost;",
+    "formula": "salt_080(sum(nn(a.hash)) OVER ()) AS token",
+    "columns": [ "start", "middleman", "supplier", "total_cost", "token" ],
+    "tweak": null,
+    "kind": "solution",
+    "token": "720293142"
+  },
+  {
+    "id": "0-5-0",
+    "query": "SELECT broker, coil_holder, salt_023(sum(nn(a_hash)) OVER ()) AS token FROM GRAPH_TABLE ( trade_graph MATCH (a:Broker)-[t:TRADES_WITH]->(b:Broker) WHERE b.part = 'Quantum Flux Coil' COLUMNS ( a.name AS broker, b.name AS coil_holder, a.hash AS a_hash ) );",
+    "formula": "salt_023(sum(nn(a.hash)) OVER ()) AS token",
+    "columns": [ "broker", "coil_holder", "token" ],
+    "tweak": null,
+    "kind": "solution",
+    "token": "773309375"
+  },
+  {
+    "id": "0-6-0",
+    "query": "SELECT start, destination, total_cost, salt_045(sum(nn(start_hash)) OVER ()) AS token FROM ( WITH RECURSIVE paths(start_id, current_id, total_cost, visited) AS ( SELECT b.id, b.id, 0, [b.id] FROM broker b UNION ALL SELECT paths.start_id, t.target_id, paths.total_cost + t.cost, array_append(paths.visited, t.target_id) FROM paths JOIN trade t ON t.source_id = paths.current_id WHERE list_position(paths.visited, t.target_id) IS NULL ) SELECT b_start.name AS start, b_end.name AS destination, b_start.hash AS start_hash, p.total_cost FROM paths p JOIN broker b_start ON b_start.id = p.start_id JOIN broker b_end ON b_end.id = p.current_id WHERE b_end.part = 'Ion Thruster' AND p.start_id != p.current_id ORDER BY total_cost LIMIT 1 );",
+    "formula": "salt_045(sum(nn(start_hash)) OVER ()) AS token",
+    "columns": [ "start", "destination", "total_cost", "token" ],
+    "tweak": null,
+    "kind": "solution",
+    "token": "229297520"
+  },
+  {
+    "id": "0-7-0",
+    "query": "SELECT seeker, elder, safe_world_source, generations_apart, salt_046(sum(nn(_hash)) OVER ()) AS token FROM GRAPH_TABLE ( groot_lineage_graph MATCH p = ANY SHORTEST (g:Colossus WHERE g.name = 'Groot') -[d:DESCENDS_FROM]->* (e:Colossus WHERE e.title = 'Keeper of Coordinates') COLUMNS ( g.name AS seeker, e.name AS elder, e.world AS safe_world_source, path_length(p) AS generations_apart, e.hash AS _hash ) );",
+    "formula": "salt_046(sum(nn(_hash)) OVER ()) AS token",
+    "columns": [ "seeker", "elder", "safe_world_source", "generations_apart", "token" ],
+    "tweak": null,
+    "kind": "solution",
+    "token": "365802695"
+  },
+  {
+    "id": "0-8-0",
+    "query": "CREATE OR REPLACE TABLE safe_trade AS SELECT t.* FROM trade t JOIN broker b1 ON t.source_id = b1.id JOIN broker b2 ON t.target_id = b2.id WHERE b1.compromised = 0 AND b2.compromised = 0; CREATE OR REPLACE PROPERTY GRAPH safe_trade_graph VERTEX TABLES ( broker LABEL Broker ) EDGE TABLES ( safe_trade SOURCE KEY (source_id) REFERENCES broker (id) DESTINATION KEY (target_id) REFERENCES broker (id) LABEL TRADES_WITH ); SELECT start, destination, hops, salt_086(sum(nn(_hash)) OVER ()) AS token FROM GRAPH_TABLE ( safe_trade_graph MATCH p = ANY SHORTEST (a:Broker WHERE a.name = 'Kraglin') -[t:TRADES_WITH]->* (b:Broker WHERE b.part = 'Ion Thruster') COLUMNS ( a.name AS start, b.name AS destination, path_length(p) AS hops, b.hash AS _hash ) );",
+    "formula": "salt_086(sum(nn(_hash)) OVER ()) AS token",
+    "columns": [ "start", "destination", "hops", "token" ],
+    "tweak": null,
+    "kind": "solution",
+    "token": "483130130"
+  }
+]

@@ -1,0 +1,13 @@
+services:
+  web:
+    build: ./web
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./output/dump.sql:/app/dump.sql:ro
+      - ./records.json:/app/records.json:ro
+      - ./web/static:/app/static:ro
+      - duckdb-extensions:/root/.duckdb/extensions  # cache duckpgq across restarts
+
+volumes:
+  duckdb-extensions:

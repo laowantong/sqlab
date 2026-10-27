@@ -1,7 +1,7 @@
 import sys
 
 from cmd2 import Cmd, Settable, Statement
-from cmd2.table_creator import Column, HorizontalAlignment, SimpleTable
+from cmd2_table.table_creator import Column, HorizontalAlignment, SimpleTable
 
 from .database import database_factory
 from .text_tools import OK, RESET, WARNING, FAIL

@@ -1,0 +1,1 @@
+-- DuckDB has no triggers. Hashes are updated in database.py::_update_hashes().

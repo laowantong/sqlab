@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Knowhere Black Market — SQL Adventure</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css">
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+
+<header>
+  <h1>🌌 KNOWHERE BLACK MARKET</h1>
+  <button id="btn-new-session">↺ New Session</button>
+</header>
+
+<main>
+  <section id="mission-panel">
+    <h2>📖 Mission</h2>
+    <div id="mission-text">Connecting to the black market…</div>
+    <div id="hint-container" style="display:none">
+      <button id="btn-hint-toggle">💡 Show Hint</button>
+      <div id="hint-text"></div>
+    </div>
+    <button id="btn-unlock" style="display:none">Unlock Next ▶</button>
+  </section>
+
+  <section id="query-panel">
+    <h2>💻 Your Query</h2>
+    <div id="editor-wrapper">
+      <textarea id="sql-editor">SELECT * FROM broker;</textarea>
+    </div>
+    <div id="query-actions">
+      <button id="btn-run">▶ Run Query</button>
+      <span id="hint-shortcut">Ctrl+Enter</span>
+    </div>
+    <div id="results-container"></div>
+  </section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/sql/sql.min.js"></script>
+<script src="/static/app.js"></script>
+</body>
+</html>
