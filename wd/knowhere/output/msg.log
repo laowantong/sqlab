@@ -1,0 +1,10 @@
+  Question 1 (42): 'List all brokers and the parts they currently possess.'
+  Question 1.5 (900723996): 'View the trade network by listing all direct broker connections in the graph.'
+  Question 2 (862855806): 'List all broker-to-broker trades and include the cost of each trade.'
+  Question 3 (72003022): 'Find the cheapest direct trade leading to a broker who has the Ion Thruster.'
+  Question 4 (256156672): 'Find two-step trade routes that lead to a broker holding the Plasma Regulator.'
+  Question 5 (720293142): 'Find brokers connected to the broker holding the Quantum Flux Coil.'
+  Question 6 (773309375): 'Find the cheapest trade route of any length leading to a broker holding the Ion Thruster.'
+  Question 7 (229297520): "Find the shortest ancestral path from Groot to the elder whose title is 'Keeper of Coordinates', and"
+  Question 8 (365802695): 'Find the shortest trade path from Kraglin to the broker holding the Ion Thruster, avoiding all compr'
+  Question 9 (483130130): ''

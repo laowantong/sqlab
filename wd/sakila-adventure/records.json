@@ -1,0 +1,60 @@
+{
+    "db_metadata": {
+        "kind": "db_metadata",
+        "title": "Payroll Investigation",
+        "pitch": "Someone tampered with the 2023 bonuses. Use SQL → Graphs to find the truth."
+    },
+
+    "042": {
+        "kind": "episode",
+        "activity_number": 1,
+        "section_path": [["Payroll Investigation", ""], ["Act I – The Scene", ""]],
+        "task_number": 1,
+        "salt": "042",
+        "context": "## Welcome, Detective!\n\nA whistleblower claims bonuses were unfairly withheld in 2023. Your job is to follow the money using SQL and graphs.",
+        "statement": "List all departments with their budget, ordered by budget descending.",
+        "reward": "Good start! Engineering has the fattest budget. Now dig into who works where.",
+        "formula": "salt_042(string_hash('secret') + sum(hash) OVER ()) as token",
+        "section": "## Act I – The Scene",
+        "solutions": [
+            {
+                "token": "175621843949664",
+                "query": "solution query is select salt_042(string_hash('secret') + sum(hash) OVER ()) as token from actor A;\n",
+                "intro": "my intro 1",
+                "columns": ["A", "B", "C"]
+            }
+        ]
+    },
+    "175621843949664": {
+        "kind": "episode",
+        "section_path": [["Payroll Investigation", ""], ["Act I – The Scene", ""]],
+        "activity_number": 1,
+        "task_number": 2,
+        "salt": "017",
+        "context": "## Act II – Follow the Money\n\nYou now know the departments. Time to look at the people inside them.",
+        "statement": "List each employee's name, their department name, and their salary. Order by salary descending.",
+        "reward": "Carol tops the list at 110k in Engineering. Interesting. Let's see who got their bonus.",
+        "formula": "salt_017(string_hash('secret') + sum(hash) OVER ()) as token",
+        "section": "## Act II – Follow the Money",
+        "solutions": [
+            {
+                "token": "202014952087916",
+                "query": "select salt_017(string_hash('secret') + sum(hash) OVER ()) as token from actor A where A.first_name = 'PENELOPE' and A.last_name = 'GUINESS'",
+                "intro": "",
+                "columns": ["A", "B", "C", "D"]
+            }
+        ]
+    },
+
+    "202014952087916": {
+        "kind": "episode",
+        "section_path": [["Payroll Investigation", ""], ["Act I – The Scene", ""]],
+        "salt": "018",
+        "activity_number": 1,
+        "task_number": 3,
+        "context": "last context",
+        "statement": "last statement",
+        "reward": "Some reward",
+        "solutions": []
+    }
+}

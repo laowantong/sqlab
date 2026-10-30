@@ -1,0 +1,27 @@
+config = {
+    "dbms": "duckdb",
+    "cnx_path": "./cnx.ini",
+    "language": "en",
+    "ddl_path": "./ddl.sql",
+    "dataset_dir": "./dataset",
+    "relational_schema_dir": "./relational_schema",
+    "source_path": "./records.json",
+    "markdown_to": "txt",          # ← add this
+    "metadata": {},
+    "strings": {
+        "preamble_default": "Wrong answer. Re-read the task carefully and try again.",
+        "preamble_accepted": "Correct! Token: {token}",
+        "preamble_rejected": "Not quite.",
+        "formula_label": "Formula",
+        "statement_label": "Statement",
+        "exercise_label": "Exercise",
+        "episode_label": "Episode",
+        "epilogue_label": "Epilogue",
+        "tweak_instruction": "tweak: {repl}",
+        "exercise_collection_label": "Exercises",
+        "adventure_label": "Adventure",
+        "exercises_label": "Exercises",
+        "tasks_label": "Tasks",
+        "exercise_tokens": "Salt: {salt}. Entry token: {token}.",
+    },
+}
