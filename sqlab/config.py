@@ -174,17 +174,18 @@ def get_config(args):
     cnx["user"] = cnx.pop("username", None)  # Change the SQLAlchemy username, into user.
 
     # Retrieve the password and, if needed, add it to the connection configuration.
-    if "password" not in cnx:
-        if args.password:
-            password = args.password  # The password is passed as a command-line argument
-        else:
-            try:  # The password may be stored in a secrets.py file
-                password = importlib.import_module(".secrets", package="sqlab").password
-            except ModuleNotFoundError:  # If not, ask the user to type it
-                prompt = f"{config['dbms']} password for user {cnx['user']}: "
-                password = getpass.getpass(prompt)
-        cnx["password"] = password
-    
+    if config["dbms"].lower().replace(" ", "") != "duckdb":
+        if "password" not in cnx:
+            if args.password:
+                password = args.password  # The password is passed as a command-line argument
+            else:
+                try:  # The password may be stored in a secrets.py file
+                    password = importlib.import_module(".secrets", package="sqlab").password
+                except ModuleNotFoundError:  # If not, ask the user to type it
+                    prompt = f"{config['dbms']} password for user {cnx['user']}: "
+                    password = getpass.getpass(prompt)
+            cnx["password"] = password
+
     # Complete the configuration with calculated values.
     config["cnx"] = cnx
     dbms = config["dbms"].lower().replace(" ", "")
