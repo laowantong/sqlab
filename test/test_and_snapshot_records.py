@@ -154,7 +154,7 @@ class TestRecordCreationErrors(unittest.TestCase):
         self.assertRaisesRegex(AssertionError, r"Missing statement", parse_nb, cells)
     
     def test_unknown_label(self):
-        cells = [markdown("**Exercice [001].** bla bla")]
+        cells = [markdown("**Atelier [001].** bla bla")]
         self.assertRaisesRegex(AssertionError, r"Unknown label", parse_nb, cells)
     
     def test_missing_formula(self):

@@ -73,8 +73,8 @@ defaults = { # Not a JSON object because it contains comments and Python lambda 
         "tasks_label": "Tasks",
     },
     "strings_fr": {
-        "exercise_label": "Exercice",
-        "exercise_collection_label": "Exercices",
+        "exercise_label": "Atelier",
+        "exercise_collection_label": "Entraînement",
         "statement_label": "Énoncé",
         "hint_label": "Indication",
         "episode_label": "Épisode",
@@ -94,7 +94,7 @@ defaults = { # Not a JSON object because it contains comments and Python lambda 
         "tweak_instruction": "remplacez (0) par {repl}",
         "exercise_tokens": "Énoncé complet : {salt}. Solution : {token}.",
         "adventure_label": "Aventure",
-        "exercises_label": "Exercices",
+        "exercises_label": "Entraînement",
         "tasks_label": "Tâches",
     },
     "metadata": {}
