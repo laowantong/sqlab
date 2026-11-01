@@ -297,10 +297,12 @@ class MessageBuilder:
         - `tweak`: the JavaScript tweak to apply to the query, if any;
         - `ok`: a boolean indicating whether the query is a solution or a hint;
         - `token`: the expected token.
+        This list will be used by SQLab Online to check the consistency of the set {query, formula,
+        tweak, token, columns}.
         """
         result = []
         sub_spaces = re.compile(r"\s+").sub
-        sub_hashes = re.compile(r"(?mi)^ +, .*\b(hash|as token)\b.*\n?").sub
+        sub_hashes = re.compile(r"(?mi)\s*,\s*.*\b(hash|as token)\b.*\n?").sub
         id_prefix = "UNDEFINED-UNDEFINED-"
         counter = "UNDEFINED"
         for (token, record) in records.items():
@@ -316,7 +318,7 @@ class MessageBuilder:
                 for solution in record["solutions"]:
                     if isinstance(solution, str):
                         continue
-                    query = sub_hashes("", solution["query"])
+                    query = sub_hashes(" ", solution["query"])
                     query = sub_spaces(" ", query).replace(" ,", ",")
                     columns = solution["columns"]
                     result.append({
@@ -330,7 +332,7 @@ class MessageBuilder:
                     })
                     counter += 1
             elif record["kind"] == "hint":
-                query = sub_hashes("", record["query"])
+                query = sub_hashes(" ", record["query"])
                 query = sub_spaces(" ", query).replace(" ,", ",")
                 result.append({
                     "id": f"{id_prefix}{counter}",
