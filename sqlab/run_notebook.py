@@ -2,6 +2,8 @@ import re
 import subprocess
 import nbformat
 from nbconvert.preprocessors import CellExecutionError, ExecutePreprocessor
+from nbformat.sign import NotebookNotary
+
 
 from .text_tools import FAIL, OK, RESET, WARNING, SQLFormatter
 
@@ -51,7 +53,8 @@ def run_notebook(config: dict) -> bool:
 
         nbformat.write(nb, ipynb_path)
         print(f"{OK}Notebook updated.{RESET}")
-        subprocess.run(["jupyter", "trust", ipynb_path], check=True)
+        nb = nbformat.read(ipynb_path, as_version=4)
+        NotebookNotary().sign(nb)
         print(f"{OK}Notebook trusted.{RESET}")
 
     return success
