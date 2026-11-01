@@ -159,7 +159,7 @@ class MessageBuilder:
         for (alias, token) in records.items():
             if isinstance(token, str):
                 self.rows[alias] = self.rows[token]
-        
+
         for token in solutions_by_token.keys():
             assert token in self.rows, f"{FAIL}Missing output token: {token}. Check that the adventure's last episode has no query.{RESET}"
 
@@ -175,6 +175,44 @@ class MessageBuilder:
         return []
 
     def compile_activities(self, records):
+        """
+        Compiles activity data from a collection of records into a structured dictionary.
+
+        Args:
+            records (dict): A dictionary where keys are tokens and values are record dictionaries
+                containing information about exercises, episodes, and hints.
+
+        Returns:
+            dict: A dictionary mapping activity numbers to activity details:
+            - kind: Type of activity ('exercises' or 'adventure').
+            - label: Label for the activity.
+            - activity_number: Unique identifier for the activity.
+            - title: Title of the activity.
+            - activity_pitch: Pitch or description of the activity.
+            - tasks: A dictionary mapping task salts to task metadata (cf. below).
+            - salts: A list to retrieve the salts of the tasks from an index.
+            - task_count: Total number of tasks in the activity.
+            - hint_count: Total number of hints in the activity.
+            - toc: JSON-serialized table of contents for the activity.
+
+        Notes:
+            - Only records of kind "exercise" and "episode" are processed as activities.
+            - Each activity contains a set of tasks, each identified by a salt value.
+            - Tasks include:
+                - salt (str): a unique identifier for the task.
+                - access (boolean or token): False for an adventure's task (except the first one),
+                                             otherwise the token to access the task.
+                - reward (int): the reward for completing the task.
+                - index (int): the task index (0-based).
+                - title (str): the task title.
+                - columns (list): the column names of the outer SELECT clause of the task's solution.
+                - Optional fields:
+                    - intro (str): an introduction to the task.
+                    - formula (str): the formula to be injected (except for an adventure's epilogue).
+                    - tweak_javascript (str): the second pass tweak expression.
+            - Hint records increment the hint count for the corresponding activity.
+            - The table of contents for each activity is compiled and serialized as JSON.
+        """
         activities = {}
         for (token, record) in records.items():
             if isinstance(record, str):
@@ -189,27 +227,30 @@ class MessageBuilder:
                         "activity_number": activity_number,
                         "title": record["section_path"][0][0],
                         "activity_pitch": record["section_path"][0][1],
-                        "tasks": [],
+                        "tasks": {},
+                        "salts": [],
                         "task_count": 0,
                         "hint_count": 0,
                     }
                 if activities[activity_number]["task_count"] == record["task_number"]:
                     continue # Already added: occurs when one variant produces a different token than the first query
                 activities[activity_number]["task_count"] = record["task_number"]
-                activities[activity_number]["tasks"].append({
+                task_metadata = {
+                    "salt": record["salt"], # Duplicated for easy access
                     "access": (record["kind"] == "exercise" or record["task_number"] == 1) and token,
                     "reward": record["reward"],
-                    "number": record["task_number"],
-                    "salt": record["salt"],
+                    "index": record["task_number"] - 1, # 0-based index
                     "task_title": record["section_path"][-1][0],
                     "columns": self.extract_column_names_from_first_solution(record["solutions"])
-                })
+                }
                 if intro := record["section_path"][-1][1]:
-                    activities[activity_number]["tasks"][-1]["task_intro"] = intro
+                    task_metadata["task_intro"] = intro
                 if formula := record.get("formula"):  # This is not the last episode of an adventure
-                    activities[activity_number]["tasks"][-1]["formula"] = formula
+                    task_metadata["formula"] = formula
                 if tweak_javascript := record.get("tweak_javascript"):
-                    activities[activity_number]["tasks"][-1]["tweak_javascript"] = tweak_javascript
+                    task_metadata["tweak_javascript"] = tweak_javascript
+                activities[activity_number]["tasks"][record["salt"]] = task_metadata
+                activities[activity_number]["salts"].append(record["salt"])
             elif record["kind"] == "hint":
                 activities[activity_number]["hint_count"] += 1
         tocs = self.compile_tocs(records)
