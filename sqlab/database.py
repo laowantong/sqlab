@@ -1,9 +1,18 @@
 import importlib
 from typing import Any
+import sys
+
+from .text_tools import FAIL, RESET
+
 
 def database_factory(config: dict):
     """Return a Database object according to the dbms specified in the configuration."""
-    db = importlib.import_module(".database", package=f"sqlab.dbms.{config['sqlab_dbms_module']}")
+    try:
+        db = importlib.import_module(".database", package=f"sqlab.dbms.{config['sqlab_dbms_module']}")
+    except ImportError:
+        print(f"{FAIL}To use {config['sqlab_dbms_module']}, follow the installation instructions in README.md.{RESET}")
+        sys.exit(1)
+    
     return db.Database(config)
 
 

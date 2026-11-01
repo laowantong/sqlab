@@ -25,8 +25,71 @@ In an educational context, this setup enables the students to learn and practice
 
 The `sqlab` command-line tool is not required to play, but is necessary to create a new adventure.
 
+You must have Python 3.9 or later. SQLite is supported out of the box. For any other DBMS, install the matching *extra* (`mysql`, `mariadb`, `postgresql`, `duckdb`), as shown below. Add `graph` if you want `sqlab` to render the activity map. Or `all` to get everything.
+
+### With uv (recommended)
+
+[uv](https://docs.astral.sh/uv/) installs `sqlab` as a standalone tool, in its own isolated environment,
+and makes the `sqlab` command available everywhere:
+
 ```
-pip install sqlab
+uv tool install sqlab                      # SQLite only
+uv tool install "sqlab[postgresql]"        # SQLite + PostgreSQL
+uv tool install "sqlab[mysql,graph]"       # several extras at once
 ```
+
+To add an extra to an existing installation, run the command again with `--force`:
+
+```
+uv tool install "sqlab[postgresql,duckdb]" --force
+```
+
+To upgrade or remove it:
+
+```
+uv tool upgrade sqlab
+uv tool uninstall sqlab
+```
+
+To run it once, without installing it:
+
+```
+uvx --from "sqlab[postgresql]" sqlab --help
+```
+
+### With uv, inside a project
+
+If your adventure is a uv project (it has a `pyproject.toml`), add `sqlab` as a dependency, then run it through uv:
+
+```
+uv add "sqlab[postgresql]"
+uv run sqlab --help
+```
+
+To add another extra later, run `uv add` again with the extra you want:
+
+```
+uv add "sqlab[postgresql,mysql]"
+```
+
+### With pip
+
+Use a virtual environment so as not to pollute your system Python:
+
+```
+python -m venv .venv
+source .venv/bin/activate        # on Windows: .venv\Scripts\activate
+pip install sqlab                # SQLite only
+pip install "sqlab[postgresql]"  # SQLite + PostgreSQL
+pip install "sqlab[all]"         # every supported DBMS + graph rendering
+```
+
+To add an extra later, run `pip install` again in the same environment:
+
+```
+pip install "sqlab[mysql]"
+```
+
+## Documentation
 
 The documentation is not yet available. In the meantime, you may explore the repository of [SQLab Island](https://github.com/laowantong/sqlab_island). The provided dataset and Jupyter notebooks serve as source material for the generation of the SQLab database.
