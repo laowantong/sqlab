@@ -89,6 +89,7 @@ def create_message_formatter(config: dict) -> callable:
                         <div class='preamble'>{preamble_accepted}</div>
                         {data['solutions']}
                     """
+                    task_data["nextTaskSalt"] = data["next_salt"]
                 context = format_text(data['context'])
                 # Add a lettrine iff the first character is a letter
                 context = re.sub(r"^(<p>)(\w)", r"\1<span class='lettrine'>\2</span>", context)

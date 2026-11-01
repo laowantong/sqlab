@@ -120,6 +120,7 @@ class MessageBuilder:
                         "statement": record["statement"],
                         "reward": record["reward"],
                         **formula,
+                        "next_salt": record.get("salt", None),  # For the next task in the adventure
                     }
                 )
             
