@@ -1,0 +1,1 @@
+CREATE OR REPLACE MACRO salt_{i:03d}(x) AS CAST((x * {y}) % 1000000000 AS BIGINT);
