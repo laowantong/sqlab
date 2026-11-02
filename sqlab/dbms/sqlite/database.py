@@ -57,10 +57,9 @@ class Database(AbstractDatabase):
         cursor.execute(query)
         return [row[0] for row in cursor.fetchall()]
 
-    def encrypt(self, clear_text, token):
-        escaped_text = clear_text.replace("'", "''")
-        query = f"SELECT encode(sha256({token}), 'hex') || encode(brotli('{escaped_text}'), 'hex');"
-        return repr(self.execute_select(query)[2][0][0])
+    def encrypt(self, clear_text: str, token: int) -> str:
+        query = "SELECT encode(sha256(?), 'hex') || encode(brotli(?), 'hex');"
+        return repr(self.execute_select(query, params=(token, clear_text))[2][0][0])
     
     def decrypt(self, encrypted, token):
         query = f"SELECT replace(cast(brotli_decode(decode({repr(encrypted[65:-1])}, 'hex')) as text), '\\\n', x'0A')"

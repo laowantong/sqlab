@@ -75,13 +75,16 @@ class AbstractDatabase:
         """Execute the queries of the given text and return the number of affected rows."""
         raise NotImplementedError
 
-    def execute_select(self, query_text: str) -> tuple[list[str], list[str], list[tuple]]:
-        """Execute the given query and return the headers, datatypes and rows of the result."""
+    def execute_select(self, query_text: str, params: tuple | list = None) -> tuple[list[str], list[str], list[tuple]]:
+        """Execute the given query with optional parameters and return headers, datatypes and rows."""
         cursor = self.cnx.cursor()
         try:
-            cursor.execute(query_text)
+            if params is not None:
+                cursor.execute(query_text, params)
+            else:
+                cursor.execute(query_text)
         except Exception as e:
-            raise RuntimeError(f"Error executing query: {query_text}") from e
+            raise RuntimeError(f"Error executing query: {query_text} with params {params}") from e
         rows = cursor.fetchall()
         headers = [desc[0] for desc in cursor.description]
         datatypes = [desc[1] for desc in cursor.description]

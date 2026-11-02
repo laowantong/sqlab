@@ -57,11 +57,10 @@ class Database(AbstractDatabase):
         Since the user passes a numeric token to our SQL function decrypt, we need to normalize
         this number by stripping the leading zeros before casting it to string.
         """
-        clear_text = f"E{repr_single(clear_text)}" # E prefix for escaping single quote with a \'
-        token = repr(token.lstrip("0"))
-        query = f"SELECT encode(pgp_sym_encrypt({clear_text}, {token}, 'cipher-algo=aes'), 'hex')"
+        token = str(token).lstrip("0")
+        query = "SELECT encode(pgp_sym_encrypt(%s, %s, 'cipher-algo=aes'), 'hex')"
         with self.cnx.cursor() as cursor:
-            cursor.execute(query)
+            cursor.execute(query, (clear_text, token))
             encrypted_hex = cursor.fetchone()[0]
             return fr"'\x{encrypted_hex}'"
     
